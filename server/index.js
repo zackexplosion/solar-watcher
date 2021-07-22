@@ -11,6 +11,7 @@ const http = require('http')
 
 const server = http.createServer(app)
 const io = require('socket.io')(server)
+const Big = require('big.js')
 
 // for log reader
 const NginxParser = require('nginxparser')
@@ -54,9 +55,9 @@ function parseLog(row) {
     const v = raw_params.get(k)
     if (v) {
       if (['acOutputPower', 'pvInputPower'].includes(paramMap[k])) {
-        params[paramMap[k]] = (parseFloat(v) / 10).toFixed(2)
+        params[paramMap[k]] = parseFloat(Big(v).div(10).toFixed(2))
       } else {
-        params[paramMap[k]] = parseFloat(v).toFixed(2)
+        params[paramMap[k]] = parseFloat(Big(v).toFixed(2))
       }
     }
   })
