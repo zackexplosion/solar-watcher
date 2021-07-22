@@ -26,9 +26,9 @@ const paramMap = {
   e: 'pvInputPower',
   f: 'pvBattVoltage',
   g: 'battVoltage',
-  h: 'battChargingCurrent',
-  i: 'battCapacity',
-  j: 'heatsinkTemp',
+  g2: 'battChargingCurrent',
+  h: 'battCapacity',
+  i: 'heatsinkTemp',
 }
 
 function parseLog(row) {
@@ -41,7 +41,7 @@ function parseLog(row) {
   const raw_params = new URL(`http://local${r[1]}`).searchParams
 
   if (!VALID_ID_LIST.includes(raw_params.get('id'))) {
-    console.error('invalid id')
+    // console.error('invalid id')
     return false
   }
 
@@ -53,7 +53,11 @@ function parseLog(row) {
     // const v = parseFloat(raw_params.get(k)) || 0
     const v = raw_params.get(k)
     if (v) {
-      params[paramMap[k]] = parseFloat(v)
+      if (['acOutputPower', 'pvInputPower'].includes(paramMap[k])) {
+        params[paramMap[k]] = (parseFloat(v) / 10).toFixed(2)
+      } else {
+        params[paramMap[k]] = parseFloat(v).toFixed(2)
+      }
     }
   })
   return params
@@ -114,8 +118,8 @@ server.listen(PORT, () => {
   //   if (err) throw err;
   //   setupLogReader()
   // })
-
-  exec(`tail -n 360 ${LOG_PATH}`, (error, stdout, stderr) => {
+  console.time('read log')
+  exec(`cat ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, (error, stdout, stderr) => {
     if (error) {
       console.log(`error: ${error.message}`);
       return;
@@ -138,16 +142,19 @@ server.listen(PORT, () => {
     }
     cacheData.reverse()
     // console.log(cacheData)
-
+    console.timeEnd('read log')
     setupLogReader()
 
     if (process.env.NODE_ENV !== 'production') {
       setInterval(() => {
         const data = {
           timestamp: cacheData[cacheData.length - 1].timestamp + 5000,
-          acOutputPower: (parseInt(Math.random() * 1000) + 1),
-          pvInputPower: (parseInt(Math.random() * 1000) + 1),
+          acOutputPower: (parseInt(Math.random() * 100) + 1),
+          pvInputVoltage: (parseInt(Math.random() * 200) + 1),
+          pvInputPower: (parseInt(Math.random() * 100) + 1),
           battVoltage: (parseInt(Math.random() * 40) + 1),
+          battCapacity: (parseInt(Math.random() * 10) + 1),
+          battChargingCurrent: (parseInt(Math.random() * 10) + 1),
           heatsinkTemp: (parseInt(Math.random() * 40) + 1),
         }
         cacheData.shift()

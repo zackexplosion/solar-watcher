@@ -32,28 +32,28 @@ const parseQuery = (cmd, data) => {
       if (data == '(NAK') return '<b>QVFW (Main CPU FW version)</b><br />Not recognised'
       const fields = data.split(/\.|\:/);
       return `${'<b>QVFW (Main CPU Firmware version)</b><br />'
-				+ 'Version: '}${parseInt(fields[1])}.${fields[2]}`;
+				+ 'Version: '}${parseFloat(fields[1])}.${fields[2]}`;
     },
     QVFW2: () => {
       // (VERFW2:00000.00
       if (data == '(NAK') return '<b>QVFW2 (SCC1 CPU Firmware version)</b><br />Not recognised'
       const fields = data.split(/\.|\:/);
       return `${'<b>QVFW2 (SCC1 CPU Firmware version)</b><br />'
-				+ 'Version: '}${parseInt(fields[1])}.${fields[2]}`;
+				+ 'Version: '}${parseFloat(fields[1])}.${fields[2]}`;
     },
     QVFW3: () => {
       // (VERFW3:00000.00
       if (data == '(NAK') return '<b>QVFW3 (SCC2 CPU Firmware version)</b><br />Not recognised'
       const fields = data.split(/\.|\:/);
       return `${'<b>QVFW3 (SCC2 CPU Firmware version)</b><br />'
-				+ 'Version: '}${parseInt(fields[1])}.${fields[2]}`;
+				+ 'Version: '}${parseFloat(fields[1])}.${fields[2]}`;
     },
     QVFW4: () => {
       // (VERFW4:00000.00
       if (data == '(NAK') return '<b>QVFW4 (SCC3 CPU Firmware version)</b><br />Not recognised'
       const fields = data.split(/\.|\:/);
       return `${'<b>QVFW4 (SCC3 CPU Firmware version)</b><br />'
-				+ 'Version: '}${parseInt(fields[1])}.${fields[2]}`;
+				+ 'Version: '}${parseFloat(fields[1])}.${fields[2]}`;
     },
     QPIRI: () => {
       // (000.0 00.0 000.0 00.0 00.0 0000 0000 00.0
@@ -93,20 +93,20 @@ const parseQuery = (cmd, data) => {
 				+ `AC output rating voltage: ${parseFloat(fields[2])}V<br />`
 				+ `AC output rating frequency: ${parseFloat(fields[3])}Hz<br />`
 				+ `AC output rating current: ${parseFloat(fields[4])}A<br />`
-				+ `AC output rating apparent power: ${parseInt(fields[5])}VA<br />`
-				+ `AC output rating active power: ${parseInt(fields[6])}W<br />`
+				+ `AC output rating apparent power: ${parseFloat(fields[5])}VA<br />`
+				+ `AC output rating active power: ${parseFloat(fields[6])}W<br />`
 				+ `Battery rating voltage: ${parseFloat(fields[7])}V<br />`
 				+ `Back-to-grid voltage: ${parseFloat(fields[8])}V<br />`
 				+ `Low voltage disconnect: ${parseFloat(fields[9])}V<br />`
 				+ `Bulk charge voltage: ${parseFloat(fields[10])}V<br />`
 				+ `Float voltage: ${parseFloat(fields[11])}V<br />`
 				+ `Battery Type: ${batteryTypes[fields[12]]}<br />`
-				+ `Max AC charging current: ${parseInt(fields[13])}A<br />`
-				+ `Max DC charging current: ${parseInt(fields[14])}A<br />`
+				+ `Max AC charging current: ${parseFloat(fields[13])}A<br />`
+				+ `Max DC charging current: ${parseFloat(fields[14])}A<br />`
 				+ `AC Input voltage range: ${voltageRanges[fields[15]]}<br />`
 				+ `Output source priority: ${outputSources[fields[16]]}<br />`
 				+ `Charger source priority: ${chargerSources[fields[17]]}<br />`
-				+ `Max in parallel: ${parseInt(fields[18])}<br />`
+				+ `Max in parallel: ${parseFloat(fields[18])}<br />`
 				+ `Device type: ${deviceTypes[fields[19]]}<br />`
 				+ `Topology: ${topologies[fields[20]]}<br />`
 				+ `Output mode: ${outputModes[fields[21]]}<br />`
@@ -142,15 +142,15 @@ const parseQuery = (cmd, data) => {
       const flags = fields[16];
 
       sendData({
-        a: parseInt(fields[5]),
-        b: parseInt(fields[6]),
-        c: parseInt(fields[12]),
-        d: parseInt(fields[13]),
-        e: parseInt(fields[19]),
-        f: parseInt(fields[14]),
-        g: parseInt(fields[8]),
-        h: parseInt(fields[10]),
-        i: parseInt(fields[11]),
+        a: parseFloat(fields[5]),
+        b: parseFloat(fields[6]),
+        c: parseFloat(fields[12]),
+        d: parseFloat(fields[13]),
+        e: parseFloat(fields[19]),
+        f: parseFloat(fields[14]),
+        g: parseFloat(fields[8]),
+        h: parseFloat(fields[10]),
+        i: parseFloat(fields[11]),
       })
 
       return `${'<b>QPIGS (Inverter status)</b><br />'
@@ -158,18 +158,18 @@ const parseQuery = (cmd, data) => {
 				+ `Grid frequency: ${parseFloat(fields[1])}Hz<br />`
 				+ `AC output voltage: ${parseFloat(fields[2])}V<br />`
 				+ `AC output frequency: ${parseFloat(fields[3])}Hz<br />`
-				+ `AC output apparent power: ${parseInt(fields[4])}VA<br />`
-				+ `AC output active power: ${parseInt(fields[5])}W<br />`
-				+ `Output load: ${parseInt(fields[6])}%<br />`
+				+ `AC output apparent power: ${parseFloat(fields[4])}VA<br />`
+				+ `AC output active power: ${parseFloat(fields[5])}W<br />`
+				+ `Output load: ${parseFloat(fields[6])}%<br />`
 				+ `Bus voltage: ${parseFloat(fields[7])}V<br />`
 				+ `Battery voltage: ${parseFloat(fields[8])}V<br />`
-				+ `Battery charging current: ${parseInt(fields[9])}A<br />`
-				+ `Battery capacity: ${parseInt(fields[10])}%<br />`
-				+ `Heatsink temp: ${parseInt(fields[11])}&deg;C<br />`
+				+ `Battery charging current: ${parseFloat(fields[9])}A<br />`
+				+ `Battery capacity: ${parseFloat(fields[10])}%<br />`
+				+ `Heatsink temp: ${parseFloat(fields[11])}&deg;C<br />`
 				+ `SCC1 Input current: ${parseFloat(fields[12])}A<br />`
 				+ `SCC1 Input voltage: ${parseFloat(fields[13])}V<br />`
 				+ `SCC1 Battery voltage: ${parseFloat(fields[14])}V<br />`
-				+ `Battery discharge current: ${parseInt(fields[15])}A<br />`
+				+ `Battery discharge current: ${parseFloat(fields[15])}A<br />`
 				+ 'Status: <br />&nbsp;&nbsp;'
 				+ `Add SBU priority: ${flags[0] == '1' ? 'Yes' : 'No'
 				}<br />&nbsp;&nbsp;`
@@ -188,11 +188,11 @@ const parseQuery = (cmd, data) => {
 				+ `AC charging: ${flags[7] == '1' ? 'On' : 'Off'
 				}<br />`
 				+ `Battery voltage offset: ${
-				  parseInt(fields[17])}mV<br />`
+				  parseFloat(fields[17])}mV<br />`
 				+ `EEprom version: ${
 				  fields[18]}<br />`
 				+ `PV1 Charging power: ${
-				  parseInt(fields[19])}W`;
+				  parseFloat(fields[19])}W`;
     },
     // QPGS0
     QPIGS2: () => {
@@ -202,21 +202,21 @@ const parseQuery = (cmd, data) => {
       const fields = data.slice(1).split(' ');
       const flags = fields[4];
       return `${'<b>QPIGS2 (Inverter status 2)</b><br />'
-				+ 'SCC2 input current: '}${parseInt(fields[0])}A<br />`
+				+ 'SCC2 input current: '}${parseFloat(fields[0])}A<br />`
 				+ `SCC2 input voltage: ${parseFloat(fields[1])}V<br />`
 				+ `SCC2 battery voltage: ${parseFloat(fields[2])}V<br />`
-				+ `SCC2 charging power: ${parseInt(fields[3])}W<br />`
+				+ `SCC2 charging power: ${parseFloat(fields[3])}W<br />`
 				+ `SCC2 charging: ${
 				  flags[0] == '1' ? 'Yes<br />' : 'No<br />'
 				}SCC3 charging: ${
 				  flags[1] == '1' ? 'Yes<br />' : 'No<br />'
-				}AC charging current: ${parseInt(fields[5])}A<br />`
-				+ `AC charging power: ${parseInt(fields[6])}W<br />`
-				+ `SCC3 input current: ${parseInt(fields[7])}A<br />`
+				}AC charging current: ${parseFloat(fields[5])}A<br />`
+				+ `AC charging power: ${parseFloat(fields[6])}W<br />`
+				+ `SCC3 input current: ${parseFloat(fields[7])}A<br />`
 				+ `SCC3 input voltage: ${parseFloat(fields[8])}V<br />`
 				+ `SCC3 battery voltage: ${parseFloat(fields[9])}V<br />`
-				+ `SCC3 charging power: ${parseInt(fields[10])}W<br />`
-				+ `Total PV charging power: ${parseInt(fields[11])}W`;
+				+ `SCC3 charging power: ${parseFloat(fields[10])}W<br />`
+				+ `Total PV charging power: ${parseFloat(fields[11])}W`;
     },
     QMOD: () => {
       if (data == '(NAK') return '<b>QMOD (Operating Mode)</b><br />Not recognised'
@@ -312,12 +312,12 @@ const parseQuery = (cmd, data) => {
       return `${'<b>QDI (Default setting values)</b><br />'
 				+ 'AC output voltage: '}${parseFloat(fields[0])}V<br />`
 				+ `AC output frequency: ${parseFloat(fields[1])}Hz<br />`
-				+ `Max AC charging current: ${parseInt(fields[2])}A<br />`
+				+ `Max AC charging current: ${parseFloat(fields[2])}A<br />`
 				+ `Low voltage disconnect: ${parseFloat(fields[3])}V<br />`
 				+ `Float voltage: ${parseFloat(fields[4])}V<br />`
 				+ `Bulk voltage: ${parseFloat(fields[5])}V<br />`
 				+ `Back-to-grid voltage: ${parseFloat(fields[6])}V<br />`
-				+ `Max DC charging current: ${parseInt(fields[7])}A<br />`
+				+ `Max DC charging current: ${parseFloat(fields[7])}A<br />`
 				+ `AC Input voltage range: ${
 				  fields[8] == '0' ? 'Appliance<br />' : 'UPS<br />'
 				}Output source priority: ${
@@ -351,8 +351,8 @@ const parseQuery = (cmd, data) => {
 				+ `Charging stages: ${stages[fields[25]]}<br />`
 				+ `Data log popup: ${
 				  fields[26] == '0' ? 'Disabled<br />' : 'Enabled<br />'
-				}Max Solar charging current: ${parseInt(fields[27])}A<br />`
-				+ `CV Charging time: ${parseInt(fields[28])}mins`;
+				}Max Solar charging current: ${parseFloat(fields[27])}A<br />`
+				+ `CV Charging time: ${parseFloat(fields[28])}mins`;
     },
     QBEQI: () => {
       // (1 000 000 000 000 00.00 000 000
@@ -360,20 +360,20 @@ const parseQuery = (cmd, data) => {
       const fields = data.slice(1).split(' ');
       return `${'<b>QBEQI (Equalisation status)</b><br />'
 				+ 'Battery equalized: '}${fields[0] == '1' ? 'Yes' : 'No'}<br />`
-				+ `Equalize time: ${parseInt(fields[1])}mins<br />`
-				+ `Equalize Interval: ${parseInt(fields[2])}days<br />`
-				+ `Max current: ${parseInt(fields[3])}A<br />`
-				+ `Next equalize: ${parseInt(fields[4])}days<br />`
+				+ `Equalize time: ${parseFloat(fields[1])}mins<br />`
+				+ `Equalize Interval: ${parseFloat(fields[2])}days<br />`
+				+ `Max current: ${parseFloat(fields[3])}A<br />`
+				+ `Next equalize: ${parseFloat(fields[4])}days<br />`
 				+ `Equalized voltage: ${parseFloat(fields[5])}V<br />`
-				+ `Absorb time: ${parseInt(fields[6])}mins<br />`
-				+ `Equalize timeout: ${parseInt(fields[7])}mins`;
+				+ `Absorb time: ${parseFloat(fields[6])}mins<br />`
+				+ `Equalize timeout: ${parseFloat(fields[7])}mins`;
     },
     QMCHGCR: () => {
       // (000 000 000 000
       if (data == '(NAK') return '<b>QMCHGCR (Max charging current settings)</b><br />Not recognised'
       const fields = data.slice(1).split(' ');
       let details = '<b>QMCHGCR (Max charging current settings)</b><br />';
-      for (const fld of fields) { details += `${parseInt(fld)}A<br />`; }
+      for (const fld of fields) { details += `${parseFloat(fld)}A<br />`; }
       return details;
     },
     QMUCHGCR: () => {
@@ -381,7 +381,7 @@ const parseQuery = (cmd, data) => {
       if (data == '(NAK') return '<b>QMUCHGCR (Max utility charging current settings)</b><br />Not recognised'
       const fields = data.slice(1).split(' ');
       let details = '<b>QMUCHGCR (Max utility charging current settings)</b><br />';
-      for (const fld of fields) { details += `${parseInt(fld)}A<br />`; }
+      for (const fld of fields) { details += `${parseFloat(fld)}A<br />`; }
       return details;
     },
     QMSCHGCR: () => {
@@ -389,7 +389,7 @@ const parseQuery = (cmd, data) => {
       if (data == '(NAK') return '<b>QMSCHGCR (Max solar charging current settings)</b><br />Not recognised'
       const fields = data.slice(1).split(' ');
       let details = '<b>QMUCHGCR (Max solar charging current settings)</b><br />';
-      for (const fld of fields) { details += `${parseInt(fld)}A<br />`; }
+      for (const fld of fields) { details += `${parseFloat(fld)}A<br />`; }
       return details;
     },
     QBOOT: () => {
@@ -423,7 +423,7 @@ const parseQuery = (cmd, data) => {
       if (data == '(NAK') return '<b>QCVT (Charging time in CV mode)</b><br />Not recognised'
       const details = data.slice(1);
       return `${'<b>QCVT (Charging time in CV mode)</b><br />'
-				+ 'Time: '}${details == '255' ? 'Auto' : `${parseInt(details)}mins`}`;
+				+ 'Time: '}${details == '255' ? 'Auto' : `${parseFloat(details)}mins`}`;
     },
     QBV: () => {
       // (000
@@ -444,21 +444,21 @@ const parseQuery = (cmd, data) => {
       const fields = data.slice(1).split(' ');
       const flags = fields[2];
       return `${'<b>Q1 (Undocumented)</b><br />'
-				+ 'Absorb (CV) time: '}${parseInt(fields[0])}sec<br />`
-				+ `Float time: ${parseInt(fields[1])}sec<br />`
+				+ 'Absorb (CV) time: '}${parseFloat(fields[0])}sec<br />`
+				+ `Float time: ${parseFloat(fields[1])}sec<br />`
 				+ `SCC ok: ${fields[2] == '01' ? 'OK<br />' : 'Not OK<br />'
 				}Allow SCC on: ${fields[3] == '01' ? 'Yes<br />' : 'No<br />'
-				}Average charge current: ${parseInt(fields[4])}A<br />`
-				+ `SCC PWM temperature: ${parseInt(fields[5])}&deg;C<br />`
-				+ `Battery temperature: ${parseInt(fields[6])}&deg;C<br />`
-				+ `Transformer temperature: ${parseInt(fields[7])}&deg;C<br />`
+				}Average charge current: ${parseFloat(fields[4])}A<br />`
+				+ `SCC PWM temperature: ${parseFloat(fields[5])}&deg;C<br />`
+				+ `Battery temperature: ${parseFloat(fields[6])}&deg;C<br />`
+				+ `Transformer temperature: ${parseFloat(fields[7])}&deg;C<br />`
 				+ `GPADAT (GPIO13) bit: ${fields[8]}<br />`
 				+ `Fan lock status: ${fields[9] == '01' ? 'Locked<br />' : 'Not Locked<br />'
-				}Fan PWM duty: ${parseInt(fields[10])}<br />`
-				+ `Fan speed: ${parseInt(fields[11])}%<br />`
-				+ `SCC charge power: ${parseInt(fields[12])}W<br />`
+				}Fan PWM duty: ${parseFloat(fields[10])}<br />`
+				+ `Fan speed: ${parseFloat(fields[11])}%<br />`
+				+ `SCC charge power: ${parseFloat(fields[12])}W<br />`
 				+ `Parallel warning: ${fields[13]}<br />`
-				+ `AC sync frequency: ${parseInt(fields[14])}Hz<br />`
+				+ `AC sync frequency: ${parseFloat(fields[14])}Hz<br />`
 				+ `Inverter charge status:${statuses[fields[15]]}`;
     },
     QGS: () => {
@@ -576,7 +576,7 @@ const parseQuery = (cmd, data) => {
       const flags = fields[2];
       const status = () => {
         let result = '';
-        const flags = parseInt(fields[14]);
+        const flags = parseFloat(fields[14]);
         if (flags & 4) result += '&nbsp;&nbsp;Load on<br />'
         else result += '&nbsp;&nbsp;Load off<br />';
         if (flags & 8) result += '&nbsp;&nbsp;Inverter relay on<br />'

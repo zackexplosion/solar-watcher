@@ -3,9 +3,14 @@
     <div v-if="!ready">Loading...</div>
     <div v-if="ready">
       <!-- <h1>Message From Server: {{msgFromServer}}</h1> -->
-      <h1>太陽能監控儀</h1>
+      <!-- <h1>太陽能監控儀</h1> -->
       <div id="chart">
-        <Chart :options="chartOptions" ref="chart" :updateArgs="updateArgs"/>
+        <Chart
+          :constructorType="'stockChart'"
+          :options="chartOptions"
+          ref="chart"
+          :updateArgs="updateArgs"
+        />
       </div>
     </div>
 
@@ -15,9 +20,10 @@
 <script>
 import { io } from 'socket.io-client'
 import { Chart } from 'highcharts-vue'
-// import stockInit from 'highcharts/modules/stock'
+import Highcharts from 'highcharts'
+import stockInit from 'highcharts/modules/stock'
 
-// stockInit(Chart)
+stockInit(Highcharts)
 
 export default {
   name: 'App',
@@ -28,7 +34,7 @@ export default {
     this.setupSocket()
     setTimeout(() => {
       window.location = window.location.toString()
-    }, 1000 * 60 * 5)
+    }, 1000 * 60 * 15)
   },
   data: () => ({
     socket: null,
@@ -40,9 +46,9 @@ export default {
         timezoneOffset: new Date().getTimezoneOffset(),
       },
       chart: {
-        height: `${(window.innerHeight - 200)}px`,
+        height: `${(window.innerHeight - 10)}px`,
       },
-      title: '',
+      title: '太陽能監控儀',
       xAxis: {
         type: 'datetime',
       },
@@ -55,27 +61,98 @@ export default {
           // },
         },
       },
+      rangeSelector: {
+        buttons: [
+          {
+            type: 'minute',
+            count: 5,
+            text: '5m',
+          },
+          {
+            type: 'minute',
+            count: 15,
+            text: '15m',
+          },
+          {
+            type: 'hour',
+            count: 1,
+            text: '1h',
+          },
+          {
+            type: 'hour',
+            count: 4,
+            text: '4h',
+          },
+          {
+            type: 'hour',
+            count: 12,
+            text: '12h',
+          },
+          {
+            type: 'day',
+            count: 1,
+            text: '1d',
+          },
+          {
+            type: 'month',
+            count: 1,
+            text: '1m',
+          },
+          {
+            type: 'year',
+            count: 1,
+            text: '1y',
+          },
+          {
+            type: 'all',
+            text: 'All',
+          }],
+        // inputEnabled: false, // it supports only days
+        selected: 0, // all
+      },
       series: [
         {
-          name: 'AC負載 (瓦特 W）',
+          name: 'AC負載 (瓦特 W x10)',
+          key: 'acOutputPower',
           color: '#cc3333',
           data: [], // sample data
         },
         {
-          name: 'PV輸入 (瓦特 W）',
+          name: 'PV輸入 (瓦特 W x10)',
+          key: 'pvInputPower',
           color: '#009933',
           data: [], // sample data
         },
         {
+          name: 'PV電壓 (伏特 V)',
+          key: 'pvInputVoltage',
+          color: '#000099',
+          data: [], // sample data
+        },
+        {
           name: '電池電壓 (伏特 V)',
+          key: 'battVoltage',
           // color: '#009933',
           data: [], // sample data
         },
-        // {
-        //   name: '散熱器溫度 (攝氏 °C)',
-        //   // color: '#009933',
-        //   data: [], // sample data
-        // },
+        {
+          name: '電池容量 (%)',
+          key: 'battCapacity',
+          // color: '#009933',
+          data: [], // sample data
+        },
+        {
+          name: '電池電流 (安培 A)',
+          key: 'battChargingCurrent',
+          // color: '#009933',
+          data: [], // sample data
+        },
+        {
+          name: '散熱器溫度 (攝氏 °C)',
+          key: 'heatsinkTemp',
+          // color: '#009933',
+          data: [], // sample data
+        },
       ],
     },
   }),
@@ -88,29 +165,21 @@ export default {
       })
 
       socket.on('initLiveChart', (data) => {
-        console.log('t1', data[0])
+        // console.log('t1', data[0])
         // console.log('t2', data[1].timestamp)
-        this.chartOptions.series[0].data = []
+        // this.chartOptions.series[0].data = []
+        // this.chartOptions.series
+        // clean data
+        for (let index = 0; index < this.chartOptions.series.length; index += 1) {
+          this.chartOptions.series[index].data = []
+        }
         data.forEach((d) => {
           const t = d.timestamp
-          if (
-            d.acOutputPower
-            && d.pvInputPower
-            && d.battVoltage
-          ) {
-            const power = parseFloat(d.acOutputPower)
-            this.chartOptions.series[0].data.push([t, power])
 
-            const pvPower = parseFloat(d.pvInputPower)
-            this.chartOptions.series[1].data.push([t, pvPower])
-
-            const battVoltage = parseFloat(d.battVoltage)
-            this.chartOptions.series[2].data.push([t, battVoltage])
-
-            // const heatsinkTemp = parseFloat(d.heatsinkTemp)
-            // this.chartOptions.series[3].data.push([t, heatsinkTemp])
-          } else {
-            console.log(d)
+          for (let index = 0; index < this.chartOptions.series.length; index += 1) {
+            const { key } = this.chartOptions.series[index]
+            const v = parseFloat(d[key])
+            this.chartOptions.series[index].data.push([t, v])
           }
         })
         this.ready = true
@@ -120,29 +189,22 @@ export default {
         // console.log('updateChart', data)
         // this.chartOptions.series[0].addPoint(data.acOutputPower)
 
-        this.$refs.chart.chart.series[0].addPoint(
-          [data.timestamp, data.acOutputPower],
-          false,
-          true,
-        )
+        for (let index = 0; index < this.chartOptions.series.length; index += 1) {
+          let updateChart = false
+          const { key } = this.chartOptions.series[index]
 
-        this.$refs.chart.chart.series[1].addPoint(
-          [data.timestamp, data.pvInputPower],
-          false,
-          true,
-        )
+          if (index === this.chartOptions.series.length - 1) {
+            updateChart = true
+          }
+          // console.log('index', index)
+          // console.log('index2', this.chartOptions.series.length)
 
-        this.$refs.chart.chart.series[2].addPoint(
-          [data.timestamp, data.battVoltage],
-          true,
-          true,
-        )
-
-        // this.$refs.chart.chart.series[3].addPoint(
-        //   [data.timestamp, data.heatsinkTemp],
-        //   true,
-        //   true,
-        // )
+          this.$refs.chart.chart.series[index].addPoint(
+            [data.timestamp, data[key]],
+            updateChart,
+            true,
+          )
+        }
       })
 
       this.socket = socket
@@ -156,7 +218,7 @@ export default {
   text-align: left;
   width: 95%;
   margin: 0 auto;
-  margin-top: 40px;
+  // margin-top: 40px;
   height: 95vh;
   overflow: hidden;
 }
