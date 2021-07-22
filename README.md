@@ -1,9 +1,12 @@
-# solar watcher
+# Solar Watcher
 
-Watch you solar invertor by YOURSELF!
+Watch your solar invertor by YOURSELF!
 
-## Structure
+# Credit
 
+Communicate with rs232 part by https://github.com/prajna-pranab/converse
+
+## File Structure
 
 ### ./client
 Read data from invertor and send to remote web server.
