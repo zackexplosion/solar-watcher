@@ -118,9 +118,14 @@ export default {
           data: [], // sample data
         },
         {
-          name: 'PV輸入 (瓦特 W x10)',
+          name: 'PV功率 (瓦特 W x10)',
           key: 'pvInputPower',
           color: '#009933',
+          data: [], // sample data
+        },
+        {
+          name: 'PV電流 (安培 A)',
+          key: 'pvInputCurrent',
           data: [], // sample data
         },
         {

@@ -150,6 +150,7 @@ server.listen(PORT, () => {
         const data = {
           timestamp: cacheData[cacheData.length - 1].timestamp + 5000,
           acOutputPower: (parseInt(Math.random() * 100) + 1),
+          pvInputCurrent: (parseInt(Math.random() * 200) + 1),
           pvInputVoltage: (parseInt(Math.random() * 200) + 1),
           pvInputPower: (parseInt(Math.random() * 100) + 1),
           battVoltage: (parseInt(Math.random() * 40) + 1),
