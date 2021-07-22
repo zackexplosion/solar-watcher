@@ -1,5 +1,6 @@
 // env setup
 const LOG_PATH = process.env.SERVER_LOG_PATH || './test.log'
+const VALID_ID_LIST = process.env.SERVER_VALID_ID_LIST.split(',').map((_) => _.trim()) || []
 
 // main server
 const express = require('express')
@@ -29,8 +30,6 @@ const paramMap = {
   i: 'battCapacity',
   j: 'heatsinkTemp',
 }
-
-const VALID_ID_LIST = process.env.SERVER_VALID_ID_LIST.split(',').map((_) => _.trim()) || []
 
 function parseLog(row) {
   const d = row.time_local.split(':')
@@ -116,7 +115,7 @@ server.listen(PORT, () => {
   //   setupLogReader()
   // })
 
-  exec(`tail -n 60 ${LOG_PATH}`, (error, stdout, stderr) => {
+  exec(`tail -n 360 ${LOG_PATH}`, (error, stdout, stderr) => {
     if (error) {
       console.log(`error: ${error.message}`);
       return;
@@ -148,6 +147,8 @@ server.listen(PORT, () => {
           timestamp: cacheData[cacheData.length - 1].timestamp + 5000,
           acOutputPower: (parseInt(Math.random() * 1000) + 1),
           pvInputPower: (parseInt(Math.random() * 1000) + 1),
+          battVoltage: (parseInt(Math.random() * 40) + 1),
+          heatsinkTemp: (parseInt(Math.random() * 40) + 1),
         }
         cacheData.shift()
         cacheData.push(data)
