@@ -54,10 +54,16 @@ function parseLog(row) {
     // const v = parseFloat(raw_params.get(k)) || 0
     const v = raw_params.get(k)
     if (v) {
-      if (['acOutputPower', 'pvInputPower'].includes(paramMap[k])) {
-        params[paramMap[k]] = parseFloat(Big(v).div(10).toFixed(2))
-      } else {
-        params[paramMap[k]] = parseFloat(Big(v).toFixed(2))
+      try {
+        // if (['acOutputPower', 'pvInputPower'].includes(paramMap[k])) {
+        //   params[paramMap[k]] = parseFloat(new Big(v).div(10).toFixed(2))
+        // } else {
+        //   params[paramMap[k]] = parseFloat(new Big(v).toFixed(2))
+        // }
+        params[paramMap[k]] = parseFloat(new Big(v).toFixed(2))
+      } catch (error) {
+        console.error(error)
+        console.log('v', v)
       }
     }
   })
@@ -109,16 +115,6 @@ const PORT = process.env.PORT || 7777
 server.listen(PORT, () => {
   console.log(`listening on *:${PORT}`);
 
-  // parser.read(LOG_PATH, (row) => {
-  //   const r = parseLog(row)
-  //   if (r) {
-  //     cacheData.push(r)
-  //     cacheData.reverse()
-  //   }
-  // }, (err) => {
-  //   if (err) throw err;
-  //   setupLogReader()
-  // })
   console.time('read log')
   exec(`cat ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, (error, stdout, stderr) => {
     if (error) {
@@ -142,8 +138,8 @@ server.listen(PORT, () => {
       })
     }
     cacheData.reverse()
-    // console.log(cacheData)
     console.timeEnd('read log')
+
     setupLogReader()
 
     if (process.env.NODE_ENV !== 'production') {

@@ -46,21 +46,30 @@ export default {
         timezoneOffset: new Date().getTimezoneOffset(),
       },
       chart: {
-        height: `${(window.innerHeight - 10)}px`,
+        height: `${(window.innerHeight - 50)}px`,
       },
       title: '太陽能監控儀',
       xAxis: {
         type: 'datetime',
       },
-      yAxis: {
-        title: {
-          enabled: false,
-          // text: '瓦特 (W)',
-          // style: {
-          //   fontWeight: 'normal',
-          // },
+      yAxis: [
+        {
+          labels: {
+            align: 'left',
+          },
+          height: '80%',
+          resize: {
+            enabled: true,
+          },
         },
-      },
+        {
+          labels: {
+            align: 'left',
+          },
+          top: '80%',
+          height: '20%',
+        },
+      ],
       rangeSelector: {
         buttons: [
           {
@@ -112,13 +121,14 @@ export default {
       },
       series: [
         {
-          name: 'AC負載 (瓦特 W x10)',
+
+          name: 'AC負載 (瓦特 W)',
           key: 'acOutputPower',
           color: '#cc3333',
           data: [], // sample data
         },
         {
-          name: 'PV功率 (瓦特 W x10)',
+          name: 'PV功率 (瓦特 W)',
           key: 'pvInputPower',
           color: '#009933',
           data: [], // sample data
@@ -127,36 +137,45 @@ export default {
           name: 'PV電流 (安培 A)',
           key: 'pvInputCurrent',
           data: [], // sample data
+          yAxis: 1,
         },
         {
           name: 'PV電壓 (伏特 V)',
           key: 'pvInputVoltage',
           color: '#000099',
           data: [], // sample data
+          yAxis: 1,
         },
         {
           name: '電池電壓 (伏特 V)',
           key: 'battVoltage',
-          // color: '#009933',
+          color: '#000000',
           data: [], // sample data
+          // type: 'column',
+          yAxis: 1,
         },
         {
           name: '電池容量 (%)',
           key: 'battCapacity',
-          // color: '#009933',
+          color: '#CCCCCC',
           data: [], // sample data
+          // type: 'column',
+          yAxis: 1,
         },
         {
           name: '電池電流 (安培 A)',
           key: 'battChargingCurrent',
-          // color: '#009933',
+          color: '#666666',
           data: [], // sample data
+          // type: 'column',
+          yAxis: 1,
         },
         {
           name: '散熱器溫度 (攝氏 °C)',
           key: 'heatsinkTemp',
-          // color: '#009933',
+          color: '#ffcc00',
           data: [], // sample data
+          yAxis: 1,
         },
       ],
     },
@@ -183,7 +202,8 @@ export default {
 
           for (let index = 0; index < this.chartOptions.series.length; index += 1) {
             const { key } = this.chartOptions.series[index]
-            const v = parseFloat(d[key])
+            // const v = parseFloat(d[key])
+            const v = d[key]
             this.chartOptions.series[index].data.push([t, v])
           }
         })
@@ -204,6 +224,7 @@ export default {
           // console.log('index', index)
           // console.log('index2', this.chartOptions.series.length)
 
+          // console.log(this.$refs.chart.chart.series[index])
           this.$refs.chart.chart.series[index].addPoint(
             [data.timestamp, data[key]],
             updateChart,
