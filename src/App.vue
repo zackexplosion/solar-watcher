@@ -54,6 +54,7 @@ body {
   text-align: left;
   width: 100%;
   margin: 0 auto;
+  padding: 1em;
   // margin-top: 40px;
   height: 100vh;
   overflow: hidden;

@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="clock"
-  >
+  <div class="clock">
   {{ theTime }}
   </div>
 </template>
@@ -10,7 +8,17 @@ export default {
   data: () => ({
     theTime: null,
   }),
+  props: {
+    socket: {
+      type: Object,
+    },
+  },
   mounted() {
+    const { socket } = this
+    socket.on('updateLiveChart', () => {
+      // const [timestamp] = data
+      this.getTime()
+    })
     this.getTime()
   },
   methods: {
@@ -37,7 +45,7 @@ export default {
       const time = `${h}:${m}:${s} ${session}`;
       this.theTime = time
 
-      setTimeout(this.getTime, 1000);
+      // setTimeout(this.getTime, 1000);
     },
   },
 }
