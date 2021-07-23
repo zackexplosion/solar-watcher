@@ -151,6 +151,12 @@ const parseQuery = (cmd, data) => {
         g: parseFloat(fields[8]),
         h: parseFloat(fields[10]),
         i: parseFloat(fields[11]),
+        j: parseFloat(fields[0]),
+        k: parseFloat(fields[1]),
+        l: parseFloat(fields[2]),
+        m: parseFloat(fields[3]),
+        n: parseFloat(fields[4]),
+        flags: JSON.stringify(flags),
       })
 
       return `${'<b>QPIGS (Inverter status)</b><br />'
@@ -766,7 +772,8 @@ const sendQuery = (txt) => {
 
 /// ////////////////////////////// main /////////////////////
 
-const request = require('axios')
+const request = require('axios');
+const { json } = require('express');
 
 function sendData(data) {
   const output = {

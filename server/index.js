@@ -18,19 +18,7 @@ const NginxParser = require('nginxparser')
 
 const parser = new NginxParser('$remote_addr - - [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"');
 const Tail = require('nodejs-tail');
-
-const paramMap = {
-  a: 'acOutputPower',
-  b: 'acOutputLoad',
-  c: 'pvInputCurrent',
-  d: 'pvInputVoltage',
-  e: 'pvInputPower',
-  f: 'pvBattVoltage',
-  g: 'battVoltage',
-  g2: 'battChargingCurrent',
-  h: 'battCapacity',
-  i: 'heatsinkTemp',
-}
+const paramMap = require('./paramMap')
 
 function parseLog(row) {
   const d = row.time_local.split(':')
