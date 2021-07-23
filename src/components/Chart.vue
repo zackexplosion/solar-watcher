@@ -1,12 +1,12 @@
 <template>
-  <div v-if="ready">
-    <Chart
-      :constructorType="'stockChart'"
-      :options="chartOptions"
-      ref="chart"
-      :updateArgs="updateArgs"
-    />
-  </div>
+  <Chart
+    v-if="ready"
+    :constructorType="'stockChart'"
+    :options="chartOptions"
+    ref="chart"
+    :updateArgs="updateArgs"
+    style="height:100%"
+  />
 </template>
 
 <script>
@@ -15,7 +15,23 @@ import Highcharts from 'highcharts'
 import stockInit from 'highcharts/modules/stock'
 
 stockInit(Highcharts)
-
+const paramsArrayMap = [
+  'timestamp', // 0
+  'gridVoltage', 'gridFrequency',
+  'acOutputVoltage', 'acOutputFrequency',
+  'acOutputApparentPower', 'acOutputActivePower',
+  'acOutputLoad', // 7
+  'busVoltage', 'batteryVoltage',
+  'batteryChargingCurrent', 'batteryCapacity',
+  'heatSinkTemp', // 12
+  'pvInputCurrent', 'pvInputVoltage',
+  'pvBatteryVoltage',
+  'batteryDischargeCurrent', // 16
+  'flags', // 17
+  'batteryVoltageOffset',
+  'EEPRomVersion',
+  'pvInputPower', // 20
+]
 export default {
   name: 'mychart',
   components: {
@@ -35,9 +51,6 @@ export default {
     chartOptions: {
       time: {
         timezoneOffset: new Date().getTimezoneOffset(),
-      },
-      chart: {
-        // height: `${(window.innerHeight - 50)}px`,
       },
       title: '太陽能監控儀',
       xAxis: {
@@ -113,9 +126,12 @@ export default {
       },
       series: [
         {
-
+          name: '市電電壓',
+          key: 'gridVoltage',
+        },
+        {
           name: 'AC負載 (瓦特 W)',
-          key: 'acOutputPower',
+          key: 'acOutputActivePower',
           color: '#cc3333',
           data: [], // sample data
         },
@@ -140,7 +156,7 @@ export default {
         },
         {
           name: '電池電壓 (伏特 V)',
-          key: 'battVoltage',
+          key: 'batteryVoltage',
           color: '#000000',
           data: [], // sample data
           // type: 'column',
@@ -148,7 +164,7 @@ export default {
         },
         {
           name: '電池容量 (%)',
-          key: 'battCapacity',
+          key: 'batteryCapacity',
           color: '#CCCCCC',
           data: [], // sample data
           // type: 'column',
@@ -156,7 +172,7 @@ export default {
         },
         {
           name: '電池電流 (安培 A)',
-          key: 'battChargingCurrent',
+          key: 'batteryChargingCurrent',
           color: '#666666',
           data: [], // sample data
           // type: 'column',
@@ -164,7 +180,7 @@ export default {
         },
         {
           name: '散熱器溫度 (攝氏 °C)',
-          key: 'heatsinkTemp',
+          key: 'heatSinkTemp',
           color: '#ffcc00',
           data: [], // sample data
           yAxis: 1,
@@ -181,21 +197,16 @@ export default {
       })
 
       socket.on('initLiveChart', (data) => {
-        // console.log('t1', data[0])
-        // console.log('t2', data[1].timestamp)
-        // this.chartOptions.series[0].data = []
-        // this.chartOptions.series
+        console.log(data)
         // clean data
         for (let index = 0; index < this.chartOptions.series.length; index += 1) {
           this.chartOptions.series[index].data = []
         }
         data.forEach((d) => {
-          const t = d.timestamp
-
+          const t = d[0]
           for (let index = 0; index < this.chartOptions.series.length; index += 1) {
             const { key } = this.chartOptions.series[index]
-            // const v = parseFloat(d[key])
-            const v = d[key]
+            const v = d[paramsArrayMap.indexOf(key)] || 0
             this.chartOptions.series[index].data.push([t, v])
           }
         })
@@ -206,24 +217,24 @@ export default {
       socket.on('updateLiveChart', (data) => {
         // console.log('updateChart', data)
         // this.chartOptions.series[0].addPoint(data.acOutputPower)
-
+        const updatedData = []
         for (let index = 0; index < this.chartOptions.series.length; index += 1) {
           let updateChart = false
           const { key } = this.chartOptions.series[index]
-
+          const value = data[paramsArrayMap.indexOf(key)]
+          updatedData.push([key, value])
           if (index === this.chartOptions.series.length - 1) {
             updateChart = true
           }
-          // console.log('index', index)
-          // console.log('index2', this.chartOptions.series.length)
 
-          // console.log(this.$refs.chart.chart.series[index])
           this.$refs.chart.chart.series[index].addPoint(
-            [data.timestamp, data[key]],
+            [data[0], value],
             updateChart,
             true,
           )
         }
+
+        // console.log(updatedData)
       })
     },
   },

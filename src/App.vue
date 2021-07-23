@@ -1,26 +1,26 @@
 <template>
   <div id="app">
     <div v-if="!ready">
-      Loading...
-      <div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+      <Loading />
     </div>
-    <div v-show="ready">
-      <Chart
-        :socket="socket"
-        @ready="ready = true"
-      />
-    </div>
+    <Chart
+      v-show="ready"
+      :socket="socket"
+      @ready="ready = true"
+    />
   </div>
 </template>
 
 <script>
 import { io } from 'socket.io-client'
 import Chart from './components/Chart.vue'
+import Loading from './components/Loading.vue'
 
 export default {
   name: 'App',
   components: {
     Chart,
+    Loading,
   },
   mounted() {
     // this.setupSocket()
@@ -39,101 +39,21 @@ export default {
 </script>
 
 <style lang="scss">
+body {
+  padding:0;
+  margin:0;
+  background: #000000;
+}
 #app {
   text-align: left;
-  width: 95%;
+  width: 100%;
   margin: 0 auto;
   // margin-top: 40px;
-  height: 95vh;
+  height: 100vh;
   overflow: hidden;
 }
 h1 {
   text-align: center;
-}
-
-.lds-roller {
-  display: inline-block;
-  position: relative;
-  width: 80px;
-  height: 80px;
-}
-.lds-roller div {
-  animation: lds-roller 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-  transform-origin: 40px 40px;
-}
-.lds-roller div:after {
-  content: " ";
-  display: block;
-  position: absolute;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #fff;
-  margin: -4px 0 0 -4px;
-}
-.lds-roller div:nth-child(1) {
-  animation-delay: -0.036s;
-}
-.lds-roller div:nth-child(1):after {
-  top: 63px;
-  left: 63px;
-}
-.lds-roller div:nth-child(2) {
-  animation-delay: -0.072s;
-}
-.lds-roller div:nth-child(2):after {
-  top: 68px;
-  left: 56px;
-}
-.lds-roller div:nth-child(3) {
-  animation-delay: -0.108s;
-}
-.lds-roller div:nth-child(3):after {
-  top: 71px;
-  left: 48px;
-}
-.lds-roller div:nth-child(4) {
-  animation-delay: -0.144s;
-}
-.lds-roller div:nth-child(4):after {
-  top: 72px;
-  left: 40px;
-}
-.lds-roller div:nth-child(5) {
-  animation-delay: -0.18s;
-}
-.lds-roller div:nth-child(5):after {
-  top: 71px;
-  left: 32px;
-}
-.lds-roller div:nth-child(6) {
-  animation-delay: -0.216s;
-}
-.lds-roller div:nth-child(6):after {
-  top: 68px;
-  left: 24px;
-}
-.lds-roller div:nth-child(7) {
-  animation-delay: -0.252s;
-}
-.lds-roller div:nth-child(7):after {
-  top: 63px;
-  left: 17px;
-}
-.lds-roller div:nth-child(8) {
-  animation-delay: -0.288s;
-}
-.lds-roller div:nth-child(8):after {
-  top: 56px;
-  left: 12px;
-}
-@keyframes lds-roller {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
 }
 
 </style>
