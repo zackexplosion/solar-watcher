@@ -57,17 +57,18 @@ export default {
           labels: {
             align: 'left',
           },
-          height: '80%',
-          resize: {
-            enabled: true,
-          },
+          height: '50%',
+          // resize: {
+          //   enabled: true,
+          // },
         },
         {
           labels: {
             align: 'left',
           },
-          top: '80%',
-          height: '20%',
+          top: '50%',
+          height: '50%',
+          offset: 0,
         },
       ],
       rangeSelector: {
@@ -144,7 +145,7 @@ export default {
           key: 'pvInputVoltage',
           color: '#000099',
           data: [], // sample data
-          yAxis: 1,
+          // yAxis: 1,
         },
         {
           name: '電池電壓 (伏特 V)',
