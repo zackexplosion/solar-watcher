@@ -3,11 +3,15 @@
     <div v-if="!ready">
       <Loading />
     </div>
-    <Chart
-      v-show="ready"
-      :socket="socket"
-      @ready="ready = true"
-    />
+    <div v-show="ready">
+      <Dashboard
+        :socket="socket"
+      />
+      <Chart
+        :socket="socket"
+        @ready="ready = true"
+      />
+    </div>
   </div>
 </template>
 
@@ -15,10 +19,12 @@
 import { io } from 'socket.io-client'
 import Chart from './components/Chart.vue'
 import Loading from './components/Loading.vue'
+import Dashboard from './components/Dashboard/Dashboard.vue'
 
 export default {
   name: 'App',
   components: {
+    Dashboard,
     Chart,
     Loading,
   },
@@ -42,7 +48,7 @@ export default {
 body {
   padding:0;
   margin:0;
-  background: #000000;
+  // background: #000000;
 }
 #app {
   text-align: left;

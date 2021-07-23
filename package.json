@@ -14,16 +14,12 @@
     "core-js": "^3.10.1",
     "dayjs": "^1.10.6",
     "express": "^4.17.1",
-    "highcharts": "^9.1.2",
-    "highcharts-vue": "^1.4.0",
     "nginxparser": "^2.1.0",
     "nodejs-tail": "^1.1.1",
     "register-service-worker": "^1.7.1",
     "serialport": "^9.2.0",
     "socket.io": "^4.0.1",
-    "socket.io-client": "^4.0.1",
-    "vue": "^2.6.11",
-    "vue-apexcharts": "^1.6.1"
+    "socket.io-client": "^4.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.13.15",
@@ -35,12 +31,18 @@
     "apexcharts": "^3.27.2",
     "babel-eslint": "^10.1.0",
     "babel-plugin-transform-remove-console": "^6.9.4",
+    "canvas-gauges": "^2.1.7",
     "eslint": "^6.7.2",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-vue": "^6.2.2",
+    "highcharts": "^9.1.2",
+    "highcharts-vue": "^1.4.0",
     "nodemon": "^2.0.7",
     "sass": "^1.26.5",
     "sass-loader": "^8.0.2",
+    "vue": "^2.6.11",
+    "vue-apexcharts": "^1.6.1",
+    "vue-canvas-gauges": "^0.0.0",
     "vue-template-compiler": "^2.6.11"
   }
 }

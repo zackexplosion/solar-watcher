@@ -14,6 +14,8 @@ import { Chart } from 'highcharts-vue'
 import Highcharts from 'highcharts'
 import stockInit from 'highcharts/modules/stock'
 
+require('highcharts/themes/dark-unica.js')
+
 stockInit(Highcharts)
 const paramsArrayMap = [
   'timestamp', // 0
@@ -126,39 +128,39 @@ export default {
       },
       series: [
         {
-          name: '市電電壓',
+          name: '市電電壓 (伏特 V)',
           key: 'gridVoltage',
         },
         {
           name: 'AC負載 (瓦特 W)',
           key: 'acOutputActivePower',
           color: '#cc3333',
-          data: [], // sample data
+        },
+        {
+          name: 'AC電壓 (瓦特 V)',
+          key: 'acOutputVoltage',
+          color: '#cc3333',
         },
         {
           name: 'PV功率 (瓦特 W)',
           key: 'pvInputPower',
           color: '#009933',
-          data: [], // sample data
         },
         {
           name: 'PV電流 (安培 A)',
           key: 'pvInputCurrent',
-          data: [], // sample data
           yAxis: 1,
         },
         {
           name: 'PV電壓 (伏特 V)',
           key: 'pvInputVoltage',
           color: '#000099',
-          data: [], // sample data
           // yAxis: 1,
         },
         {
           name: '電池電壓 (伏特 V)',
           key: 'batteryVoltage',
           color: '#000000',
-          data: [], // sample data
           // type: 'column',
           yAxis: 1,
         },
@@ -166,7 +168,6 @@ export default {
           name: '電池容量 (%)',
           key: 'batteryCapacity',
           color: '#CCCCCC',
-          data: [], // sample data
           // type: 'column',
           yAxis: 1,
         },
@@ -174,7 +175,6 @@ export default {
           name: '電池電流 (安培 A)',
           key: 'batteryChargingCurrent',
           color: '#666666',
-          data: [], // sample data
           // type: 'column',
           yAxis: 1,
         },
@@ -182,7 +182,6 @@ export default {
           name: '散熱器溫度 (攝氏 °C)',
           key: 'heatSinkTemp',
           color: '#ffcc00',
-          data: [], // sample data
           yAxis: 1,
         },
       ],
