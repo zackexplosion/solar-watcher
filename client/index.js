@@ -3,8 +3,24 @@ const ID = process.env.CLIENT_ID || 'YOLO'
 const LOGGER_URL = process.env.CLIENT_LOGGER_URL || 'http://localhost:7788'
 const SERIAL_PORT_PATH = process.env.CLIENT_SERIAL_PORT_PATH || 'COM1'
 
+const request = require('axios')
+
+function sendData(data) {
+  const output = {
+    id: ID,
+    ...data,
+  }
+  request.get(LOGGER_URL, {
+    params: output,
+  })
+    .catch((err) => {
+      console.error(err)
+    })
+}
+
 // code from https://github.com/prajna-pranab/converse/blob/master/index.html
 const sp = require('serialport');
+// eslint-disable-next-line import/no-extraneous-dependencies
 const Readline = require('@serialport/parser-readline');
 
 const parser = new Readline({ delimiter: '\r' });
@@ -17,40 +33,38 @@ const parseQuery = (cmd, data) => {
   const queries = {
     QPI: () => {
       // (PI00
-      if (data == '(NAK') return '<b>QPI (Protocol ID)</b><br />Not recognised'
-      return `${'<b>QPI (Protocol ID)</b><br />'
-				+ 'Protocol ID: '}${data.slice(1)}`;
+      if (data === '(NAK') return '<b>QPI (Protocol ID)</b><br />Not recognised'
+      return `${'<b>QPI (Protocol ID)</b><br /> Protocol ID: '}${data.slice(1)}`
     },
     QID: () => {
       // (00000000000000
-      if (data == '(NAK') return '<b>QID (Serial Number)</b><br />Not recognised'
-      return `${'<b>QID (Serial number)</b><br />'
-				+ 'Serial No: '}${data.slice(1)}`;
+      if (data === '(NAK') return '<b>QID (Serial Number)</b><br />Not recognised'
+      return `${'<b>QID (Serial number)</b><br />Serial No: '}${data.slice(1)}`
     },
     QVFW: () => {
       // (VERFW:00000.00
-      if (data == '(NAK') return '<b>QVFW (Main CPU FW version)</b><br />Not recognised'
+      if (data === '(NAK') return '<b>QVFW (Main CPU FW version)</b><br />Not recognised'
       const fields = data.split(/\.|\:/);
       return `${'<b>QVFW (Main CPU Firmware version)</b><br />'
 				+ 'Version: '}${parseFloat(fields[1])}.${fields[2]}`;
     },
     QVFW2: () => {
       // (VERFW2:00000.00
-      if (data == '(NAK') return '<b>QVFW2 (SCC1 CPU Firmware version)</b><br />Not recognised'
+      if (data === '(NAK') return '<b>QVFW2 (SCC1 CPU Firmware version)</b><br />Not recognised'
       const fields = data.split(/\.|\:/);
       return `${'<b>QVFW2 (SCC1 CPU Firmware version)</b><br />'
 				+ 'Version: '}${parseFloat(fields[1])}.${fields[2]}`;
     },
     QVFW3: () => {
       // (VERFW3:00000.00
-      if (data == '(NAK') return '<b>QVFW3 (SCC2 CPU Firmware version)</b><br />Not recognised'
+      if (data === '(NAK') return '<b>QVFW3 (SCC2 CPU Firmware version)</b><br />Not recognised'
       const fields = data.split(/\.|\:/);
       return `${'<b>QVFW3 (SCC2 CPU Firmware version)</b><br />'
 				+ 'Version: '}${parseFloat(fields[1])}.${fields[2]}`;
     },
     QVFW4: () => {
       // (VERFW4:00000.00
-      if (data == '(NAK') return '<b>QVFW4 (SCC3 CPU Firmware version)</b><br />Not recognised'
+      if (data === '(NAK') return '<b>QVFW4 (SCC3 CPU Firmware version)</b><br />Not recognised'
       const fields = data.split(/\.|\:/);
       return `${'<b>QVFW4 (SCC3 CPU Firmware version)</b><br />'
 				+ 'Version: '}${parseFloat(fields[1])}.${fields[2]}`;
@@ -136,28 +150,30 @@ const parseQuery = (cmd, data) => {
     },
     QPIGS: () => {
       // (000.0 00.0 000.0 00.0 0000 0000 000 000 00.00 000
-      //	000 0000 0000 000.0 00.00 00000 10101010 00 00 00000 000
-      if (data == '(NAK') return '<b>QPIGS (Inverter status)</b><br />Not recognised'
+      // 000 0000 0000 000.0 00.00 00000 10101010 00 00 00000 000
+      if (data === '(NAK') return '<b>QPIGS (Inverter status)</b><br />Not recognised'
       const fields = data.slice(1).split(' ');
       const flags = fields[16];
-
       sendData({
-        a: parseFloat(fields[5]),
-        b: parseFloat(fields[6]),
-        c: parseFloat(fields[12]),
-        d: parseFloat(fields[13]),
-        e: parseFloat(fields[19]),
-        f: parseFloat(fields[14]),
-        g: parseFloat(fields[8]),
-        h: parseFloat(fields[10]),
-        i: parseFloat(fields[11]),
-        j: parseFloat(fields[0]),
-        k: parseFloat(fields[1]),
-        l: parseFloat(fields[2]),
-        m: parseFloat(fields[3]),
-        n: parseFloat(fields[4]),
-        flags: JSON.stringify(flags),
+        data: fields.join(','),
       })
+      // sendData({
+      //   a: parseFloat(fields[5]),
+      //   b: parseFloat(fields[6]),
+      //   c: parseFloat(fields[12]),
+      //   d: parseFloat(fields[13]),
+      //   e: parseFloat(fields[19]),
+      //   f: parseFloat(fields[14]),
+      //   g: parseFloat(fields[8]),
+      //   h: parseFloat(fields[10]),
+      //   i: parseFloat(fields[11]),
+      //   j: parseFloat(fields[0]),
+      //   k: parseFloat(fields[1]),
+      //   l: parseFloat(fields[2]),
+      //   m: parseFloat(fields[3]),
+      //   n: parseFloat(fields[4]),
+      //   flags: JSON.stringify(flags),
+      // })
 
       return `${'<b>QPIGS (Inverter status)</b><br />'
 				+ 'Grid voltage: '}${parseFloat(fields[0])}V<br />`
@@ -771,24 +787,6 @@ const sendQuery = (txt) => {
 }
 
 /// ////////////////////////////// main /////////////////////
-
-const request = require('axios');
-const { json } = require('express');
-
-function sendData(data) {
-  const output = {
-    id: ID,
-    ...data,
-  }
-  request.get(LOGGER_URL, {
-    params: output,
-  })
-    .catch((err) => {
-      console.error(err)
-    })
-
-  // console.log(output)
-}
 
 // set up serial connection
 sp.list().then((ports) => {

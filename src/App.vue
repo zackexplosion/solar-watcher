@@ -1,29 +1,21 @@
 <template>
   <div id="app">
-    <div v-if="!ready">Loading...</div>
-    <div v-if="ready">
-      <!-- <h1>Message From Server: {{msgFromServer}}</h1> -->
-      <!-- <h1>太陽能監控儀</h1> -->
-      <div id="chart">
-        <Chart
-          :constructorType="'stockChart'"
-          :options="chartOptions"
-          ref="chart"
-          :updateArgs="updateArgs"
-        />
-      </div>
+    <div v-if="!ready">
+      Loading...
+      <div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
     </div>
-
+    <div v-show="ready">
+      <Chart
+        :socket="socket"
+        @ready="ready = true"
+      />
+    </div>
   </div>
 </template>
 
 <script>
 import { io } from 'socket.io-client'
-import { Chart } from 'highcharts-vue'
-import Highcharts from 'highcharts'
-import stockInit from 'highcharts/modules/stock'
-
-stockInit(Highcharts)
+import Chart from './components/Chart.vue'
 
 export default {
   name: 'App',
@@ -31,211 +23,17 @@ export default {
     Chart,
   },
   mounted() {
-    this.setupSocket()
-    setTimeout(() => {
-      window.location = window.location.toString()
-    }, 1000 * 60 * 15)
+    // this.setupSocket()
   },
   data: () => ({
-    socket: null,
+    socket: io(),
     ready: false,
     msgFromServer: '',
-    updateArgs: [true, true],
-    chartOptions: {
-      time: {
-        timezoneOffset: new Date().getTimezoneOffset(),
-      },
-      chart: {
-        height: `${(window.innerHeight - 50)}px`,
-      },
-      title: '太陽能監控儀',
-      xAxis: {
-        type: 'datetime',
-      },
-      yAxis: [
-        {
-          labels: {
-            align: 'left',
-          },
-          height: '50%',
-          // resize: {
-          //   enabled: true,
-          // },
-        },
-        {
-          labels: {
-            align: 'left',
-          },
-          top: '50%',
-          height: '50%',
-          offset: 0,
-        },
-      ],
-      rangeSelector: {
-        buttons: [
-          {
-            type: 'minute',
-            count: 5,
-            text: '5m',
-          },
-          {
-            type: 'minute',
-            count: 15,
-            text: '15m',
-          },
-          {
-            type: 'hour',
-            count: 1,
-            text: '1h',
-          },
-          {
-            type: 'hour',
-            count: 4,
-            text: '4h',
-          },
-          {
-            type: 'hour',
-            count: 12,
-            text: '12h',
-          },
-          {
-            type: 'day',
-            count: 1,
-            text: '1d',
-          },
-          {
-            type: 'month',
-            count: 1,
-            text: '1m',
-          },
-          {
-            type: 'year',
-            count: 1,
-            text: '1y',
-          },
-          {
-            type: 'all',
-            text: 'All',
-          }],
-        // inputEnabled: false, // it supports only days
-        selected: 0, // all
-      },
-      series: [
-        {
-
-          name: 'AC負載 (瓦特 W)',
-          key: 'acOutputPower',
-          color: '#cc3333',
-          data: [], // sample data
-        },
-        {
-          name: 'PV功率 (瓦特 W)',
-          key: 'pvInputPower',
-          color: '#009933',
-          data: [], // sample data
-        },
-        {
-          name: 'PV電流 (安培 A)',
-          key: 'pvInputCurrent',
-          data: [], // sample data
-          yAxis: 1,
-        },
-        {
-          name: 'PV電壓 (伏特 V)',
-          key: 'pvInputVoltage',
-          color: '#000099',
-          data: [], // sample data
-          // yAxis: 1,
-        },
-        {
-          name: '電池電壓 (伏特 V)',
-          key: 'battVoltage',
-          color: '#000000',
-          data: [], // sample data
-          // type: 'column',
-          yAxis: 1,
-        },
-        {
-          name: '電池容量 (%)',
-          key: 'battCapacity',
-          color: '#CCCCCC',
-          data: [], // sample data
-          // type: 'column',
-          yAxis: 1,
-        },
-        {
-          name: '電池電流 (安培 A)',
-          key: 'battChargingCurrent',
-          color: '#666666',
-          data: [], // sample data
-          // type: 'column',
-          yAxis: 1,
-        },
-        {
-          name: '散熱器溫度 (攝氏 °C)',
-          key: 'heatsinkTemp',
-          color: '#ffcc00',
-          data: [], // sample data
-          yAxis: 1,
-        },
-      ],
-    },
   }),
   methods: {
-    setupSocket() {
-      const socket = io()
-
-      socket.on('connect', () => {
-        console.log('websocket connected')
-      })
-
-      socket.on('initLiveChart', (data) => {
-        // console.log('t1', data[0])
-        // console.log('t2', data[1].timestamp)
-        // this.chartOptions.series[0].data = []
-        // this.chartOptions.series
-        // clean data
-        for (let index = 0; index < this.chartOptions.series.length; index += 1) {
-          this.chartOptions.series[index].data = []
-        }
-        data.forEach((d) => {
-          const t = d.timestamp
-
-          for (let index = 0; index < this.chartOptions.series.length; index += 1) {
-            const { key } = this.chartOptions.series[index]
-            // const v = parseFloat(d[key])
-            const v = d[key]
-            this.chartOptions.series[index].data.push([t, v])
-          }
-        })
-        this.ready = true
-      })
-
-      socket.on('updateLiveChart', (data) => {
-        // console.log('updateChart', data)
-        // this.chartOptions.series[0].addPoint(data.acOutputPower)
-
-        for (let index = 0; index < this.chartOptions.series.length; index += 1) {
-          let updateChart = false
-          const { key } = this.chartOptions.series[index]
-
-          if (index === this.chartOptions.series.length - 1) {
-            updateChart = true
-          }
-          // console.log('index', index)
-          // console.log('index2', this.chartOptions.series.length)
-
-          // console.log(this.$refs.chart.chart.series[index])
-          this.$refs.chart.chart.series[index].addPoint(
-            [data.timestamp, data[key]],
-            updateChart,
-            true,
-          )
-        }
-      })
-
-      this.socket = socket
-    },
+    // setupSocket() {
+    //   const socket = io()
+    // },
   },
 };
 </script>
@@ -252,4 +50,90 @@ export default {
 h1 {
   text-align: center;
 }
+
+.lds-roller {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.lds-roller div {
+  animation: lds-roller 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  transform-origin: 40px 40px;
+}
+.lds-roller div:after {
+  content: " ";
+  display: block;
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+  margin: -4px 0 0 -4px;
+}
+.lds-roller div:nth-child(1) {
+  animation-delay: -0.036s;
+}
+.lds-roller div:nth-child(1):after {
+  top: 63px;
+  left: 63px;
+}
+.lds-roller div:nth-child(2) {
+  animation-delay: -0.072s;
+}
+.lds-roller div:nth-child(2):after {
+  top: 68px;
+  left: 56px;
+}
+.lds-roller div:nth-child(3) {
+  animation-delay: -0.108s;
+}
+.lds-roller div:nth-child(3):after {
+  top: 71px;
+  left: 48px;
+}
+.lds-roller div:nth-child(4) {
+  animation-delay: -0.144s;
+}
+.lds-roller div:nth-child(4):after {
+  top: 72px;
+  left: 40px;
+}
+.lds-roller div:nth-child(5) {
+  animation-delay: -0.18s;
+}
+.lds-roller div:nth-child(5):after {
+  top: 71px;
+  left: 32px;
+}
+.lds-roller div:nth-child(6) {
+  animation-delay: -0.216s;
+}
+.lds-roller div:nth-child(6):after {
+  top: 68px;
+  left: 24px;
+}
+.lds-roller div:nth-child(7) {
+  animation-delay: -0.252s;
+}
+.lds-roller div:nth-child(7):after {
+  top: 63px;
+  left: 17px;
+}
+.lds-roller div:nth-child(8) {
+  animation-delay: -0.288s;
+}
+.lds-roller div:nth-child(8):after {
+  top: 56px;
+  left: 12px;
+}
+@keyframes lds-roller {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 </style>
