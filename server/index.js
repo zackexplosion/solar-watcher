@@ -11,7 +11,6 @@ const http = require('http')
 
 const server = http.createServer(app)
 const io = require('socket.io')(server)
-const Big = require('big.js')
 
 // for log reader
 const NginxParser = require('nginxparser')

@@ -3,20 +3,14 @@
     <div v-if="!ready">
       <Loading />
     </div>
-    <div v-show="ready">
-      <Dashboard
-        :socket="socket"
-      />
-      <Chart
-        :socket="socket"
-        @ready="ready = true"
-      />
+    <div v-show="ready" style="height:70%">
+      <Dashboard />
+      <Chart @ready="ready = true" />
     </div>
   </div>
 </template>
 
 <script>
-import { io } from 'socket.io-client'
 import Chart from './components/Chart.vue'
 import Loading from './components/Loading.vue'
 import Dashboard from './components/Dashboard/Dashboard.vue'
@@ -30,9 +24,10 @@ export default {
   },
   mounted() {
     // this.setupSocket()
+    // this.$store.socket = io()
   },
   data: () => ({
-    socket: io(),
+    // socket: io(),
     ready: false,
     msgFromServer: '',
   }),
@@ -48,7 +43,7 @@ export default {
 body {
   padding:0;
   margin:0;
-  // background: #000000;
+  background: #000000;
 }
 #app {
   text-align: left;

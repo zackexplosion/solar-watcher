@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Clock :socket="socket"/>
+    <Clock/>
     <div ref="gauges" />
   </div>
 </template>
@@ -22,7 +22,7 @@ export default {
     // const radial = new RadialGauge({
     //   renderTo: document.createElement('canvas'),
     // })
-    const { socket } = this
+    const { socket } = this.$store.state
 
     const g_gridVoltage = this.createGauge({
       majorTicks: [200, 210, 220, 230, 240, 250],
@@ -83,10 +83,14 @@ export default {
     createGauge(options = {}) {
       const gauge = new RadialGauge({
         renderTo: document.createElement('canvas'),
-        barWidth: 20,
-        barShadow: 1,
+        barWidth: 10,
+        barShadow: 0,
+        colorPlate: 'rgba(0,0,0,.0)',
         colorBarProgress: 'rgba(200,50,50,.75)',
         colorBar: '#eaa',
+        colorMajorTicks: '#FFFFFF',
+        colorNumbers: '#DDDDDD',
+        colorValueText: '#DDDDDD',
         borderShadowWidth: 0,
         borderInnerWidth: 0,
         borderOuterWidth: 0,
@@ -98,8 +102,12 @@ export default {
         valueBoxStroke: 0,
         valueTextShadow: 0,
         needle: false,
-        width: 160,
-        height: 160,
+        width: 320,
+        height: 320,
+        minorTicks: 3,
+        // strokeTicks: 1,
+        // ticksWidth: 1,
+        // ticksWidthMinor: 10,
         ...options,
       }).draw()
       this.$refs.gauges.appendChild(gauge.options.renderTo)

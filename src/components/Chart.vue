@@ -14,9 +14,11 @@ import { Chart } from 'highcharts-vue'
 import Highcharts from 'highcharts'
 import stockInit from 'highcharts/modules/stock'
 
-require('highcharts/themes/dark-unica.js')
+import darkUnica from 'highcharts/themes/dark-unica';
 
+darkUnica(Highcharts)
 stockInit(Highcharts)
+
 const paramsArrayMap = [
   'timestamp', // 0
   'gridVoltage', 'gridFrequency',
@@ -173,6 +175,11 @@ export default {
       },
       series: [
         {
+          name: 'PV功率 (瓦特 W)',
+          key: 'pvInputPower',
+          color: '#009933',
+        },
+        {
           name: '市電電壓 (伏特 V)',
           key: 'gridVoltage',
         },
@@ -185,11 +192,6 @@ export default {
           name: 'AC電壓 (瓦特 V)',
           key: 'acOutputVoltage',
           color: '#cc3333',
-        },
-        {
-          name: 'PV功率 (瓦特 W)',
-          key: 'pvInputPower',
-          color: '#009933',
         },
         {
           name: 'PV電流 (安培 A)',
@@ -234,14 +236,14 @@ export default {
   }),
   methods: {
     setup() {
-      const { socket } = this
+      const { socket } = this.$store.state
 
       socket.on('connect', () => {
         console.log('websocket connected')
       })
 
       socket.on('initLiveChart', (data) => {
-        console.log(data)
+        // console.log(data)
         // clean data
         for (let index = 0; index < this.chartOptions.series.length; index += 1) {
           this.chartOptions.series[index].data = []

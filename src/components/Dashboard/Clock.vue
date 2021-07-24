@@ -14,7 +14,7 @@ export default {
     },
   },
   mounted() {
-    const { socket } = this
+    const { socket } = this.$store.state
     socket.on('updateLiveChart', () => {
       // const [timestamp] = data
       this.getTime()
@@ -42,7 +42,8 @@ export default {
       m = (m < 10) ? `0${m}` : m;
       s = (s < 10) ? `0${s}` : s;
 
-      const time = `${h}:${m}:${s} ${session}`;
+      // const time = `${h}:${m}:${s} ${session}`;
+      const time = `${h}:${m}`;
       this.theTime = time
 
       // setTimeout(this.getTime, 1000);
@@ -53,6 +54,7 @@ export default {
 
 <style scoped>
 .clock {
+  text-align: center;
   /* background: black; */
   /* position: absolute;
   top: 50%;
