@@ -58,6 +58,7 @@ export default {
       },
       chart: {
         styledMode: true,
+        colorCount: 20,
       },
       title: '太陽能監控儀',
       xAxis: {
@@ -179,62 +180,62 @@ export default {
       series: [
         {
           name: 'PV功率 (瓦特 W)',
-          key: 'pvInputPower',
+          className: 'pvInputPower',
           color: 'green',
         },
         {
           name: '輸出負載 (瓦特 W)',
-          key: 'acOutputActivePower',
+          className: 'acOutputActivePower',
           color: 'blue',
         },
         {
           name: '市電電壓 (伏特 V)',
-          key: 'gridVoltage',
+          className: 'gridVoltage',
           color: 'red',
           yAxis: 1,
         },
         {
           name: '輸出電壓 (伏特 V)',
-          key: 'acOutputVoltage',
+          className: 'acOutputVoltage',
           color: 'blue',
           yAxis: 1,
         },
         // {
         //   name: 'PV電流 (安培 A)',
-        //   key: 'pvInputCurrent',
+        //   className: 'pvInputCurrent',
         //   yAxis: 1,
         // },
         {
           name: 'PV電壓 (伏特 V)',
-          key: 'pvInputVoltage',
-          color: '#000099',
+          className: 'pvInputVoltage',
+          // color: '#000099',
           yAxis: 1,
         },
         {
           name: '電池電壓 (伏特 V)',
-          key: 'batteryVoltage',
-          color: '#000000',
+          className: 'batteryVoltage',
+          // color: '#000000',
           // type: 'column',
           yAxis: 1,
         },
         // {
         //   name: '電池容量 (%)',
-        //   key: 'batteryCapacity',
+        //   className: 'batteryCapacity',
         //   color: '#CCCCCC',
         //   // type: 'column',
         //   yAxis: 1,
         // },
         // {
         //   name: '電池電流 (安培 A)',
-        //   key: 'batteryChargingCurrent',
+        //   className: 'batteryChargingCurrent',
         //   color: '#666666',
         //   // type: 'column',
         //   yAxis: 1,
         // },
         {
           name: '散熱器溫度 (攝氏 °C)',
-          key: 'heatSinkTemp',
-          color: '#ffcc00',
+          className: 'heatSinkTemp',
+          // color: '#ffcc00',
           yAxis: 1,
         },
       ],
@@ -257,8 +258,8 @@ export default {
         data.forEach((d) => {
           const t = d[0]
           for (let index = 0; index < this.chartOptions.series.length; index += 1) {
-            const { key } = this.chartOptions.series[index]
-            const v = d[paramsArrayMap.indexOf(key)] || 0
+            const { className } = this.chartOptions.series[index]
+            const v = d[paramsArrayMap.indexOf(className)] || 0
             this.chartOptions.series[index].data.push([t, v])
           }
         })
@@ -272,9 +273,9 @@ export default {
         const updatedData = []
         for (let index = 0; index < this.chartOptions.series.length; index += 1) {
           let updateChart = false
-          const { key } = this.chartOptions.series[index]
-          const value = data[paramsArrayMap.indexOf(key)]
-          updatedData.push([key, value])
+          const { className } = this.chartOptions.series[index]
+          const value = data[paramsArrayMap.indexOf(className)]
+          updatedData.push([className, value])
           if (index === this.chartOptions.series.length - 1) {
             updateChart = true
           }
@@ -292,3 +293,25 @@ export default {
   },
 };
 </script>
+
+<style>
+/* .highcharts-color-0 {
+  color: red;
+}
+.highcharts-tracker-line {
+  stroke: green;
+} */
+/* .pvInputPower {
+  fill: rgb(38, 184, 9);
+  stroke: rgb(38, 184, 9);
+}
+
+.acOutputActivePower {
+  fill: rgb(10, 120, 247);
+  stroke:rgb(10, 120, 247);
+}
+.heatSinkTemp {
+  fill: orange;
+  stroke:orange;
+} */
+</style>

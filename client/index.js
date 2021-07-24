@@ -174,7 +174,6 @@ const parseQuery = (cmd, data) => {
       //   n: parseFloat(fields[4]),
       //   flags: JSON.stringify(flags),
       // })
-
       return `${'<b>QPIGS (Inverter status)</b><br />'
 				+ 'Grid voltage: '}${parseFloat(fields[0])}V<br />`
 				+ `Grid frequency: ${parseFloat(fields[1])}Hz<br />`

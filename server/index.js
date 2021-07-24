@@ -55,12 +55,11 @@ function parseLog(row) {
   }
 
   let params = []
-  let dataParam = raw_params.get('data')
-
+  const dataParam = raw_params.get('data')
   if (dataParam) {
-    if (dataParam[0] !== '2') {
-      dataParam = dataParam.slice(1)
-    }
+    // if (dataParam[0] !== '2') {
+    //   dataParam = dataParam.slice(1)
+    // }
 
     // console.log(dataParam)
 
@@ -68,12 +67,17 @@ function parseLog(row) {
       timestamp.valueOf(),
       ...dataParam.split(',').map((_, index) => {
         if (index !== 16) { // skip the flags column
+          const m = _.match(/[\d]+\.[\d]+/)
+          if (m) {
+            return parseFloat(m[0]) || 0
+          }
           return parseFloat(_) || 0
         }
+
         return _
       }),
     ]
-    // console.log(params)
+    console.log(params)
   } else {
     const _ = parseLogV1(raw_params)
     params = [
@@ -169,13 +173,13 @@ exec(`cat ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, async (error, stdout, stder
   }
 
   const cacheLogs = stdout.split('\n')
+  // console.log(cacheLogs)
   // const promises = []
-  for (let index = cacheLogs.length - 1; index > 0; index -= 1) {
+  for (let index = cacheLogs.length - 1; index >= 0; index -= 1) {
     const line = cacheLogs[index]
-    // promises.push(getParsedLog(line))
-
     parser.parseLine(line, (log) => {
       const data = parseLog(log)
+      // console.log(data)
       if (data) {
         cacheData.push(data)
       }
