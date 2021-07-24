@@ -34,12 +34,11 @@ export default {
   }),
   methods: {
     onReady() {
-      document.querySelector('.loading-container').remove()
+      const loader = document.querySelector('.loading-container')
+      if (loader) loader.remove()
+
       this.ready = true
     },
-    // setupSocket() {
-    //   const socket = io()
-    // },
   },
 };
 </script>

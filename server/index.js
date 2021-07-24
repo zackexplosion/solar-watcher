@@ -150,12 +150,12 @@ io.on('connection', (socket) => {
 console.time('read log')
 exec(`cat ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, async (error, stdout, stderr) => {
   if (error) {
-    console.log(`error: ${error.message}`);
-    return;
+    console.log(`error: ${error.message}`)
+    return
   }
   if (stderr) {
-    console.log(`stderr: ${stderr}`);
-    return;
+    console.log(`stderr: ${stderr}`)
+    return
   }
 
   const cacheLogs = stdout.split('\n')

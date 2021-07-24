@@ -19,7 +19,7 @@ function sendData(data) {
 }
 
 // code from https://github.com/prajna-pranab/converse/blob/master/index.html
-const sp = require('serialport');
+const Serialport = require('serialport')
 // eslint-disable-next-line import/no-extraneous-dependencies
 const Readline = require('@serialport/parser-readline');
 
@@ -774,8 +774,8 @@ const sendQuery = (txt) => {
 /// ////////////////////////////// main /////////////////////
 
 // set up serial connection
-sp.list().then((ports) => {
-  port = new sp(SERIAL_PORT_PATH, {
+Serialport.list().then((ports) => {
+  port = new Serialport(SERIAL_PORT_PATH, {
     baudRate: 2400,
   })
 
@@ -791,16 +791,16 @@ sp.list().then((ports) => {
   port.on('open', () => {
     parser.on('data', (data) => { rxData(data) })
 
-    sendQuery('QPIGS')
-    setInterval(() => {
-      // console.log('aaa')
-      try {
+    try {
+      sendQuery('QPIGS')
+
+      setInterval(() => {
         sendQuery('QPIGS')
-      } catch (error) {
-        // do nothing , just waiting for next loop
-        console.error(error)
-      }
-    }, 1000 * 5)
+      }, 1000 * 5)
+    } catch (error) {
+      // do nothing , just waiting for next loop
+      console.error(error)
+    }
   })
 })
   .catch((err) => {
