@@ -106,18 +106,6 @@ function parseLog(row) {
   return params
 }
 
-async function getParsedLog(line) {
-  return new Promise((resolve, reject) => {
-    parser.parseLine(line, (log) => {
-      const r = parseLog(log)
-      if (r) {
-        return resolve(r)
-      }
-      return reject(new Error(`parsing failed\n${line}`))
-    })
-  })
-}
-
 const cacheData = []
 function setupLogReader() {
   // to use Tail again cuz nginx parse cant not just read the last line
@@ -125,10 +113,14 @@ function setupLogReader() {
 
   tail.on('line', async (line) => {
     try {
-      const data = await getParsedLog(line)
-      cacheData.shift()
-      cacheData.push(data)
-      io.emit('updateLiveChart', data)
+      parser.parseLine(line, (log) => {
+        const data = parseLog(log)
+        if (data) {
+          cacheData.shift()
+          cacheData.push(data)
+          io.emit('updateLiveChart', data)
+        }
+      })
     } catch (error) {
       console.error(error)
     }
@@ -147,6 +139,24 @@ io.on('connection', (socket) => {
   socket.emit('initLiveChart', cacheData)
 })
 
+// async function getParsedLog(line) {
+//   return new Promise((resolve, reject) => {
+//     try {
+//       parser.parseLine(line, (log) => {
+//         const data = parseLog(log)
+//         if (data) {
+//           return resolve(data)
+//         }
+
+//         return reject(new Error(`parsing failed${line}`))
+//       })
+//     } catch (error) {
+//       console.log(error)
+//       return reject(new Error(`parsing failed${line}`))
+//     }
+//   })
+// }
+
 console.time('read log')
 exec(`cat ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, async (error, stdout, stderr) => {
   if (error) {
@@ -159,24 +169,35 @@ exec(`cat ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, async (error, stdout, stder
   }
 
   const cacheLogs = stdout.split('\n')
+  // const promises = []
   for (let index = cacheLogs.length - 1; index > 0; index -= 1) {
     const line = cacheLogs[index]
-    try {
-      // eslint-disable-next-line no-await-in-loop
-      const data = await getParsedLog(line)
+    // promises.push(getParsedLog(line))
 
-      cacheData.push(data)
-    } catch (err) {
-      console.error(err)
-    }
+    parser.parseLine(line, (log) => {
+      const data = parseLog(log)
+      if (data) {
+        cacheData.push(data)
+      }
+    })
   }
+
+  // try {
+  //   const data = await Promise.all(promises)
+  //   console.log(data)
+  //   if (data) {
+  //     cacheData.push(data)
+  //   }
+  // } catch (err) {
+  //   console.error(err)
+  // }
+
   cacheData.reverse()
   console.timeEnd('read log')
 
   setupLogReader()
 
-  // console.log(cacheData)
-
+  // console.log('cacheData', cacheData)
   server.listen(PORT, () => {
     console.log(`listening on *:${PORT}`);
   })
@@ -212,4 +233,4 @@ exec(`cat ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, async (error, stdout, stder
       io.emit('updateLiveChart', data)
     }, 1000)
   }
-});
+})

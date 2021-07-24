@@ -45,9 +45,8 @@ export default {
       m = (m < 10) ? `0${m}` : m
       s = (s < 10) ? `0${s}` : s
 
-      // const time = `${h}:${m}:${s} ${session}`;
-      const time = `${h}:${m}`
-      // const time = `${h}:${m}:${s} ${session}`
+      // const time = `${h}:${m}`
+      const time = `${h}:${m}:${s} ${session}`
       this.theTime = time
 
       this.clockTimeout = setTimeout(this.getTime, 1000)

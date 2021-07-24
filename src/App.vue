@@ -1,7 +1,9 @@
 <template>
   <div id="app" v-show="ready">
     <Dashboard />
-    <Chart @ready="onReady()" />
+    <div class="chart">
+      <Chart @ready="onReady()" />
+    </div>
   </div>
 </template>
 
@@ -38,17 +40,17 @@ export default {
 
 <style lang="scss">
 body {
-  padding: 1em;
+  padding:0 1em;
 }
 #app {
   text-align: left;
   margin: 0 auto;
   width: 100%;
   height: 100vh;
-  overflow: hidden;
+  // overflow: hidden;
 }
-h1 {
-  text-align: center;
+.chart {
+  height: calc(100vh - 450px) ;
 }
 
 </style>

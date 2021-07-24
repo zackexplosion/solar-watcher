@@ -5,8 +5,7 @@
     :options="chartOptions"
     ref="chart"
     :updateArgs="updateArgs"
-    style="height:100%;
-    width:100%;"
+    style="height:100%;"
   />
 </template>
 
