@@ -241,8 +241,6 @@ export default {
       })
 
       socket.on('initLiveChart', (data) => {
-        console.log(data)
-        // clean data
         for (let index = 0; index < this.chartOptions.series.length; index += 1) {
           this.chartOptions.series[index].data = []
         }

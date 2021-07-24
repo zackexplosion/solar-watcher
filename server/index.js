@@ -111,10 +111,9 @@ async function getParsedLog(line) {
     parser.parseLine(line, (log) => {
       const r = parseLog(log)
       if (r) {
-        resolve(r)
-      } else {
-        reject(new Error())
+        return resolve(r)
       }
+      return reject(new Error())
     })
   })
 }
@@ -144,7 +143,7 @@ function setupLogReader() {
 
 // main
 io.on('connection', (socket) => {
-  console.log('a user connected', socket.id)
+  console.log('a user connected', socket.id, new Date())
   socket.emit('initLiveChart', cacheData)
 })
 
@@ -160,7 +159,6 @@ exec(`cat ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, async (error, stdout, stder
   }
 
   const cacheLogs = stdout.split('\n')
-
   for (let index = cacheLogs.length - 1; index > 0; index -= 1) {
     const line = cacheLogs[index]
     try {
