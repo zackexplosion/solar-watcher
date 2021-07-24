@@ -17,7 +17,7 @@ const io = require('socket.io')(server)
 const NginxParser = require('nginxparser')
 
 const parser = new NginxParser('$remote_addr - - [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"');
-const Tail = require('nodejs-tail');
+const Tail = require('nodejs-tail')
 const { exec } = require('child_process')
 const paramMapV1 = require('./paramMap')
 
@@ -68,7 +68,7 @@ function parseLog(row) {
       timestamp.valueOf(),
       ...dataParam.split(',').map((_, index) => {
         if (index !== 16) { // skip the flags column
-          return parseFloat(_)
+          return parseFloat(_) || 0
         }
         return _
       }),
@@ -113,7 +113,7 @@ async function getParsedLog(line) {
       if (r) {
         return resolve(r)
       }
-      return reject(new Error())
+      return reject(new Error(`parsing failed\n${line}`))
     })
   })
 }
@@ -164,6 +164,7 @@ exec(`cat ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, async (error, stdout, stder
     try {
       // eslint-disable-next-line no-await-in-loop
       const data = await getParsedLog(line)
+
       cacheData.push(data)
     } catch (err) {
       console.error(err)

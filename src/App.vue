@@ -1,8 +1,7 @@
 <template>
-  <div id="app">
-    <div v-show="ready" style="height:70%">
-      <Dashboard />
-      <Chart @ready="onReady()" />
+  <div id="app" v-show="ready">
+    <Dashboard />
+    <Chart @ready="onReady()" />
   </div>
 </template>
 
