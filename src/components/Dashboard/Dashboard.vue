@@ -1,7 +1,7 @@
 <template>
   <div>
     <Clock/>
-    <div ref="gauges" />
+    <div class="gauges" ref="gauges" />
   </div>
 </template>
 <script>
@@ -117,3 +117,10 @@ export default {
   },
 };
 </script>
+<style scoped>
+.gauges {
+  display: flex;
+  justify-content: space-between;
+  text-align: center;
+}
+</style>

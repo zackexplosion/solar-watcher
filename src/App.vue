@@ -37,12 +37,13 @@ export default {
 </script>
 
 <style lang="scss">
+body {
+  padding: 1em;
+}
 #app {
   text-align: left;
-  width: 100%;
   margin: 0 auto;
-  padding: 1em;
-  // margin-top: 40px;
+  width: 100%;
   height: 100vh;
   overflow: hidden;
 }
