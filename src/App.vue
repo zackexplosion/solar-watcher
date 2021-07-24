@@ -1,18 +1,14 @@
 <template>
   <div id="app">
-    <div v-if="!ready">
-      <Loading />
-    </div>
     <div v-show="ready" style="height:70%">
       <Dashboard />
-      <Chart @ready="ready = true" />
-    </div>
+      <Chart @ready="onReady()" />
   </div>
 </template>
 
 <script>
 import Chart from './components/Chart.vue'
-import Loading from './components/Loading.vue'
+// import Loading from './components/Loading.vue'
 import Dashboard from './components/Dashboard/Dashboard.vue'
 
 export default {
@@ -20,7 +16,6 @@ export default {
   components: {
     Dashboard,
     Chart,
-    Loading,
   },
   mounted() {
     // this.setupSocket()
@@ -32,19 +27,17 @@ export default {
     msgFromServer: '',
   }),
   methods: {
-    // setupSocket() {
-    //   const socket = io()
-    // },
+    onReady() {
+      const loader = document.querySelector('.loading-container')
+      if (loader) loader.remove()
+
+      this.ready = true
+    },
   },
 };
 </script>
 
 <style lang="scss">
-body {
-  padding:0;
-  margin:0;
-  background: #000000;
-}
 #app {
   text-align: left;
   width: 100%;

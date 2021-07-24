@@ -19,7 +19,7 @@ function sendData(data) {
 }
 
 // code from https://github.com/prajna-pranab/converse/blob/master/index.html
-const sp = require('serialport');
+const Serialport = require('serialport')
 // eslint-disable-next-line import/no-extraneous-dependencies
 const Readline = require('@serialport/parser-readline');
 
@@ -220,7 +220,7 @@ const parseQuery = (cmd, data) => {
     QPIGS2: () => {
       // (0000 000.0 00.00 00000 00000000 0000 0000 0000
       //	000.0 00.00 0000 00000
-      if (data == '(NAK') return '<b>QPIGS2 (Inverter status 2)</b><br />Not recognised'
+      if (data === '(NAK') return '<b>QPIGS2 (Inverter status 2)</b><br />Not recognised'
       const fields = data.slice(1).split(' ');
       const flags = fields[4];
       return `${'<b>QPIGS2 (Inverter status 2)</b><br />'
@@ -229,9 +229,9 @@ const parseQuery = (cmd, data) => {
 				+ `SCC2 battery voltage: ${parseFloat(fields[2])}V<br />`
 				+ `SCC2 charging power: ${parseFloat(fields[3])}W<br />`
 				+ `SCC2 charging: ${
-				  flags[0] == '1' ? 'Yes<br />' : 'No<br />'
+				  flags[0] === '1' ? 'Yes<br />' : 'No<br />'
 				}SCC3 charging: ${
-				  flags[1] == '1' ? 'Yes<br />' : 'No<br />'
+				  flags[1] === '1' ? 'Yes<br />' : 'No<br />'
 				}AC charging current: ${parseFloat(fields[5])}A<br />`
 				+ `AC charging power: ${parseFloat(fields[6])}W<br />`
 				+ `SCC3 input current: ${parseFloat(fields[7])}A<br />`
@@ -251,16 +251,15 @@ const parseQuery = (cmd, data) => {
         H: 'Power Saving',
       };
       // (B
-      return `${'<b>QMOD (Operating Mode)</b><br />'
-				+ 'Mode: '}${modes[data[1]]}`;
+      return `${'<b>QMOD (Operating Mode)</b><br />Mode: '}${modes[data[1]]}`;
     },
     QPIWS: () => {
       /*
-				Returns different values on protocol 3000
-			*/
+        Returns different values on protocol 3000
+      */
       // (10101010101010101010101010101010101010
-      if (data == '(NAK') return '<b>QPIWS (Warning Status)</b><br />Not recognised'
-      const isSet = (pos) => data[pos] == '1'
+      if (data === '(NAK') return '<b>QPIWS (Warning Status)</b><br />Not recognised'
+      const isSet = (pos) => data[pos] === '1'
       const chk = (str, pos, type) => {
         switch (type) {
           case 'none': return `<span class="noFault">${str}</span><br />`;
@@ -317,7 +316,7 @@ const parseQuery = (cmd, data) => {
       }${chk('SCC3 Battery too low to charge', 38, 'warn')}`;
     },
     QDI: () => {
-      if (data == '(NAK') return '<b>QDI (Default setting values)</b><br />Not recognised'
+      if (data === '(NAK') return '<b>QDI (Default setting values)</b><br />Not recognised'
       const modes = {
         0: 'Solo',
         1: 'Parallel',
@@ -372,16 +371,16 @@ const parseQuery = (cmd, data) => {
 				+ `PV power balance: ${balances[fields[24]]}<br />`
 				+ `Charging stages: ${stages[fields[25]]}<br />`
 				+ `Data log popup: ${
-				  fields[26] == '0' ? 'Disabled<br />' : 'Enabled<br />'
+				  fields[26] === '0' ? 'Disabled<br />' : 'Enabled<br />'
 				}Max Solar charging current: ${parseFloat(fields[27])}A<br />`
 				+ `CV Charging time: ${parseFloat(fields[28])}mins`;
     },
     QBEQI: () => {
       // (1 000 000 000 000 00.00 000 000
-      if (data == '(NAK') return '<b>QBEQI (Equalisation status)</b><br />Not recognised'
+      if (data === '(NAK') return '<b>QBEQI (Equalisation status)</b><br />Not recognised'
       const fields = data.slice(1).split(' ');
       return `${'<b>QBEQI (Equalisation status)</b><br />'
-				+ 'Battery equalized: '}${fields[0] == '1' ? 'Yes' : 'No'}<br />`
+				+ 'Battery equalized: '}${fields[0] === '1' ? 'Yes' : 'No'}<br />`
 				+ `Equalize time: ${parseFloat(fields[1])}mins<br />`
 				+ `Equalize Interval: ${parseFloat(fields[2])}days<br />`
 				+ `Max current: ${parseFloat(fields[3])}A<br />`
@@ -392,7 +391,7 @@ const parseQuery = (cmd, data) => {
     },
     QMCHGCR: () => {
       // (000 000 000 000
-      if (data == '(NAK') return '<b>QMCHGCR (Max charging current settings)</b><br />Not recognised'
+      if (data === '(NAK') return '<b>QMCHGCR (Max charging current settings)</b><br />Not recognised'
       const fields = data.slice(1).split(' ');
       let details = '<b>QMCHGCR (Max charging current settings)</b><br />';
       for (const fld of fields) { details += `${parseFloat(fld)}A<br />`; }
@@ -400,7 +399,7 @@ const parseQuery = (cmd, data) => {
     },
     QMUCHGCR: () => {
       // (000 000 000 000 000 000
-      if (data == '(NAK') return '<b>QMUCHGCR (Max utility charging current settings)</b><br />Not recognised'
+      if (data === '(NAK') return '<b>QMUCHGCR (Max utility charging current settings)</b><br />Not recognised'
       const fields = data.slice(1).split(' ');
       let details = '<b>QMUCHGCR (Max utility charging current settings)</b><br />';
       for (const fld of fields) { details += `${parseFloat(fld)}A<br />`; }
@@ -408,7 +407,7 @@ const parseQuery = (cmd, data) => {
     },
     QMSCHGCR: () => {
       // (000 000 000 000 000 000
-      if (data == '(NAK') return '<b>QMSCHGCR (Max solar charging current settings)</b><br />Not recognised'
+      if (data === '(NAK') return '<b>QMSCHGCR (Max solar charging current settings)</b><br />Not recognised'
       const fields = data.slice(1).split(' ');
       let details = '<b>QMUCHGCR (Max solar charging current settings)</b><br />';
       for (const fld of fields) { details += `${parseFloat(fld)}A<br />`; }
@@ -416,13 +415,12 @@ const parseQuery = (cmd, data) => {
     },
     QBOOT: () => {
       // (1
-      if (data == '(NAK') return '<b>QBOOT (DSP has bootstrap?)</b><br />Not recognised'
-      return `${'<b>QBOOT (DSP has bootstrap?)</b><br />'
-				+ 'Has bootstrap: '}${data.slice(1) == '1' ? 'Yes' : 'No'}`;
+      if (data === '(NAK') return '<b>QBOOT (DSP has bootstrap?)</b><br />Not recognised'
+      return `${'<b>QBOOT (DSP has bootstrap?)</b><br />Has bootstrap: '}${data.slice(1) === '1' ? 'Yes' : 'No'}`;
     },
     QOPM: () => {
       // (00
-      if (data == '(NAK') return '<b>QOPM (Output mode)</b><br />Not recognised'
+      if (data === '(NAK') return '<b>QOPM (Output mode)</b><br />Not recognised'
       const modes = {
         '00': 'Solo',
         '01': 'Parallel',
@@ -430,33 +428,29 @@ const parseQuery = (cmd, data) => {
         '03': 'Phase 2',
         '04': 'Phase 3',
       };
-      return `${'<b>QOPM (Output mode)</b><br />'
-				+ 'Mode: '}${modes[data.slice(1)]}`;
+      return `${'<b>QOPM (Output mode)</b><br />Mode: '}${modes[data.slice(1)]}`;
     },
     QCST: () => {
       // (00
-      if (data == '(NAK') return '<b>QCST (Charging stage enquiry)</b><br />Not recognised'
+      if (data === '(NAK') return '<b>QCST (Charging stage enquiry)</b><br />Not recognised'
       const modes = { '00': 'Auto', '01': '2 Stage', '02': '3 Stage' };
-      return `${'<b>QCST (Charging stage enquiry)</b><br />'
-				+ 'Stages: '}${modes[data.slice(1)]}`;
+      return `${'<b>QCST (Charging stage enquiry)</b><br />Stages: '}${modes[data.slice(1)]}`;
     },
     QCVT: () => {
       // (000
-      if (data == '(NAK') return '<b>QCVT (Charging time in CV mode)</b><br />Not recognised'
+      if (data === '(NAK') return '<b>QCVT (Charging time in CV mode)</b><br />Not recognised'
       const details = data.slice(1);
-      return `${'<b>QCVT (Charging time in CV mode)</b><br />'
-				+ 'Time: '}${details == '255' ? 'Auto' : `${parseFloat(details)}mins`}`;
+      return `${'<b>QCVT (Charging time in CV mode)</b><br />Time: '}${details === '255' ? 'Auto' : `${parseFloat(details)}mins`}`
     },
     QBV: () => {
       // (000
-      if (data == '(NAK') return '<b>QBV (SoC compensated voltage?)</b><br />Not recognised'
-      const details = data.slice(1);
-      return '<b>QBV (SoC compensated voltage?)</b><br />'
-				+ 'Not yet supported';
+      if (data === '(NAK') return '<b>QBV (SoC compensated voltage?)</b><br />Not recognised'
+      // const details = data.slice(1);
+      return '<b>QBV (SoC compensated voltage?)</b><br />Not yet supported'
     },
     Q1: () => {
       // (0000 00000 00 00 00 000 000 000 000 00 00 000 0000 0000 0000 00.00 10
-      if (data == '(NAK') return '<b>Q1 (Undocumented)</b><br />Not recognised'
+      if (data === '(NAK') return '<b>Q1 (Undocumented)</b><br />Not recognised'
       const statuses = {
         10: 'Not charging',
         11: 'Bulk mode',
@@ -491,99 +485,89 @@ const parseQuery = (cmd, data) => {
         11: 'Bulk mode',
         12: 'Absorb mode',
       };
-      const fields = data.slice(1).split(' ');
-      const flags = fields[2];
-      return '<b>QGS (Undocumented)</b><br />'
-				+ 'Not yet implemented';
+      // const fields = data.slice(1).split(' ');
+      // const flags = fields[2];
+      return '<b>QGS (Undocumented)</b><br />Not yet implemented'
     },
     QSID: () => {
       // (1492931811100046005535
-      if (data == '(NAK') return '<b>QSID (Undocumented: serial no?)</b><br />Not recognised'
-      const fields = data.slice(1).split(' ');
-      const flags = fields[2];
-      return '<b>QSID (Undocumented: serial no?)</b><br />'
-				+ 'Not yet implemented';
+      if (data === '(NAK') return '<b>QSID (Undocumented: serial no?)</b><br />Not recognised'
+      // const fields = data.slice(1).split(' ');
+      // const flags = fields[2];
+      return '<b>QSID (Undocumented: serial no?)</b><br />Not yet implemented'
     },
     QID2: () => {
       // (0000
-      if (data == '(NAK') return '<b>QID2 (Undocumented: id?)</b><br />Not recognised'
-      const fields = data.slice(1).split(' ');
-      const flags = fields[2];
-      return '<b>QID2 (Undocumented: id?)</b><br />'
-				+ 'Not yet implemented';
+      if (data === '(NAK') return '<b>QID2 (Undocumented: id?)</b><br />Not recognised'
+      // const fields = data.slice(1).split(' ');
+      // const flags = fields[2];
+      return '<b>QID2 (Undocumented: id?)</b><br />Not yet implemented'
     },
     QDM: () => {
       // (0000
-      if (data == '(NAK') return '<b>QDM (Undocumented: device model?)</b><br />Not recognised'
-      const fields = data.slice(1).split(' ');
-      const flags = fields[2];
-      return '<b>QDM (Undocumented: device model?)</b><br />'
-				+ 'Not yet implemented';
+      if (data === '(NAK') return '<b>QDM (Undocumented: device model?)</b><br />Not recognised'
+      // const fields = data.slice(1).split(' ');
+      // const flags = fields[2];
+      return '<b>QDM (Undocumented: device model?)</b><br />Not yet implemented'
     },
     QCHT: () => {
       // (0000
-      if (data == '(NAK') return '<b>QCHT (Undocumented: CHT support?)</b><br />Not recognised'
-      const fields = data.slice(1).split(' ');
-      const flags = fields[2];
-      return '<b>QCHT (Undocumented: CHT support?)</b><br />'
-				+ 'Not yet implemented';
+      if (data === '(NAK') return '<b>QCHT (Undocumented: CHT support?)</b><br />Not recognised'
+      // const fields = data.slice(1).split(' ');
+      // const flags = fields[2];
+      return '<b>QCHT (Undocumented: CHT support?)</b><br />Not yet implemented'
     },
     QPPS: () => {
       // (0000
-      if (data == '(NAK') return '<b>QPPS (Undocumented: QPPS support?)</b><br />Not recognised'
-      const fields = data.slice(1).split(' ');
-      const flags = fields[2];
-      return '<b>QPPS (Undocumented: QPPS support?)</b><br />'
-				+ 'Not yet implemented';
+      if (data === '(NAK') return '<b>QPPS (Undocumented: QPPS support?)</b><br />Not recognised'
+      // const fields = data.slice(1).split(' ');
+      // const flags = fields[2];
+      return '<b>QPPS (Undocumented: QPPS support?)</b><br />Not yet implemented'
     },
     QCHGS: () => {
-      if (data == '(NAK') return '<b>QCHGS (Undocumented: CHGS id?)</b><br />Not recognised'
+      if (data === '(NAK') return '<b>QCHGS (Undocumented: CHGS id?)</b><br />Not recognised'
       // (0000
-      const fields = data.slice(1).split(' ');
-      const flags = fields[2];
-      return '<b>QCHGS (Undocumented: CHGS id?)</b><br />'
-				+ 'Not yet implemented';
+      // const fields = data.slice(1).split(' ');
+      // const flags = fields[2];
+      return '<b>QCHGS (Undocumented: CHGS id?)</b><br />Not yet implemented'
     },
     QMD: () => {
       // (0000
-      if (data == '(NAK') return '<b>QMD (Undocumented)</b><br />Not recognised'
-      const fields = data.slice(1).split(' ');
-      const flags = fields[2];
-      return '<b>QMD (Undocumented)</b><br />'
-				+ 'Not yet implemented';
+      if (data === '(NAK') return '<b>QMD (Undocumented)</b><br />Not recognised'
+      // const fields = data.slice(1).split(' ');
+      // const flags = fields[2];
+      return '<b>QMD (Undocumented)</b><br />Not yet implemented'
     },
     QVFTR: () => {
       // (0000
-      if (data == '(NAK') return '<b>QVFTR (Undocumented)</b><br />Not recognised'
-      const fields = data.slice(1).split(' ');
-      const flags = fields[2];
-      return '<b>QVFTR (Undocumented)</b><br />'
-				+ 'Not yet implemented';
+      if (data === '(NAK') return '<b>QVFTR (Undocumented)</b><br />Not recognised'
+      // const fields = data.slice(1).split(' ');
+      // const flags = fields[2];
+      return '<b>QVFTR (Undocumented)</b><br />Not yet implemented'
     },
     QPIHF: () => {
       // (0000
-      if (data == '(NAK') return '<b>QPIHF (Undocumented)</b><br />Not recognised'
-      const fields = data.slice(1).split(' ');
-      const flags = fields[2];
-      return '<b>QPIHF (Undocumented)</b><br />'
-				+ 'Not yet implemented';
+      if (data === '(NAK') return '<b>QPIHF (Undocumented)</b><br />Not recognised'
+      // const fields = data.slice(1).split(' ');
+      // const flags = fields[2];
+      return '<b>QPIHF (Undocumented)</b><br />Not yet implemented'
     },
     QPICF: () => {
       // (0000
-      if (data == '(NAK') return '<b>QPICF (Undocumented)</b><br />Not recognised'
-      const fields = data.slice(1).split(' ');
-      const flags = fields[2];
-      return '<b>QPICF (Undocumented)</b><br />'
-				+ 'Not yet implemented';
+      if (data === '(NAK') return '<b>QPICF (Undocumented)</b><br />Not recognised'
+      // const fields = data.slice(1).split(' ');
+      // const flags = fields[2];
+      return '<b>QPICF (Undocumented)</b><br />Not yet implemented'
     },
     QFS: () => {
       /*
-			 from posting by Coulomb
-			 http://forums.aeva.asn.au/viewtopic.php?f=64&t=4332&start=2200#p71161
-			*/
+        from posting by Coulomb
+        http://forums.aeva.asn.au/viewtopic.php?f=64&t=4332&start=2200#p71161
+      */
+
       // (00 00 00 0000 0000 0000 000.0 00.00 000.0
       //  00.00 000.0 000.0 00.0 000 000
-      if (data == '(NAK') return '<b>QFS Fault query?</b><br />Not recognised'
+      if (data === '(NAK') return '<b>QFS Fault query?</b><br />Not recognised'
       const modes = {
         '00': 'Power On',
         '01': 'Standby',
@@ -593,25 +577,25 @@ const parseQuery = (cmd, data) => {
         '05': 'Bypass',
         '06': 'Fault',
         '07': 'Shutdown',
-      };
+      }
       const fields = data.slice(1).split(' ');
       const flags = fields[2];
       const status = () => {
         let result = '';
         const flags = parseFloat(fields[14]);
-        if (flags & 4) result += '&nbsp;&nbsp;Load on<br />'
+        if (flags && 4) result += '&nbsp;&nbsp;Load on<br />'
         else result += '&nbsp;&nbsp;Load off<br />';
-        if (flags & 8) result += '&nbsp;&nbsp;Inverter relay on<br />'
+        if (flags && 8) result += '&nbsp;&nbsp;Inverter relay on<br />'
         else result += '&nbsp;&nbsp;Inverter relay off<br />';
-        if (flags & 32) result += '&nbsp;&nbsp;Battery mode<br />';
-        if (flags & 64) result += '&nbsp;&nbsp;Line mode<br />';
-        if (flags & 128) result += '&nbsp;&nbsp;AC relay on<br />'
+        if (flags && 32) result += '&nbsp;&nbsp;Battery mode<br />';
+        if (flags && 64) result += '&nbsp;&nbsp;Line mode<br />';
+        if (flags && 128) result += '&nbsp;&nbsp;AC relay on<br />'
         else result += '&nbsp;&nbsp;AC relay off<br />';
         return result;
       }
       return `${'<b>QFS Fault query?</b><br />'
 				+ 'Fault record status: '}${
-        fields[0] == '01' ? 'Recording' : 'Not recording'
+        fields[0] === '01' ? 'Recording' : 'Not recording'
       }<br/ >`
 				+ `Fault code: ${fields[1]}<br />`
 				+ `Inverter mode: ${modes[fields[2]]}<br />`
@@ -634,7 +618,7 @@ const parseQuery = (cmd, data) => {
 			 http://forums.aeva.asn.au/viewtopic.php?f=64&t=4332&start=2200#p71161
 			*/
       // (00 00 0000 0000 0000 000.0 000.0 00.00 000.0 000.0
-      if (data == '(NAK') return '<b>QFAULT Fault query?</b><br />Not recognised'
+      if (data === '(NAK') return '<b>QFAULT Fault query?</b><br />Not recognised'
       const modes = {
         '00': 'Power On',
         '01': 'Standby',
@@ -772,7 +756,8 @@ const sendQuery = (txt) => {
     Buffer.from(txt, 'utf-8'),
     CRCXModem(txt),
     Uint8Array.from([0x0D]),
-  ]);
+  ])
+
   // save the command so the reply parser knows what it is
   cmd = txt;
   // update window and log
@@ -783,38 +768,41 @@ const sendQuery = (txt) => {
     if (err) {
       console.error('Writing returned:', err.message);
     }
-  });
+  })
 }
 
 /// ////////////////////////////// main /////////////////////
 
 // set up serial connection
-sp.list().then((ports) => {
-  // console.log(ports)
-
-  port = new sp(SERIAL_PORT_PATH, {
+Serialport.list().then((ports) => {
+  port = new Serialport(SERIAL_PORT_PATH, {
     baudRate: 2400,
-  });
+  })
+
   // set up parser to read whole lines
-  port.pipe(parser);
+  port.pipe(parser)
+
   // handle open port errors
   port.on('error', (err) => {
     console.error('Opening port returned:', err.message);
-  });
+  })
+
   // handle coms responses
   port.on('open', () => {
-    // console.log('Opened', port.path, port);
-    // console.log('device:', devices[0]);
-    parser.on('data', (data) => { rxData(data) });
+    parser.on('data', (data) => { rxData(data) })
 
-    sendQuery('QPIGS')
-    setInterval(() => {
+    try {
       sendQuery('QPIGS')
-    }, 1000 * 5)
-  });
-  // update window and log
-  // console.log('Found', devices[0].manufacturer.trim(),
-  // 'on', devices[0].comName);
-}).catch((err) => {
-  console.error('Listing ports returned:', err.message);
-});
+
+      setInterval(() => {
+        sendQuery('QPIGS')
+      }, 1000 * 5)
+    } catch (error) {
+      // do nothing , just waiting for next loop
+      console.error(error)
+    }
+  })
+})
+  .catch((err) => {
+    console.error('Listing ports returned:', err.message);
+  })

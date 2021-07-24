@@ -1,6 +1,7 @@
 // env setup
 const LOG_PATH = process.env.SERVER_LOG_PATH || './test.log'
 const VALID_ID_LIST = process.env.SERVER_VALID_ID_LIST.split(',').map((_) => _.trim()) || []
+const PORT = process.env.PORT || 7777
 
 // main server
 const express = require('express')
@@ -105,20 +106,32 @@ function parseLog(row) {
   return params
 }
 
+async function getParsedLog(line) {
+  return new Promise((resolve, reject) => {
+    parser.parseLine(line, (log) => {
+      const r = parseLog(log)
+      if (r) {
+        return resolve(r)
+      }
+      return reject(new Error())
+    })
+  })
+}
+
 const cacheData = []
 function setupLogReader() {
   // to use Tail again cuz nginx parse cant not just read the last line
   const tail = new Tail(LOG_PATH)
 
-  tail.on('line', (line) => {
-    parser.parseLine(line, (log) => {
-      const dataToUpdate = parseLog(log)
-      if (dataToUpdate) {
-        cacheData.shift()
-        cacheData.push(dataToUpdate)
-        io.emit('updateLiveChart', dataToUpdate)
-      }
-    })
+  tail.on('line', async (line) => {
+    try {
+      const data = await getParsedLog(line)
+      cacheData.shift()
+      cacheData.push(data)
+      io.emit('updateLiveChart', data)
+    } catch (error) {
+      console.error(error)
+    }
   })
 
   tail.on('close', () => {
@@ -130,40 +143,38 @@ function setupLogReader() {
 
 // main
 io.on('connection', (socket) => {
-  console.log('a user connected', socket.id)
+  console.log('a user connected', socket.id, new Date())
   socket.emit('initLiveChart', cacheData)
 })
-const PORT = process.env.PORT || 7777
 
 console.time('read log')
-exec(`cat ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, (error, stdout, stderr) => {
+exec(`cat ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, async (error, stdout, stderr) => {
   if (error) {
-    console.log(`error: ${error.message}`);
-    return;
+    console.log(`error: ${error.message}`)
+    return
   }
   if (stderr) {
-    console.log(`stderr: ${stderr}`);
-    return;
+    console.log(`stderr: ${stderr}`)
+    return
   }
 
   const cacheLogs = stdout.split('\n')
-
   for (let index = cacheLogs.length - 1; index > 0; index -= 1) {
     const line = cacheLogs[index]
-    parser.parseLine(line, (log) => {
-      const r = parseLog(log)
-      // console.log(r)
-      if (r) {
-        cacheData.push(r)
-      }
-    })
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      const data = await getParsedLog(line)
+      cacheData.push(data)
+    } catch (err) {
+      console.error(err)
+    }
   }
   cacheData.reverse()
   console.timeEnd('read log')
 
   setupLogReader()
 
-  console.log(cacheData)
+  // console.log(cacheData)
 
   server.listen(PORT, () => {
     console.log(`listening on *:${PORT}`);
@@ -171,21 +182,6 @@ exec(`cat ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, (error, stdout, stderr) => 
 
   if (process.env.NODE_ENV !== 'production') {
     setInterval(() => {
-      // const data = [
-      //   new Date().getTime(), // timestamp
-      //   (parseInt(Math.random() * 40) + 1),
-      //   (parseInt(Math.random() * 40) + 1),
-      //   (parseInt(Math.random() * 40) + 1),
-      //   (parseInt(Math.random() * 40) + 1),
-      //   (parseInt(Math.random() * 40) + 1),
-      //   (parseInt(Math.random() * 40) + 1),
-      //   (parseInt(Math.random() * 40) + 1),
-      //   (parseInt(Math.random() * 40) + 1),
-      //   (parseInt(Math.random() * 40) + 1),
-      //   (parseInt(Math.random() * 40) + 1),
-      //   (parseInt(Math.random() * 40) + 1),
-      //   (parseInt(Math.random() * 40) + 1),
-      // ]
       const data = [
         new Date().getTime(), // timestamp
         224.7 + (parseInt(Math.random() * 10) + 1),
