@@ -68,31 +68,31 @@ export default {
           labels: {
             align: 'left',
           },
-          height: '55%',
+          height: '50%',
           resize: {
             enabled: true,
           },
-          padding: 50,
+          // padding: 50,
         },
         {
           title: '電池',
           labels: {
             align: 'left',
           },
-          top: '55%',
-          height: '30%',
+          top: '50%',
+          height: '50%',
           offset: 0,
-          padding: 50,
+          // padding: 50,
         },
-        {
-          labels: {
-            align: 'left',
-          },
-          top: '85%',
-          height: '15%',
-          offset: 0,
-          padding: 50,
-        },
+        // {
+        //   labels: {
+        //     align: 'left',
+        //   },
+        //   top: '85%',
+        //   height: '15%',
+        //   offset: 0,
+        //   padding: 50,
+        // },
       ],
       rangeSelector: {
         buttons: [
@@ -180,32 +180,35 @@ export default {
         {
           name: 'PV功率 (瓦特 W)',
           key: 'pvInputPower',
-          color: '#009933',
+          color: 'green',
+        },
+        {
+          name: '輸出負載 (瓦特 W)',
+          key: 'acOutputActivePower',
+          color: 'blue',
         },
         {
           name: '市電電壓 (伏特 V)',
           key: 'gridVoltage',
-        },
-        {
-          name: 'AC負載 (瓦特 W)',
-          key: 'acOutputActivePower',
-          color: '#cc3333',
-        },
-        {
-          name: 'AC電壓 (瓦特 V)',
-          key: 'acOutputVoltage',
-          color: '#cc3333',
-        },
-        {
-          name: 'PV電流 (安培 A)',
-          key: 'pvInputCurrent',
+          color: 'red',
           yAxis: 1,
         },
+        {
+          name: '輸出電壓 (伏特 V)',
+          key: 'acOutputVoltage',
+          color: 'blue',
+          yAxis: 1,
+        },
+        // {
+        //   name: 'PV電流 (安培 A)',
+        //   key: 'pvInputCurrent',
+        //   yAxis: 1,
+        // },
         {
           name: 'PV電壓 (伏特 V)',
           key: 'pvInputVoltage',
           color: '#000099',
-          // yAxis: 1,
+          yAxis: 1,
         },
         {
           name: '電池電壓 (伏特 V)',
@@ -214,20 +217,20 @@ export default {
           // type: 'column',
           yAxis: 1,
         },
-        {
-          name: '電池容量 (%)',
-          key: 'batteryCapacity',
-          color: '#CCCCCC',
-          // type: 'column',
-          yAxis: 1,
-        },
-        {
-          name: '電池電流 (安培 A)',
-          key: 'batteryChargingCurrent',
-          color: '#666666',
-          // type: 'column',
-          yAxis: 1,
-        },
+        // {
+        //   name: '電池容量 (%)',
+        //   key: 'batteryCapacity',
+        //   color: '#CCCCCC',
+        //   // type: 'column',
+        //   yAxis: 1,
+        // },
+        // {
+        //   name: '電池電流 (安培 A)',
+        //   key: 'batteryChargingCurrent',
+        //   color: '#666666',
+        //   // type: 'column',
+        //   yAxis: 1,
+        // },
         {
           name: '散熱器溫度 (攝氏 °C)',
           key: 'heatSinkTemp',
