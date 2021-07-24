@@ -14,9 +14,9 @@ import { Chart } from 'highcharts-vue'
 import Highcharts from 'highcharts'
 import stockInit from 'highcharts/modules/stock'
 
-import darkUnica from 'highcharts/themes/dark-unica';
+// import darkUnica from 'highcharts/themes/dark-unica';
 
-darkUnica(Highcharts)
+// darkUnica(Highcharts)
 stockInit(Highcharts)
 
 const paramsArrayMap = [
@@ -55,6 +55,9 @@ export default {
     chartOptions: {
       time: {
         timezoneOffset: new Date().getTimezoneOffset(),
+      },
+      chart: {
+        styledMode: true,
       },
       title: '太陽能監控儀',
       xAxis: {
