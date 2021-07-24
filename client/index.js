@@ -809,7 +809,12 @@ sp.list().then((ports) => {
 
     sendQuery('QPIGS')
     setInterval(() => {
-      sendQuery('QPIGS')
+      try {
+        sendQuery('QPIGS')
+      } catch (error) {
+        // do nothing , just waiting for next loop
+        console.error(error)
+      }
     }, 1000 * 5)
   });
   // update window and log
