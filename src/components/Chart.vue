@@ -63,18 +63,30 @@ export default {
           labels: {
             align: 'left',
           },
-          height: '50%',
-          // resize: {
-          //   enabled: true,
-          // },
+          height: '55%',
+          resize: {
+            enabled: true,
+          },
+          padding: 50,
+        },
+        {
+          title: '電池',
+          labels: {
+            align: 'left',
+          },
+          top: '55%',
+          height: '30%',
+          offset: 0,
+          padding: 50,
         },
         {
           labels: {
             align: 'left',
           },
-          top: '50%',
-          height: '50%',
+          top: '85%',
+          height: '15%',
           offset: 0,
+          padding: 50,
         },
       ],
       rangeSelector: {
@@ -124,7 +136,40 @@ export default {
             text: 'All',
           }],
         // inputEnabled: false, // it supports only days
-        selected: 0, // all
+        selected: 1, // all
+      },
+      tooltip: {
+        shape: 'square',
+        headerShape: 'callout',
+        borderWidth: 0,
+        shadow: false,
+        valueDecimals: 1,
+        positioner(width, height, point) {
+          const { chart } = this;
+          let position;
+
+          if (point.isHeader) {
+            position = {
+              x: Math.max(
+              // Left side limit
+                chart.plotLeft,
+                Math.min(
+                  point.plotX + chart.plotLeft - width / 2,
+                  // Right side limit
+                  chart.chartWidth - width - chart.marginRight,
+                ),
+              ),
+              y: point.plotY,
+            };
+          } else {
+            position = {
+              x: point.series.chart.plotLeft,
+              y: point.series.yAxis.top - chart.plotTop,
+            };
+          }
+
+          return position;
+        },
       },
       series: [
         {
