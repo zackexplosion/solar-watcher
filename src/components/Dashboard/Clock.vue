@@ -65,7 +65,7 @@ export default {
   transform: translateX(-50%) translateY(-50%); */
   color: #CCC;
   font-size: 34px;
-  font-family: Orbitron;
+  font-family: 'Inconsolata', monospace;
   letter-spacing: 7px;
 }
 
