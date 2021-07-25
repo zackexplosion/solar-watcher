@@ -78,7 +78,7 @@ export default {
       'batteryVoltage',
     ]
 
-    socket.on('updateLiveChart', (data) => {
+    function setupGauge(data) {
       const [
         timestamp,
         gridVoltage, gridFrequency,
@@ -101,6 +101,15 @@ export default {
       g_acOutputVoltage.value = acOutputVoltage
       g_pvInputPower.value = pvInputPower
       g_batteryVoltage.value = batteryVoltage
+    }
+
+    socket.emit('initLiveChart', (_data) => {
+      const data = _data[_data.length - 1]
+      setupGauge(data)
+    })
+
+    socket.on('updateLiveChart', (data) => {
+      setupGauge(data)
     })
   },
   data: () => ({
