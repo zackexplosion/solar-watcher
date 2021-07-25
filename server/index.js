@@ -16,7 +16,7 @@ const io = require('socket.io')(server)
 // for log reader
 const NginxParser = require('nginxparser')
 
-const parser = new NginxParser('$remote_addr - - [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"');
+const parser = new NginxParser('$remote_addr - - [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"')
 const Tail = require('nodejs-tail')
 const { exec } = require('child_process')
 const paramMapV1 = require('./paramMap')
