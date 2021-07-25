@@ -153,7 +153,7 @@ const parseQuery = (cmd, data) => {
       // 000 0000 0000 000.0 00.00 00000 10101010 00 00 00000 000
       if (data === '(NAK') return '<b>QPIGS (Inverter status)</b><br />Not recognised'
       const fields = data.slice(1).split(' ');
-      const flags = fields[16];
+      // const flags = fields[16];
       sendData({
         data: fields.join(','),
       })
@@ -174,46 +174,46 @@ const parseQuery = (cmd, data) => {
       //   n: parseFloat(fields[4]),
       //   flags: JSON.stringify(flags),
       // })
-      return `${'<b>QPIGS (Inverter status)</b><br />'
-				+ 'Grid voltage: '}${parseFloat(fields[0])}V<br />`
-				+ `Grid frequency: ${parseFloat(fields[1])}Hz<br />`
-				+ `AC output voltage: ${parseFloat(fields[2])}V<br />`
-				+ `AC output frequency: ${parseFloat(fields[3])}Hz<br />`
-				+ `AC output apparent power: ${parseFloat(fields[4])}VA<br />`
-				+ `AC output active power: ${parseFloat(fields[5])}W<br />`
-				+ `Output load: ${parseFloat(fields[6])}%<br />`
-				+ `Bus voltage: ${parseFloat(fields[7])}V<br />`
-				+ `Battery voltage: ${parseFloat(fields[8])}V<br />`
-				+ `Battery charging current: ${parseFloat(fields[9])}A<br />`
-				+ `Battery capacity: ${parseFloat(fields[10])}%<br />`
-				+ `Heatsink temp: ${parseFloat(fields[11])}&deg;C<br />`
-				+ `SCC1 Input current: ${parseFloat(fields[12])}A<br />`
-				+ `SCC1 Input voltage: ${parseFloat(fields[13])}V<br />`
-				+ `SCC1 Battery voltage: ${parseFloat(fields[14])}V<br />`
-				+ `Battery discharge current: ${parseFloat(fields[15])}A<br />`
-				+ 'Status: <br />&nbsp;&nbsp;'
-				+ `Add SBU priority: ${flags[0] == '1' ? 'Yes' : 'No'
-				}<br />&nbsp;&nbsp;`
-				+ `Config changed: ${flags[1] == '1' ? 'Yes' : 'No'
-				}<br />&nbsp;&nbsp;`
-				+ `SCC Firmware updated: ${flags[2] == '1' ? 'Yes' : 'No'
-				}<br />&nbsp;&nbsp;`
-				+ `Load status: ${flags[3] == '1' ? 'On' : 'Off'
-				}<br />&nbsp;&nbsp;`
-				+ `Steady voltage: ${flags[4] == '1' ? 'Yes' : 'No'
-				}<br />&nbsp;&nbsp;`
-				+ `Charging status: ${flags[5] == '1' ? 'On' : 'Off'
-				}<br />&nbsp;&nbsp;`
-				+ `SCC1 charging: ${flags[6] == '1' ? 'On' : 'Off'
-				}<br />&nbsp;&nbsp;`
-				+ `AC charging: ${flags[7] == '1' ? 'On' : 'Off'
-				}<br />`
-				+ `Battery voltage offset: ${
-				  parseFloat(fields[17])}mV<br />`
-				+ `EEprom version: ${
-				  fields[18]}<br />`
-				+ `PV1 Charging power: ${
-				  parseFloat(fields[19])}W`;
+      // return `${'<b>QPIGS (Inverter status)</b><br />'
+      // 	+ 'Grid voltage: '}${parseFloat(fields[0])}V<br />`
+      // 	+ `Grid frequency: ${parseFloat(fields[1])}Hz<br />`
+      // 	+ `AC output voltage: ${parseFloat(fields[2])}V<br />`
+      // 	+ `AC output frequency: ${parseFloat(fields[3])}Hz<br />`
+      // 	+ `AC output apparent power: ${parseFloat(fields[4])}VA<br />`
+      // 	+ `AC output active power: ${parseFloat(fields[5])}W<br />`
+      // 	+ `Output load: ${parseFloat(fields[6])}%<br />`
+      // 	+ `Bus voltage: ${parseFloat(fields[7])}V<br />`
+      // 	+ `Battery voltage: ${parseFloat(fields[8])}V<br />`
+      // 	+ `Battery charging current: ${parseFloat(fields[9])}A<br />`
+      // 	+ `Battery capacity: ${parseFloat(fields[10])}%<br />`
+      // 	+ `Heatsink temp: ${parseFloat(fields[11])}&deg;C<br />`
+      // 	+ `SCC1 Input current: ${parseFloat(fields[12])}A<br />`
+      // 	+ `SCC1 Input voltage: ${parseFloat(fields[13])}V<br />`
+      // 	+ `SCC1 Battery voltage: ${parseFloat(fields[14])}V<br />`
+      // 	+ `Battery discharge current: ${parseFloat(fields[15])}A<br />`
+      // 	+ 'Status: <br />&nbsp;&nbsp;'
+      // 	+ `Add SBU priority: ${flags[0] == '1' ? 'Yes' : 'No'
+      // 	}<br />&nbsp;&nbsp;`
+      // 	+ `Config changed: ${flags[1] == '1' ? 'Yes' : 'No'
+      // 	}<br />&nbsp;&nbsp;`
+      // 	+ `SCC Firmware updated: ${flags[2] == '1' ? 'Yes' : 'No'
+      // 	}<br />&nbsp;&nbsp;`
+      // 	+ `Load status: ${flags[3] == '1' ? 'On' : 'Off'
+      // 	}<br />&nbsp;&nbsp;`
+      // 	+ `Steady voltage: ${flags[4] == '1' ? 'Yes' : 'No'
+      // 	}<br />&nbsp;&nbsp;`
+      // 	+ `Charging status: ${flags[5] == '1' ? 'On' : 'Off'
+      // 	}<br />&nbsp;&nbsp;`
+      // 	+ `SCC1 charging: ${flags[6] == '1' ? 'On' : 'Off'
+      // 	}<br />&nbsp;&nbsp;`
+      // 	+ `AC charging: ${flags[7] == '1' ? 'On' : 'Off'
+      // 	}<br />`
+      // 	+ `Battery voltage offset: ${
+      // 	  parseFloat(fields[17])}mV<br />`
+      // 	+ `EEprom version: ${
+      // 	  fields[18]}<br />`
+      // 	+ `PV1 Charging power: ${
+      // 	  parseFloat(fields[19])}W`;
     },
     // QPGS0
     QPIGS2: () => {
