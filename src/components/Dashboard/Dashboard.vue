@@ -37,7 +37,7 @@ export default {
       majorTicks: [0, 500, 1000, 1500, 2000, 2500, 3000],
       units: 'Watt',
       value: 0,
-      minValue: 500,
+      minValue: 0,
       maxValue: 3000,
       title: '輸出負載',
     })
@@ -61,11 +61,12 @@ export default {
     })
 
     const g_batteryVoltage = this.createGauge({
-      majorTicks: [40, 45, 50, 55, 60, 65],
+      majorTicks: [45, 50, 55, 60],
       units: 'Voltage',
       value: 48,
-      minValue: 40,
-      maxValue: 65,
+      minValue: 45,
+      maxValue: 60,
+      valueInt: 2,
       title: '電池電壓',
     })
 
@@ -92,8 +93,6 @@ export default {
       g_acOutputVoltage.value = acOutputVoltage
       g_pvInputPower.value = pvInputPower
       g_batteryVoltage.value = batteryVoltage
-      // g_gridVoltage.update()
-      // g_acOutputActivePower.update()
     })
   },
   data: () => ({
@@ -121,15 +120,14 @@ export default {
         valueBoxBorderRadius: 0,
         valueBoxStroke: 0,
         valueTextShadow: 0,
+        valueDec: 1,
         needle: false,
         width: 300,
         height: 300,
         minorTicks: 3,
-        // strokeTicks: 1,
-        // ticksWidth: 1,
-        // ticksWidthMinor: 10,
         ...options,
       }).draw()
+
       this.$refs.gauges.appendChild(gauge.options.renderTo)
 
       return gauge
