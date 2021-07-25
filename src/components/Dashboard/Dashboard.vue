@@ -70,6 +70,14 @@ export default {
       title: '電池電壓',
     })
 
+    const gauges = [
+      'gridVoltage',
+      'acOutputActivePower',
+      'acOutputVoltage',
+      'pvInputPower',
+      'batteryVoltage',
+    ]
+
     socket.on('updateLiveChart', (data) => {
       const [
         timestamp,
@@ -122,8 +130,8 @@ export default {
         valueTextShadow: 0,
         valueDec: 1,
         needle: false,
-        width: 300,
-        height: 300,
+        width: 150,
+        height: 150,
         minorTicks: 3,
         ...options,
       }).draw()
@@ -135,11 +143,23 @@ export default {
   },
 };
 </script>
-<style scoped>
+<style lang="scss">
 .gauges {
   display: flex;
   justify-content: space-between;
   text-align: center;
   flex-wrap: wrap;
+  canvas {
+    margin: 0 auto;
+  }
+}
+
+@media  (min-width: 768px) {
+  .gauges {
+    flex-wrap: wrap;
+  }
+  .gauges canvas{
+    flex-grow: 1;
+  }
 }
 </style>

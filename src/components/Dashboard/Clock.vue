@@ -64,8 +64,14 @@ export default {
   left: 50%;
   transform: translateX(-50%) translateY(-50%); */
   color: #CCC;
-  font-size: 60px;
+  font-size: 34px;
   font-family: Orbitron;
   letter-spacing: 7px;
+}
+
+@media  (min-width: 768px) {
+  .clock {
+    font-size: 60px;
+  }
 }
 </style>
