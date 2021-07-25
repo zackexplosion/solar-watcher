@@ -51,14 +51,23 @@ export default {
     //   title: '市電電壓',
     // })
 
-    const g_acOutputVoltage = this.createGauge({
-      majorTicks: [200, 210, 220, 230, 240, 250],
+    const g_pvInputVoltage = this.createGauge({
+      majorTicks: [0, 50, 100, 150, 200, 250, 300],
       units: 'Voltage',
-      value: 220,
-      minValue: 200,
-      maxValue: 250,
-      title: '輸出電壓',
+      value: 0,
+      minValue: 0,
+      maxValue: 300,
+      title: 'PV電壓',
     })
+
+    // const g_acOutputVoltage = this.createGauge({
+    //   majorTicks: [200, 210, 220, 230, 240, 250],
+    //   units: 'Voltage',
+    //   value: 220,
+    //   minValue: 200,
+    //   maxValue: 250,
+    //   title: '輸出電壓',
+    // })
 
     const g_batteryVoltage = this.createGauge({
       majorTicks: [45, 50, 55, 60],
@@ -98,9 +107,10 @@ export default {
       ] = data
       // g_gridVoltage.value = gridVoltage
       g_acOutputActivePower.value = acOutputActivePower
-      g_acOutputVoltage.value = acOutputVoltage
+      // g_acOutputVoltage.value = acOutputVoltage
       g_pvInputPower.value = pvInputPower
       g_batteryVoltage.value = batteryVoltage
+      g_pvInputVoltage.value = pvInputVoltage
     }
 
     socket.emit('initLiveChart', (_data) => {
@@ -119,6 +129,7 @@ export default {
     createGauge(options = {}) {
       const gauge = new RadialGauge({
         renderTo: document.createElement('canvas'),
+        fontValue: '',
         barWidth: 10,
         barShadow: 0,
         colorPlate: 'rgba(0,0,0,.0)',
