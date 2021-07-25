@@ -30,23 +30,24 @@ export default {
       let h = date.getHours() // 0 - 23
       let m = date.getMinutes() // 0 - 59
       let s = date.getSeconds() // 0 - 59
-      let session = 'AM'
+      // const session = 'AM'
 
       if (h === 0) {
         h = 12
       }
 
-      if (h > 12) {
-        h -= 12;
-        session = 'PM'
-      }
+      // if (h > 12) {
+      //   h -= 12;
+      //   session = 'PM'
+      // }
 
       h = (h < 10) ? `0${h}` : h
       m = (m < 10) ? `0${m}` : m
       s = (s < 10) ? `0${s}` : s
 
       // const time = `${h}:${m}`
-      const time = `${h}:${m}:${s} ${session}`
+      // const time = `${session} ${h}:${m}:${s}`
+      const time = `${h}:${m}:${s}`
       this.theTime = time
 
       this.clockTimeout = setTimeout(this.getTime, 1000)
@@ -65,12 +66,15 @@ export default {
   transform: translateX(-50%) translateY(-50%); */
   color: #CCC;
   font-size: 34px;
-  font-family: 'Inconsolata', monospace;
+  /* font-family: 'Inconsolata', monospace; */
+  font-weight: bold;
   letter-spacing: 7px;
+  padding: 1em 0;
 }
 
 @media  (min-width: 768px) {
   .clock {
+    padding: 0;
     font-size: 60px;
   }
 }

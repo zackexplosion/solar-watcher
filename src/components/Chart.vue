@@ -141,8 +141,8 @@ export default {
             type: 'all',
             text: 'All',
           }],
-        // inputEnabled: false, // it supports only days
-        selected: 4, // 12h
+        inputEnabled: false, // it supports only days
+        selected: 2, // 12h
       },
       tooltip: {
         shape: 'square',

@@ -127,9 +127,15 @@ export default {
   }),
   methods: {
     createGauge(options = {}) {
+      let size = 320
+
+      if (window.innerWidth <= size) {
+        size = window.innerWidth - 30
+      }
+
       const gauge = new RadialGauge({
         renderTo: document.createElement('canvas'),
-        fontValue: '',
+        // fontValue: '',
         barWidth: 10,
         barShadow: 0,
         colorPlate: 'rgba(0,0,0,.0)',
@@ -149,9 +155,12 @@ export default {
         valueBoxStroke: 0,
         valueTextShadow: 0,
         valueDec: 1,
+        fontNumbersSize: 15,
+        // fontValueSize: 26,
+        // fontUnitsSize: 20,
         needle: false,
-        width: 150,
-        height: 150,
+        width: size,
+        height: size,
         minorTicks: 3,
         ...options,
       }).draw()
@@ -171,12 +180,17 @@ export default {
   flex-wrap: wrap;
   canvas {
     margin: 0 auto;
+    // width: 50%;
   }
 }
 
 @media  (min-width: 768px) {
   .gauges {
     flex-wrap: wrap;
+
+    // canvas {
+    //   width: 50%;
+    // }
   }
   .gauges canvas{
     // flex-grow: 1;
