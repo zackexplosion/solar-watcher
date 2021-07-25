@@ -42,14 +42,14 @@ export default {
       title: '輸出負載',
     })
 
-    const g_gridVoltage = this.createGauge({
-      majorTicks: [200, 210, 220, 230, 240, 250],
-      units: 'Voltage',
-      value: 220,
-      minValue: 200,
-      maxValue: 250,
-      title: '市電電壓',
-    })
+    // const g_gridVoltage = this.createGauge({
+    //   majorTicks: [200, 210, 220, 230, 240, 250],
+    //   units: 'Voltage',
+    //   value: 220,
+    //   minValue: 200,
+    //   maxValue: 250,
+    //   title: '市電電壓',
+    // })
 
     const g_acOutputVoltage = this.createGauge({
       majorTicks: [200, 210, 220, 230, 240, 250],
@@ -96,7 +96,7 @@ export default {
         EEPRomVersion,
         pvInputPower,
       ] = data
-      g_gridVoltage.value = gridVoltage
+      // g_gridVoltage.value = gridVoltage
       g_acOutputActivePower.value = acOutputActivePower
       g_acOutputVoltage.value = acOutputVoltage
       g_pvInputPower.value = pvInputPower
@@ -159,7 +159,7 @@ export default {
     flex-wrap: wrap;
   }
   .gauges canvas{
-    flex-grow: 1;
+    // flex-grow: 1;
   }
 }
 </style>
