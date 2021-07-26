@@ -162,7 +162,8 @@ io.on('connection', (socket) => {
 // }
 
 console.time('read log')
-exec(`cat ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, async (error, stdout, stderr) => {
+// only cache last 15min
+exec(`tail -n 900 ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, async (error, stdout, stderr) => {
   if (error) {
     console.log(`error: ${error.message}`)
     return
