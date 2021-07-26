@@ -60,9 +60,17 @@ export default {
         styledMode: true,
         colorCount: 20,
       },
+      navigator: {
+        adaptToUpdatedData: false,
+      },
       title: '太陽能監控儀',
       xAxis: {
         type: 'datetime',
+        events: {
+          afterSetExtremes(e) {
+            console.log(e)
+          },
+        },
       },
       yAxis: [
         {
