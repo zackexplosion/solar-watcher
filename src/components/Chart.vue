@@ -69,11 +69,11 @@ export default {
       title: '太陽能監控儀',
       xAxis: {
         type: 'datetime',
-        events: {
-          afterSetExtremes(e) {
-            console.log(e)
-          },
-        },
+        // events: {
+        //   afterSetExtremes(e) {
+        //     console.log(e)
+        //   },
+        // },
       },
       yAxis: [
         {
@@ -108,21 +108,21 @@ export default {
       ],
       rangeSelector: {
         buttons: [
-          {
-            type: 'minute',
-            count: 5,
-            text: '5m',
-          },
+          // {
+          //   type: 'minute',
+          //   count: 5,
+          //   text: '5m',
+          // },
           {
             type: 'minute',
             count: 15,
             text: '15m',
           },
-          {
-            type: 'hour',
-            count: 1,
-            text: '1h',
-          },
+          // {
+          //   type: 'hour',
+          //   count: 1,
+          //   text: '1h',
+          // },
           {
             type: 'hour',
             count: 4,
@@ -153,7 +153,7 @@ export default {
             text: 'All',
           }],
         inputEnabled: false, // it supports only days
-        selected: 2, // 12h
+        selected: 0, // 15m
       },
       tooltip: {
         shape: 'square',
@@ -291,7 +291,7 @@ export default {
             updateChart = true
           }
 
-          this.$refs.chart.chart.series[index].shift()
+          // this.$refs.chart.chart.series[index].data.shift()
           this.$refs.chart.chart.series[index].addPoint(
             [data[0], value],
             updateChart,

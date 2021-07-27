@@ -208,7 +208,7 @@ async function main() {
   do {
     const start = dayjs(startTime).toDate()
     const periodTime = dayjs(startTime).startOf('minute')
-    const end = periodTime.add(15, 'minute').toDate()
+    const end = periodTime.add(5, 'minute').toDate()
 
     console.log('start time', start)
     // console.log('end time', end)
@@ -259,7 +259,7 @@ async function main() {
       new_document.acOutputVoltage || 0,
       new_document.acOutputFrequency || 0,
       0,
-      new_document.acOutputPower || 0,
+      new_document.acOutputActivePower || 0,
       new_document.acOutputLoad || 0,
       0,
       new_document.batteryVoltage || 0,
@@ -283,7 +283,7 @@ async function main() {
     // console.log('new doc', dataLength, JSON.stringify(new_document))
 
     // const insertResult = await parsed_collection.insertMany([new_document])
-    // console.log('Inserted documents =>', insertResult)
+    console.log('Inserted documents =>', JSON.stringify(params))
 
     startTime = end
   } while (dayjs(startTime).isBefore(dayjs()))

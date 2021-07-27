@@ -2,7 +2,13 @@
 const LOG_PATH = process.env.SERVER_LOG_PATH || './test.log'
 const VALID_ID_LIST = process.env.SERVER_VALID_ID_LIST.split(',').map((_) => _.trim()) || []
 const PORT = process.env.PORT || 7777
-const CACHE_POINTS_COUNT = process.env.CACHE_POINTS_COUNT || 900
+const MAX_CACHE_POINTS = process.env.MAX_CACHE_POINTS || 900
+
+const low = require('lowdb')
+const FileSync = require('lowdb/adapters/FileSync')
+
+const adapter = new FileSync('db.json')
+const lowdb = low(adapter)
 
 // main server
 const express = require('express')
@@ -16,10 +22,10 @@ const io = require('socket.io')(server)
 
 // for log reader
 const NginxParser = require('nginxparser')
+const { exec } = require('child_process')
 
 const parser = new NginxParser('$remote_addr - - [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"')
 const Tail = require('nodejs-tail')
-const { exec } = require('child_process')
 const paramMapV1 = require('./paramMap')
 
 function parseLogV1(raw_params) {
@@ -78,7 +84,7 @@ function parseLog(row) {
         return _
       }),
     ]
-    console.log(params)
+    // console.log(params)
   } else {
     const _ = parseLogV1(raw_params)
     params = [
@@ -110,8 +116,9 @@ function parseLog(row) {
 
   return params
 }
-
 const cacheData = []
+
+// const cacheData = []
 function setupLogReader() {
   // to use Tail again cuz nginx parse cant not just read the last line
   const tail = new Tail(LOG_PATH)
@@ -121,7 +128,10 @@ function setupLogReader() {
       parser.parseLine(line, (log) => {
         const data = parseLog(log)
         if (data) {
-          cacheData.shift()
+          if (cacheData.length >= MAX_CACHE_POINTS) {
+            cacheData.shift()
+          }
+
           cacheData.push(data)
           io.emit('updateLiveChart', data)
         }
@@ -141,7 +151,8 @@ function setupLogReader() {
 // main
 io.on('connection', (socket) => {
   console.log('a user connected', socket.id, new Date())
-  socket.emit('initLiveChart', cacheData)
+  const logs = lowdb.get('logs')
+  socket.emit('initLiveChart', logs)
 })
 
 // async function getParsedLog(line) {
@@ -162,9 +173,16 @@ io.on('connection', (socket) => {
 //   })
 // }
 
-console.time('read log')
-// only cache last 15min
-exec(`tail -n ${CACHE_POINTS_COUNT} ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, async (error, stdout, stderr) => {
+// console.log('cacheData', cacheData)
+// server.listen(PORT, () => {
+//   console.log(`listening on *:${PORT}`);
+
+//   setupLogReader()
+// })
+
+// console.time('read log')
+// // only cache last 15min
+exec(`tail -n ${MAX_CACHE_POINTS} ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, async (error, stdout, stderr) => {
   if (error) {
     console.log(`error: ${error.message}`)
     return
@@ -235,7 +253,7 @@ exec(`tail -n ${CACHE_POINTS_COUNT} ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, a
         1,
       ]
 
-      if (cacheData.length >= CACHE_POINTS_COUNT) {
+      if (cacheData.length >= MAX_CACHE_POINTS) {
         cacheData.shift()
       }
 
