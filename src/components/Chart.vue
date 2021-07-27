@@ -14,28 +14,31 @@ import { Chart } from 'highcharts-vue'
 import Highcharts from 'highcharts'
 import stockInit from 'highcharts/modules/stock'
 
+import paramsArrayMap from '../../server/paramsArrayMap'
+
+// const paramsArrayMap = [
+//   'timestamp', // 0
+//   'gridVoltage', 'gridFrequency',
+//   'acOutputVoltage', 'acOutputFrequency',
+//   'acOutputApparentPower', 'acOutputActivePower',
+//   'acOutputLoad', // 7
+//   'busVoltage', 'batteryVoltage',
+//   'batteryChargingCurrent', 'batteryCapacity',
+//   'heatSinkTemp', // 12
+//   'pvInputCurrent', 'pvInputVoltage',
+//   'pvBatteryVoltage',
+//   'batteryDischargeCurrent', // 16
+//   'flags', // 17
+//   'batteryVoltageOffset',
+//   'EEPRomVersion',
+//   'pvInputPower', // 20
+// ]
+
 // import darkUnica from 'highcharts/themes/dark-unica';
 
 // darkUnica(Highcharts)
 stockInit(Highcharts)
 
-const paramsArrayMap = [
-  'timestamp', // 0
-  'gridVoltage', 'gridFrequency',
-  'acOutputVoltage', 'acOutputFrequency',
-  'acOutputApparentPower', 'acOutputActivePower',
-  'acOutputLoad', // 7
-  'busVoltage', 'batteryVoltage',
-  'batteryChargingCurrent', 'batteryCapacity',
-  'heatSinkTemp', // 12
-  'pvInputCurrent', 'pvInputVoltage',
-  'pvBatteryVoltage',
-  'batteryDischargeCurrent', // 16
-  'flags', // 17
-  'batteryVoltageOffset',
-  'EEPRomVersion',
-  'pvInputPower', // 20
-]
 export default {
   name: 'mychart',
   components: {
@@ -288,6 +291,7 @@ export default {
             updateChart = true
           }
 
+          this.$refs.chart.chart.series[index].shift()
           this.$refs.chart.chart.series[index].addPoint(
             [data[0], value],
             updateChart,

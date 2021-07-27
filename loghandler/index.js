@@ -1,4 +1,19 @@
-const LOG_PATH = process.env.SERVER_LOG_PATH || './solar.log.1'
+/* eslint-disable no-await-in-loop */
+const low = require('lowdb')
+const FileSync = require('lowdb/adapters/FileSync')
+
+const adapter = new FileSync('db.json')
+const lowdb = low(adapter)
+
+// Set some defaults
+lowdb.defaults({ logs: [] })
+  .write()
+
+// reset
+lowdb.get('logs')
+  .remove((x) => x)
+  .write()
+
 const VALID_ID_LIST = process.env.SERVER_VALID_ID_LIST.split(',').map((_) => _.trim()) || []
 const { exec } = require('child_process')
 
@@ -6,8 +21,10 @@ const NginxParser = require('nginxparser')
 
 const parser = new NginxParser('$remote_addr - - [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"')
 const dayjs = require('dayjs')
-const fs = require('fs');
 const glob = require('glob')
+const Big = require('big.js')
+const { MongoClient } = require('mongodb')
+const paramsArrayMap = require('../server/paramsArrayMap')
 const paramMapV1 = require('../server/paramMap')
 
 function parseLogV1(raw_params) {
@@ -101,32 +118,182 @@ function handleTmpData(tmpData) {
   console.log(tmpData)
 }
 
-// options is optional
-glob(`${__dirname}/*.log*`, {}, (er, files) => {
-  files.forEach((file) => {
-    exec(`cat ${file}`, { maxBuffer: 1024 * 50000 }, async (error, stdout, stderr) => {
-      if (error) {
-        console.log(`error: ${error.message}`)
-        return
-      }
+async function startParsingLog(collection) {
+  // console.log('collection', collection)
 
-      if (stderr) {
-        console.log(`stderr: ${stderr}`)
-        return
-      }
+  return new Promise((resolve, reject) => {
+    glob(`${__dirname}/*.log*`, {}, (er, files) => {
+      const promises = []
+      files.forEach((file) => {
+        exec(`cat ${file}`, { maxBuffer: 1024 * 50000 }, async (error, stdout, stderr) => {
+          if (error) {
+            console.log(`error: ${error.message}`)
+            return
+          }
 
-      const cacheLogs = stdout.split('\n')
+          if (stderr) {
+            console.log(`stderr: ${stderr}`)
+            return
+          }
 
-      for (let index = cacheLogs.length - 1; index >= 0; index -= 1) {
-        const line = cacheLogs[index]
-        const m = null
-        const tmpData = []
-        parser.parseLine(line, (log) => {
-          const data = parseLog(log)
-          const d = dayjs(data[0])
-          console.log(JSON.stringify(data))
+          const cacheLogs = stdout.split('\n')
+          const documents = []
+          for (let index = cacheLogs.length - 1; index >= 0; index -= 1) {
+            const line = cacheLogs[index]
+            parser.parseLine(line, async (log) => {
+              const data = parseLog(log)
+              const time = dayjs(data[0]).toDate()
+              const document = {
+                time,
+              }
+              for (let i = 1; i < data.length; i += 1) {
+                const key = paramsArrayMap[i]
+
+                document[key] = data[i]
+              }
+
+              // console.log(document)
+              documents.push(document)
+            })
+          }
+          try {
+            promises.push(collection.insertMany(documents))
+          // const r = await collection.insertMany(documents)
+          // console.log(r)
+          } catch (_) {
+          // console.error(_)
+          }
         })
+      })
+      Promise.all(promises).then((_) => {
+        resolve(_)
+      })
+    }) // glob
+  })
+}
+
+// Connection URL
+const url = 'mongodb://root:root@localhost:27017'
+const client = new MongoClient(url)
+
+// Database Name
+const dbName = 'solar-watcher'
+
+async function main() {
+  // Use connect method to connect to the server
+  await client.connect()
+  console.log('Connected successfully to server')
+  const db = client.db(dbName)
+  const collection = db.collection('logs')
+  const parsed_collection = db.collection('parsed')
+  try {
+    await parsed_collection.drop()
+  } catch (_) {
+    console.error(_)
+  }
+  // await startParsingLog(collection)
+  const first = await collection.find({
+    acOutputActivePower: {
+      $ne: 0,
+    },
+  }).sort({
+    time: 1,
+  }).limit(1).toArray()
+
+  console.log('first', first)
+
+  let startTime = first[0].time
+  let next
+
+  do {
+    const start = dayjs(startTime).toDate()
+    const periodTime = dayjs(startTime).startOf('minute')
+    const end = periodTime.add(15, 'minute').toDate()
+
+    console.log('start time', start)
+    // console.log('end time', end)
+
+    next = await collection.find({
+      time: {
+        $gte: start,
+        $lte: end,
+      },
+    }).toArray()
+
+    // console.log('next', next.length)
+    // console.log('next', next)
+
+    const new_document = {
+      timestamp: periodTime.toDate(),
+      acOutputActivePower: new Big(0),
+      pvInputPower: new Big(0),
+    }
+
+    let dataLength = next.length
+
+    next.forEach((n) => {
+      // console.log('n.acOutputActivePower', n)
+      try {
+        new_document.acOutputActivePower = new_document.acOutputActivePower.plus(n.acOutputActivePower)
+        new_document.pvInputPower = new_document.pvInputPower.plus(n.pvInputPower)
+      } catch (error) {
+        dataLength -= 1
       }
     })
+
+    new_document.acOutputActivePower = Big(new_document
+      .acOutputActivePower
+      .div(dataLength || 1)
+      .toFixed(0))
+      .toNumber()
+    new_document.pvInputPower = Big(new_document
+      .pvInputPower
+      .div(dataLength || 1)
+      .toFixed(0))
+      .toNumber()
+
+    const params = [
+      new_document.timestamp.valueOf(),
+      0,
+      0,
+      new_document.acOutputVoltage || 0,
+      new_document.acOutputFrequency || 0,
+      0,
+      new_document.acOutputPower || 0,
+      new_document.acOutputLoad || 0,
+      0,
+      new_document.batteryVoltage || 0,
+      new_document.batteryChargingCurrent || 0,
+      new_document.batteryCapacity || 0,
+      new_document.heatSinkTemp || 0,
+      new_document.pvInputCurrent || 0,
+      new_document.pvInputVoltage || 0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      new_document.pvInputPower || 0,
+    ]
+
+    lowdb.get('logs')
+      .push(params)
+      .write()
+
+    // console.log('new doc', dataLength, JSON.stringify(new_document))
+
+    // const insertResult = await parsed_collection.insertMany([new_document])
+    // console.log('Inserted documents =>', insertResult)
+
+    startTime = end
+  } while (dayjs(startTime).isBefore(dayjs()))
+
+  return 'done.'
+}
+
+main()
+  .then((_) => {
+    console.log(_)
+    process.exit()
   })
-})
+  .catch(console.error)

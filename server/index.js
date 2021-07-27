@@ -2,6 +2,7 @@
 const LOG_PATH = process.env.SERVER_LOG_PATH || './test.log'
 const VALID_ID_LIST = process.env.SERVER_VALID_ID_LIST.split(',').map((_) => _.trim()) || []
 const PORT = process.env.PORT || 7777
+const CACHE_POINTS_COUNT = process.env.CACHE_POINTS_COUNT || 900
 
 // main server
 const express = require('express')
@@ -163,7 +164,7 @@ io.on('connection', (socket) => {
 
 console.time('read log')
 // only cache last 15min
-exec(`tail -n 900 ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, async (error, stdout, stderr) => {
+exec(`tail -n ${CACHE_POINTS_COUNT} ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, async (error, stdout, stderr) => {
   if (error) {
     console.log(`error: ${error.message}`)
     return
@@ -233,7 +234,11 @@ exec(`tail -n 900 ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, async (error, stdou
         0,
         1,
       ]
-      cacheData.shift()
+
+      if (cacheData.length >= CACHE_POINTS_COUNT) {
+        cacheData.shift()
+      }
+
       cacheData.push(data)
       io.emit('updateLiveChart', data)
     }, 1000)
