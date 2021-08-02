@@ -25,6 +25,8 @@ deploy.tar
 test.log
 solar.log
 *.log
+*.log*
+*.gz
 .envrc
 deploy.sh
 ecosystem.config.js
