@@ -31,3 +31,4 @@ solar.log
 deploy.sh
 ecosystem.config.js
 db.json
+test.js

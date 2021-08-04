@@ -26,10 +26,19 @@ function parseLogV1(raw_params) {
 }
 
 function parseLog(row) {
-  const d = row.time_local.split(':')
+  const m = row.match(/\[(.+)\] "GET \/\?(.+) HTTP/)
+
+  // console.log(m)
+  if (!m || !m[1]) return false
+  const d = m[1].split(':')
+  const r = m[2]
+  // const r = row.request.split(' ')
+
   const timestamp = dayjs(`${d[0]} ${d[1]}:${d[2]}:${d[3]}`, 'DD/MMM/YY HH:mm:ss ZZ')
-  const r = row.request.split(' ')
-  const raw_params = new URL(`http://local${r[1]}`).searchParams
+  // const timestamp = dayjs(m[1], 'DD/MMM/YY HH:mm:ss ZZ')
+  const raw_params = new URL(`http://local/?${r}`).searchParams
+
+  // console.log(timestamp.toDate())
 
   if (!VALID_ID_LIST.includes(raw_params.get('id'))) {
     return false
@@ -48,8 +57,8 @@ function parseLog(row) {
       timestamp.valueOf(),
       ...dataParam.split(',').map((_, index) => {
         if (index !== 16) { // skip the flags column
-          const m = _.match(/[\d]+\.[\d]+/)
-          if (m) {
+          const mm = _.match(/[\d]+\.[\d]+/)
+          if (mm) {
             return parseFloat(m[0]) || 0
           }
           return parseFloat(_) || 0

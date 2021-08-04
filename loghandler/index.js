@@ -1,31 +1,32 @@
+/* eslint-disable no-continue */
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
-const { SERVER_LOG_URI } = process.env
+const { SERVER_LOG_URI, SERVER_LOG_URI_RENEW } = process.env
+const fs = require('fs')
+const dayjs = require('dayjs')
+const Big = require('big.js')
+
 const MODE = process.env.MODE || 'renew'
 
 const low = require('lowdb')
 const FileSync = require('lowdb/adapters/FileSync')
 
-const adapter = new FileSync('db.json')
-const lowdb = low(adapter)
+const lowdb = low(new FileSync('db.json'))
 
 // Set some defaults
 lowdb.defaults({ logs: [] })
   .write()
 
+if (MODE === 'renew') {
 // reset
-lowdb.get('logs')
-  .remove((x) => x)
-  .write()
+  lowdb.get('logs')
+    .remove((x) => x)
+    .write()
+}
 
 const { exec } = require('child_process')
 
-const NginxParser = require('nginxparser')
-
-const parser = new NginxParser('$remote_addr - - [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"')
-const dayjs = require('dayjs')
 const glob = require('glob')
-const Big = require('big.js')
-const { MongoClient } = require('mongodb')
 const util = require('util');
 const path = require('path')
 const paramsArrayMap = require('../server/paramsArrayMap')
@@ -34,256 +35,153 @@ const parseLog = require('../server/parseLog')
 const promiseExec = util.promisify(exec);
 
 async function loadLogFromServer() {
-  try {
-    await promiseExec(`rm -rf ${path.join(__dirname, 'solar*')}`)
-  } catch (error) {
-    console.error(error)
+  console.log('copy log from server')
+  let log_path = SERVER_LOG_URI
+  if (MODE === 'renew') {
+    log_path = SERVER_LOG_URI_RENEW
+    try {
+      await promiseExec(`rm -rf ${path.join(__dirname, 'solar*')}`)
+    } catch (error) {
+      console.error(error)
+    }
   }
+
   return new Promise(((resolve, reject) => {
-    exec(`scp '${SERVER_LOG_URI}' ${__dirname}`, { maxBuffer: 1024 * 50000 }, async (error, stdout, stderr) => {
+    exec(`scp '${log_path}' ${__dirname}`, { maxBuffer: 1024 * 50000 }, async (error, stdout, stderr) => {
       if (error) {
         return reject(error)
       }
 
-      exec(`gunzip -d ${__dirname}/solar*.gz`, (_error, _stdout, _stderr) => {
-        if (_error) {
-          return reject(_error)
-        }
-        return resolve(true)
-      })
+      if (MODE === 'renew') {
+        exec(`gunzip -d ${__dirname}/solar*.gz`, (_error, _stdout, _stderr) => {
+          if (_error) {
+            return reject(_error)
+          }
+          return resolve(true)
+        })
+      } else {
+        resolve(true)
+      }
     })
   }))
 }
-async function startParsingLog(collection) {
-  // console.log('collection', collection)
 
-  const last = await collection.find({
-    acOutputActivePower: {
-      $ne: 0,
-    },
-  }).sort({
-    time: -1,
-  }).limit(1).toArray()
-
-  console.log('last record time is', last.time)
-
+function getLogList() {
   return new Promise((resolve, reject) => {
-    glob(`${__dirname}/*.log*`, {}, (er, files) => {
-      const promises = []
-      files.forEach((file) => {
-        const p = new Promise((_resolve, _reject) => {
-          exec(`cat ${file}`, { maxBuffer: 1024 * 50000 }, async (error, stdout, stderr) => {
-            if (error) {
-              console.log(`error: ${error.message}`)
-              return
-            }
+    glob(`${__dirname}/*.log*`, {}, (err, files) => {
+      if (err) return reject(err)
 
-            if (stderr) {
-              console.log(`stderr: ${stderr}`)
-              return
-            }
+      const regex = /solar.log\.?(\d+)/
 
-            const cacheLogs = stdout.split('\n')
-            const documents = []
-            for (let index = cacheLogs.length - 1; index >= 0; index -= 1) {
-              const line = cacheLogs[index]
-              parser.parseLine(line, async (log) => {
-                const data = parseLog(log)
-                const time = dayjs(data[0])
-                const document = {
-                  time: time.toDate(),
-                }
-                for (let i = 1; i < data.length; i += 1) {
-                  const key = paramsArrayMap[i]
+      // sort log files name, start from oldest
+      files.sort((a, b) => {
+        let _a = a.match(regex)
+        if (_a && _a[1]) {
+          _a = parseInt(_a[1])
+        }
 
-                  document[key] = data[i]
-                }
+        let _b = b.match(regex)
+        if (_b && _b[1]) {
+          _b = parseInt(_b[1])
+        }
 
-                // console.log('typeof last', typeof last.time === 'undefined')
-                // console.log('time.isAfter(dayjs(last.time)', time.isAfter(dayjs(last.time)))
-                // prevent handle old log again
-                const writeToDB = (typeof last.time === 'undefined') || time.isAfter(dayjs(last.time))
-                process.stdout.write(`handliing ${time.toDate()}, writeToDB ${writeToDB}\r`)
-
-                if (writeToDB) {
-                  documents.push(document)
-                }
-              })
-            }
-            try {
-              if (documents.length > 0) {
-                const r = await collection.insertMany(documents)
-                console.log(r)
-              }
-
-              _resolve()
-            } catch (_) {
-              // console.error(_)
-            }
-          })
-        })
-        promises.push(p)
+        if (_a > _b) return -1
+        if (_a < _b) return 1
       })
-      console.log('promises', promises)
-      Promise.all(promises).then((_) => {
-        process.stdout.write('\n')
-        resolve(_)
-      })
-    }) // glob
+
+      return resolve(files)
+    })
   })
 }
 
-// Connection URL
-const url = 'mongodb://root:root@localhost:27017'
-// Database Name
-const dbName = 'solar-watcher'
-const client = new MongoClient(url)
+const NOT_COUNT_COLUMN_INDEXES = [0, 17, 18, 19]
+function handleArrayOfLogToCount(data) {
+  const result = new Array(22)
+  result.fill(0)
 
-function getFieldsToProcess(cb) {
-  paramsArrayMap.forEach((_, index) => {
-    if (![0, 17].includes(index)) {
-      cb(_)
-    }
+  const [startTime] = data[0]
+  result[0] = startTime
+
+  data.forEach((_) => {
+    _.forEach((d, i) => {
+      if (NOT_COUNT_COLUMN_INDEXES.includes(i)) {
+        // result[i] += d
+      } else {
+        result[i] += d
+      }
+    })
   })
+
+  for (let i = 0; i < 22; i += 1) {
+    if (NOT_COUNT_COLUMN_INDEXES.includes(i)) continue
+    result[i] = Number.parseFloat(Big(result[i]).div(data.length).toFixed(2))
+  }
+
+  lowdb.get('logs')
+    .push(result)
+    .write()
+
+  return result
 }
+
+const PERIOD_IN_MINUTES = 5
 
 async function main() {
   console.time('took')
-  // Use connect method to connect to the server
-  await client.connect()
-  console.log('Connected successfully to server')
-  const db = client.db(dbName)
-  const collection = db.collection('logs')
+  console.log('current mode is', MODE)
+  // await loadLogFromServer()
 
-  // try {
-  //   await collection.drop()
-  // } catch (_) {
-  //   console.error(_)
-  // }
-
-  console.log('copy log from server')
-  await loadLogFromServer()
-
-  console.log('parsing log to db')
-  await startParsingLog(collection)
-
-  // await startParsingLog(collection)
-  let first
-
-  if (MODE === 'renew') {
-    first = await collection.find({
-      // acOutputActivePower: {
-      //   $ne: 0,
-      // },
-    }).sort({
-      time: 1,
-    }).limit(1).toArray()
-  } else {
-    // start from last one
-    first = await collection.find({
-    }).sort({
-      time: -1,
-    }).limit(1).toArray()
-  }
-
-  if (!first) {
-    return
-  }
-
-  console.log('first', first)
-
-  let startTime = first[0].time
-  let next
-
-  do {
-    const start = dayjs(startTime).toDate()
-    const periodTime = dayjs(startTime).startOf('minute')
-    const end = periodTime.add(5, 'minute').toDate()
-
-    next = await collection.find({
-      time: {
-        $gte: start,
-        $lte: end,
-      },
-    }).toArray()
-    const new_document = {
-      timestamp: periodTime.toDate(),
-      // acOutputActivePower: new Big(0),
-      // pvInputPower: new Big(0),
-    }
-
-    getFieldsToProcess((_) => {
-      new_document[_] = new Big(0)
-    })
-    // paramsArrayMap.forEach((_, index) => {
-    //   if (![0, 17].includes(index)) {
-    //     new_document[_] = new Big(0)
-    //   }
-    // })
-
-    let dataLength = next.length
-
-    next.forEach((n) => {
-      // console.log('n.acOutputActivePower', n)
-      try {
-        getFieldsToProcess((_) => {
-          new_document[_] = new_document[_].plus(n[_])
-        })
-      } catch (error) {
-        dataLength -= 1
+  const files = await getLogList()
+  for (const file of files) {
+    console.log('handling', file)
+    const contents = fs.readFileSync(file, 'utf-8').split('\n')
+    let d1
+    let d2
+    let arrayOfLogToCount = []
+    // let counter = 0
+    for (const c of contents) {
+      // counter += 1
+      const log = parseLog(c)
+      if (!d1) {
+        // get perfect!
+        if (dayjs(log[0]).get('minutes') % PERIOD_IN_MINUTES !== 0) {
+          continue
+        }
+        d1 = dayjs(log[0])
+        console.log('start from', d1.toDate())
       }
-    })
 
-    getFieldsToProcess((_) => {
-      new_document[_] = new Big(new_document[_]
-        .div(dataLength || 1)
-        .toFixed(0))
-        .toNumber()
-    })
+      d2 = dayjs(log[0])
 
-    const params = [
-      new_document.timestamp.valueOf(),
-      0,
-      0,
-      new_document.acOutputVoltage || 0,
-      new_document.acOutputFrequency || 0,
-      0,
-      new_document.acOutputActivePower || 0,
-      new_document.acOutputLoad || 0,
-      0,
-      new_document.batteryVoltage || 0,
-      new_document.batteryChargingCurrent || 0,
-      new_document.batteryCapacity || 0,
-      new_document.heatSinkTemp || 0,
-      new_document.pvInputCurrent || 0,
-      new_document.pvInputVoltage || 0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      new_document.pvInputPower || 0,
-    ]
+      if (log) {
+        arrayOfLogToCount.push(log)
+        const output = `handling ${d2.toDate()}\r`
 
-    lowdb.get('logs')
-      .push(params)
-      .write()
+        // console.log(output)
+        // process.stdout.write(output)
+      }
 
-    // console.log('Inserted documents =>', JSON.stringify(params))
+      const diff = d2.diff(d1, 'minutes')
+      // console.log('Diff:', diff, d1.toDate(), d2.toDate())
 
-    process.stdout.write(`Inserted ${startTime} ${JSON.stringify(params)}\r`)
+      // process.stdout.write(`Diff: ${d1.diff(d2, 'minutes')}`)
 
-    startTime = end
-  } while (dayjs(startTime).isBefore(dayjs()))
+      if (diff >= PERIOD_IN_MINUTES) {
+        // console.log('yee')
+        // console.log("d2.diff(d1, 'minute')", d2.diff(d1, 'minute'), d1.toDate(), d2.toDate())
+        // console.log(arrayOfLogToCount)
+        handleArrayOfLogToCount(arrayOfLogToCount)
 
-  process.stdout.write('\n')
+        // reset
+        arrayOfLogToCount = []
+        d1 = dayjs(log[0])
+      }
+
+      // if (counter >= 300) break
+    }
+  }
   console.timeEnd('took')
-  return 'done.'
 }
 
 main()
-  .then((_) => {
-    console.log(_)
-    process.exit()
-  })
   .catch(console.error)

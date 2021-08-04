@@ -348,7 +348,6 @@ export default {
           for (let index = 0; index < this.chartOptions.series.length; index += 1) {
             const { className } = this.chartOptions.series[index]
             const v = d[paramsArrayMap.indexOf(className)] || 0
-            // console.log(t, v)
             this.chartOptions.series[index].data.push([t, v])
 
             // this.chartOptions.series[index].update()

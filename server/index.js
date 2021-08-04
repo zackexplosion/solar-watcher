@@ -38,14 +38,14 @@ function setupLogReader() {
     try {
       parser.parseLine(line, (log) => {
         const data = parseLog(log)
-        if (data) {
-          if (cacheData.length >= MAX_CACHE_POINTS) {
-            cacheData.shift()
-          }
+        if (!data) return
 
-          cacheData.push(data)
-          io.emit('updateLiveChart', data)
+        if (cacheData.length >= MAX_CACHE_POINTS) {
+          cacheData.shift()
         }
+
+        cacheData.push(data)
+        io.emit('updateLiveChart', data)
       })
     } catch (error) {
       console.error(error)
