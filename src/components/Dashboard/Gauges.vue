@@ -4,6 +4,8 @@
 
 <script>
 import { RadialGauge } from 'canvas-gauges'
+import dayjs from 'dayjs'
+import Big from 'big.js'
 
 export default {
   name: 'Gauges',
@@ -13,13 +15,23 @@ export default {
     // })
     const { socket } = this.$store.state
 
+    const g_powerGeneratedToday = this.createGauge({
+      majorTicks: [0, 5, 10, 15],
+      units: '度',
+      minValue: 0,
+      maxValue: 15,
+      valueInt: 1,
+      valueDec: 2,
+      title: '今日已發電',
+    })
+
     const g_pvInputPower = this.createGauge({
       majorTicks: [0, 500, 1000, 1500, 2000, 2500, 3000],
       units: 'Watt',
       value: 0,
       minValue: 0,
       maxValue: 3000,
-      title: '發電量',
+      title: '即時發電量',
     })
 
     const g_acOutputActivePower = this.createGauge({
@@ -68,13 +80,14 @@ export default {
       title: '電池電壓',
     })
 
-    const gauges = [
-      'gridVoltage',
-      'acOutputActivePower',
-      'acOutputVoltage',
-      'pvInputPower',
-      'batteryVoltage',
-    ]
+    // const gauges = [
+    //   'gridVoltage',
+    //   'acOutputActivePower',
+    //   'acOutputVoltage',
+    //   'pvInputPower',
+    //   'batteryVoltage',
+    //   'powerGeneratedToday',
+    // ]
 
     function setupGauge(data) {
       const [
@@ -101,6 +114,13 @@ export default {
       g_batteryVoltage.value = batteryVoltage
       g_pvInputVoltage.value = pvInputVoltage
 
+      // update powerGenerated
+      if (pvInputPower) {
+        let powerGenerated = Big(pvInputPower).div(3600).div(1000).toNumber()
+        powerGenerated = Number.parseFloat(powerGenerated.toFixed(2))
+        g_powerGeneratedToday.value += powerGenerated
+      }
+
       document.querySelectorAll('.gauges canvas').forEach((_) => _.removeAttribute('style'))
     }
 
@@ -112,13 +132,31 @@ export default {
     socket.on('updateLiveChart', (data) => {
       setupGauge(data)
     })
+
+    let powerGeneratedToday = Big(0)
+    socket.on('setChartData', (data) => {
+      // console.time('count pv power')
+      const d1 = dayjs().startOf('date')
+      data.forEach((_) => {
+        const d2 = dayjs(_[0])
+        const diff = d2.diff(d1)
+        if (diff < 0) return
+        const pvInput = Big(_[20]).div(12).div(1000)
+        powerGeneratedToday = powerGeneratedToday.plus(pvInput)
+      })
+
+      // console.timeEnd('count pv power')
+      powerGeneratedToday = Number.parseFloat(powerGeneratedToday.toFixed(2))
+      // console.log('powerGeneratedToday', powerGeneratedToday)
+      g_powerGeneratedToday.value = powerGeneratedToday
+    })
   },
   data: () => ({
 
   }),
   methods: {
     createGauge(options = {}) {
-      let size = 640
+      let size = 400
 
       if (window.innerWidth <= size) {
         size = window.innerWidth - 30
@@ -186,7 +224,7 @@ export default {
   }
   .gauges canvas{
     max-width: 320px;
-    width: 25%;
+    width: 20%;
     flex-grow: 1;
   }
 }

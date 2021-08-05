@@ -60,8 +60,10 @@ io.on('connection', (socket) => {
   console.log('a user connected', socket.id, new Date())
 
   socket.on('getChartData', () => {
+    // prevent cache
+    lowdb.read()
     const logs = lowdb.get('logs').value()
-    console.log('logs', logs.length)
+    console.log('logs read', logs.length)
     if (logs.length > 0) {
       socket.emit('setChartData', logs)
     }
@@ -126,8 +128,8 @@ exec(`tail -n ${MAX_CACHE_POINTS} ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, asy
         '00010101',
         0,
         0,
-        0,
-        40 + (Number.parseFloat(Math.random() * 10) + 1),
+        1000 + (Number.parseFloat(Math.random() * 10) + 1),
+        1000 + (Number.parseFloat(Math.random() * 10) + 1),
       ]
 
       if (cacheData.length >= MAX_CACHE_POINTS) {
