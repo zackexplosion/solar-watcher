@@ -73,9 +73,9 @@ function handleArrayOfLogToCount(data) {
   return result
 }
 
-const last_log = lowdb.get('logs').last().value()
-
 function handleFile(file) {
+  lowdb.read()
+  const last_log = lowdb.get('logs').last().value()
   console.log('handling', file)
   const contents = fs.readFileSync(file, 'utf-8').split('\n')
   let d1

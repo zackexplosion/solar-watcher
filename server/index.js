@@ -95,7 +95,6 @@ exec(`tail -n ${MAX_CACHE_POINTS} ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, asy
   }
 
   cacheData.reverse()
-  console.timeEnd('read log')
 
   setupLogReader()
 
