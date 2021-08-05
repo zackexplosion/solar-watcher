@@ -1,7 +1,7 @@
 <template>
   <div class="clock">
-    <div class="time">{{ currentTime }}</div>
     <div class="date">{{ currentDate }}</div>
+    <div class="time">{{ currentTime }}</div>
   </div>
 </template>
 <script>
@@ -42,6 +42,7 @@ export default {
 
 <style lang="scss" scoped>
 .clock {
+  display: none;
   text-align: center;
   /* background: black; */
   /* position: absolute;
@@ -58,6 +59,7 @@ export default {
 
 @media  (min-width: 768px) {
   .clock {
+    display: block;
     padding: 0;
     font-size: 60px;
     .time,

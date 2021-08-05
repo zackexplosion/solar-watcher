@@ -60,6 +60,7 @@ export default {
     liveMode: false,
     updateArgs: [true, true],
     chartOptions: {
+      panning: true,
       time: {
         timezoneOffset: new Date().getTimezoneOffset(),
       },
@@ -75,7 +76,7 @@ export default {
         type: 'datetime',
         events: {
           afterSetExtremes(e) {
-            console.log(e)
+            // console.log(e)
           },
         },
       },
@@ -127,36 +128,36 @@ export default {
               },
             },
           },
-          {
-            type: 'hour',
-            count: 1,
-            text: '1h',
-            events: {
-              click() {
-                this.liveMode = false
-              },
-            },
-          },
-          {
-            type: 'hour',
-            count: 4,
-            text: '4h',
-            events: {
-              click() {
-                this.liveMode = false
-              },
-            },
-          },
-          {
-            type: 'hour',
-            count: 12,
-            text: '12h',
-            events: {
-              click() {
-                this.liveMode = false
-              },
-            },
-          },
+          // {
+          //   type: 'hour',
+          //   count: 1,
+          //   text: '1h',
+          //   events: {
+          //     click() {
+          //       this.liveMode = false
+          //     },
+          //   },
+          // },
+          // {
+          //   type: 'hour',
+          //   count: 4,
+          //   text: '4h',
+          //   events: {
+          //     click() {
+          //       this.liveMode = false
+          //     },
+          //   },
+          // },
+          // {
+          //   type: 'hour',
+          //   count: 12,
+          //   text: '12h',
+          //   events: {
+          //     click() {
+          //       this.liveMode = false
+          //     },
+          //   },
+          // },
           {
             type: 'day',
             count: 1,
@@ -192,7 +193,7 @@ export default {
             text: 'All',
           }],
         inputEnabled: false, // it supports only days
-        selected: 3, // 15m
+        selected: 1, // 1d
       },
       tooltip: {
         shape: 'square',
@@ -200,6 +201,7 @@ export default {
         borderWidth: 0,
         shadow: false,
         valueDecimals: 1,
+        followTouchMove: false,
         positioner(width, height, point) {
           const { chart } = this;
           let position;

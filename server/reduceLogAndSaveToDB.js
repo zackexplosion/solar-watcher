@@ -76,7 +76,9 @@ function handleArrayOfLogToCount(data) {
 function handleFile(file) {
   lowdb.read()
   const last_log = lowdb.get('logs').last().value()
+  const start_date = dayjs(last_log[0])
   console.log('handling', file)
+  console.log('start from', start_date.toDate())
   const contents = fs.readFileSync(file, 'utf-8').split('\n')
   let d1
   let d2
@@ -91,7 +93,6 @@ function handleFile(file) {
         continue
       }
       d1 = dayjs(log[0])
-      console.log('start from', d1.toDate())
     }
 
     if (log) {
