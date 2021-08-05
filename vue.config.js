@@ -1,5 +1,6 @@
 if (process.env.NODE_ENV !== 'production') {
   const app = require('./server/index.js')
+  console.log('app loaded', app)
 }
 module.exports = {
   devServer: {

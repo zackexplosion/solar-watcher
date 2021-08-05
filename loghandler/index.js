@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable no-continue */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
@@ -6,7 +7,12 @@ const fs = require('fs')
 const dayjs = require('dayjs')
 const Big = require('big.js')
 
-const MODE = process.env.MODE || 'renew'
+const MODES = {
+  RENEW: 'RENEW',
+  APPEND: 'APPEND',
+}
+
+const MODE = process.env.MODE || MODES.RENEW
 
 const low = require('lowdb')
 const FileSync = require('lowdb/adapters/FileSync')
@@ -17,7 +23,7 @@ const lowdb = low(new FileSync('db.json'))
 lowdb.defaults({ logs: [] })
   .write()
 
-if (MODE === 'renew') {
+if (MODE === MODES.RENEW) {
 // reset
   lowdb.get('logs')
     .remove((x) => x)
@@ -36,7 +42,7 @@ const promiseExec = util.promisify(exec);
 async function loadLogFromServer() {
   console.log('copy log from server')
   let log_path = SERVER_LOG_URI
-  if (MODE === 'renew') {
+  if (MODE === MODES.RENEW) {
     log_path = SERVER_LOG_URI_RENEW
     try {
       await promiseExec(`rm -rf ${path.join(__dirname, 'solar*')}`)
@@ -51,7 +57,7 @@ async function loadLogFromServer() {
         return reject(error)
       }
 
-      if (MODE === 'renew') {
+      if (MODE === MODES.RENEW) {
         exec(`gunzip -d ${__dirname}/solar*.gz`, (_error, _stdout, _stderr) => {
           if (_error) {
             return reject(_error)
@@ -94,7 +100,7 @@ function getLogList() {
 }
 
 const NOT_COUNT_COLUMN_INDEXES = [0, 17, 18, 19]
-const PERIOD_IN_MINUTES = 15
+const PERIOD_IN_MINUTES = 5
 const DATA_LENGTH = 21
 
 function handleArrayOfLogToCount(data) {
@@ -146,6 +152,8 @@ function handleArrayOfLogToCount(data) {
   return result
 }
 
+const last_log = lowdb.get('logs').last().value()
+
 function handleFile(file) {
   console.log('handling', file)
   const contents = fs.readFileSync(file, 'utf-8').split('\n')
@@ -154,8 +162,8 @@ function handleFile(file) {
   let arrayOfLogToCount = []
   // let counter = 0
   for (const c of contents) {
-    // counter += 1
     const log = parseLog(c)
+    // counter += 1
     if (!d1) {
       // get perfect!
       if (dayjs(log[0]).get('minutes') % PERIOD_IN_MINUTES !== 0) {
@@ -166,12 +174,20 @@ function handleFile(file) {
     }
 
     if (log) {
-      arrayOfLogToCount.push(log)
       d2 = dayjs(log[0])
-      // const output = `handling ${d2.toDate()}\r`
 
-      // console.log(output)
-      // process.stdout.write(output)
+      // skip old data
+      if (MODE === MODES.APPEND) {
+        const dd = dayjs(last_log[0])
+        const diff = d2.diff(dd, 'second')
+        // console.log('_diff', diff)
+
+        if (diff < 0) {
+          continue
+        }
+      }
+
+      arrayOfLogToCount.push(log)
       const diff = d2.diff(d1, 'minutes')
 
       if (diff >= PERIOD_IN_MINUTES) {
@@ -182,8 +198,6 @@ function handleFile(file) {
         d1 = dayjs(log[0])
       }
     }
-
-    // if (counter >= 300) break
   }
 }
 
@@ -193,9 +207,15 @@ async function main() {
   await loadLogFromServer()
 
   const files = await getLogList()
-  for (const file of files) {
-    handleFile(file)
+
+  if (MODE === MODES.RENEW) {
+    for (const file of files) {
+      handleFile(file)
+    }
+  } else {
+    handleFile(files[files.length - 1])
   }
+
   console.timeEnd('took')
 }
 

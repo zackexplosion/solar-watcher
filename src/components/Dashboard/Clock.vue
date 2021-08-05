@@ -1,12 +1,16 @@
 <template>
   <div class="clock">
-  {{ theTime }}
+    <div class="time">{{ currentTime }}</div>
+    <div class="date">{{ currentDate }}</div>
   </div>
 </template>
 <script>
+import dayjs from 'dayjs'
+
 export default {
   data: () => ({
-    theTime: null,
+    currentDate: null,
+    currentTime: null,
     timer: null,
   }),
   props: {
@@ -26,29 +30,9 @@ export default {
   },
   methods: {
     getTime() {
-      const date = new Date()
-      let h = date.getHours() // 0 - 23
-      let m = date.getMinutes() // 0 - 59
-      let s = date.getSeconds() // 0 - 59
-      // const session = 'AM'
-
-      if (h === 0) {
-        h = 12
-      }
-
-      // if (h > 12) {
-      //   h -= 12;
-      //   session = 'PM'
-      // }
-
-      h = (h < 10) ? `0${h}` : h
-      m = (m < 10) ? `0${m}` : m
-      s = (s < 10) ? `0${s}` : s
-
-      // const time = `${h}:${m}`
-      // const time = `${session} ${h}:${m}:${s}`
-      const time = `${h}:${m}:${s}`
-      this.theTime = time
+      const date = dayjs()
+      this.currentDate = date.format('YYYY.MM.DD')
+      this.currentTime = date.format('h:mm:ss A')
 
       this.clockTimeout = setTimeout(this.getTime, 1000)
     },
@@ -56,7 +40,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .clock {
   text-align: center;
   /* background: black; */
@@ -69,13 +53,18 @@ export default {
   /* font-family: 'Inconsolata', monospace; */
   font-weight: bold;
   letter-spacing: 7px;
-  padding: 1em 0;
+  padding: 0.5em 0;
 }
 
 @media  (min-width: 768px) {
   .clock {
     padding: 0;
     font-size: 60px;
+    .time,
+    .date {
+      display: inline-block;
+      margin-right: 1em;
+    }
   }
 }
 </style>
