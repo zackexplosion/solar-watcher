@@ -15,7 +15,6 @@
     "express": "^4.17.1",
     "lowdb": "^1.0.0",
     "mongodb": "^4.0.1",
-    "nginxparser": "^2.1.0",
     "nodejs-tail": "^1.1.1",
     "register-service-worker": "^1.7.1",
     "socket.io": "^4.0.1",

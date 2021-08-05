@@ -167,34 +167,29 @@ export default {
               },
             },
           },
-          {
-            type: 'month',
-            count: 1,
-            text: '1m',
-            events: {
-              click() {
-                this.liveMode = false
-              },
-            },
-          },
-          {
-            type: 'year',
-            count: 1,
-            text: '1y',
-            events: {
-              click() {
-                this.liveMode = false
-              },
-            },
-          },
+          // {
+          //   type: 'month',
+          //   count: 1,
+          //   text: '1m',
+          //   events: {
+          //     click() {
+          //       this.liveMode = false
+          //     },
+          //   },
+          // },
+          // {
+          //   type: 'year',
+          //   count: 1,
+          //   text: '1y',
+          //   events: {
+          //     click() {
+          //       this.liveMode = false
+          //     },
+          //   },
+          // },
           {
             type: 'all',
             text: 'All',
-            events: {
-              click() {
-                this.liveMode = false
-              },
-            },
           }],
         inputEnabled: false, // it supports only days
         selected: 3, // 15m

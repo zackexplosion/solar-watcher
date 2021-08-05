@@ -19,10 +19,8 @@ const server = http.createServer(app)
 const io = require('socket.io')(server)
 
 // for log reader
-const NginxParser = require('nginxparser')
 const { exec } = require('child_process')
 
-const parser = new NginxParser('$remote_addr - - [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"')
 const Tail = require('nodejs-tail')
 
 const parseLog = require('./parseLog')
@@ -36,17 +34,15 @@ function setupLogReader() {
 
   tail.on('line', async (line) => {
     try {
-      parser.parseLine(line, (log) => {
-        const data = parseLog(log)
-        if (!data) return
+      const data = parseLog(line)
+      if (!data) return
 
-        if (cacheData.length >= MAX_CACHE_POINTS) {
-          cacheData.shift()
-        }
+      if (cacheData.length >= MAX_CACHE_POINTS) {
+        cacheData.shift()
+      }
 
-        cacheData.push(data)
-        io.emit('updateLiveChart', data)
-      })
+      cacheData.push(data)
+      io.emit('updateLiveChart', data)
     } catch (error) {
       console.error(error)
     }
@@ -92,24 +88,11 @@ exec(`tail -n ${MAX_CACHE_POINTS} ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, asy
   // const promises = []
   for (let index = cacheLogs.length - 1; index >= 0; index -= 1) {
     const line = cacheLogs[index]
-    parser.parseLine(line, (log) => {
-      const data = parseLog(log)
-      // console.log(data)
-      if (data) {
-        cacheData.push(data)
-      }
-    })
+    const data = parseLog(line)
+    if (data) {
+      cacheData.push(data)
+    }
   }
-
-  // try {
-  //   const data = await Promise.all(promises)
-  //   console.log(data)
-  //   if (data) {
-  //     cacheData.push(data)
-  //   }
-  // } catch (err) {
-  //   console.error(err)
-  // }
 
   cacheData.reverse()
   console.timeEnd('read log')
@@ -125,17 +108,17 @@ exec(`tail -n ${MAX_CACHE_POINTS} ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, asy
     setInterval(() => {
       const data = [
         new Date().getTime(), // timestamp
-        224.7 + (parseInt(Math.random() * 10) + 1),
+        224.7 + (Number.parseFloat(Math.random() * 10) + 1),
         60,
-        224.7 + (parseInt(Math.random() * 10) + 1),
+        224.7 + (Number.parseFloat(Math.random() * 10) + 1),
         60,
-        1078 + (parseInt(Math.random() * 100) + 1),
-        958 + (parseInt(Math.random() * 100) + 1),
+        1078 + (Number.parseFloat(Math.random() * 100) + 1),
+        958 + (Number.parseFloat(Math.random() * 100) + 1),
         21,
-        374 + (parseInt(Math.random() * 10) + 1),
-        49.2 + (parseInt(Math.random() * 10) + 1),
+        374 + (Number.parseFloat(Math.random() * 10) + 1),
+        49.2 + (Number.parseFloat(Math.random() * 10) + 1),
         0,
-        40 + (parseInt(Math.random() * 10) + 1),
+        40 + (Number.parseFloat(Math.random() * 10) + 1),
         38,
         0,
         0,
@@ -145,7 +128,7 @@ exec(`tail -n ${MAX_CACHE_POINTS} ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, asy
         0,
         0,
         0,
-        1,
+        40 + (Number.parseFloat(Math.random() * 10) + 1),
       ]
 
       if (cacheData.length >= MAX_CACHE_POINTS) {

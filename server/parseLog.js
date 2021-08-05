@@ -1,6 +1,7 @@
 const VALID_ID_LIST = process.env.SERVER_VALID_ID_LIST.split(',').map((_) => _.trim()) || []
 const dayjs = require('dayjs')
 const paramMapV1 = require('./paramMap')
+const paramsArrayMap = require('./paramsArrayMap')
 
 function parseLogV1(raw_params) {
   const output = {}
@@ -33,7 +34,7 @@ function parseLog(row) {
   const d = m[1].split(':')
   const r = m[2]
   // const r = row.request.split(' ')
-
+  const NOT_COUNT_COLUMN_INDEXES = [17, 18, 19]
   const timestamp = dayjs(`${d[0]} ${d[1]}:${d[2]}:${d[3]}`, 'DD/MMM/YY HH:mm:ss ZZ')
   // const timestamp = dayjs(m[1], 'DD/MMM/YY HH:mm:ss ZZ')
   const raw_params = new URL(`http://local/?${r}`).searchParams
@@ -44,33 +45,48 @@ function parseLog(row) {
     return false
   }
 
-  let params = []
-  const dataParam = raw_params.get('data')
+  let params = Array(21)
+  params.fill(0)
+  let dataParam = raw_params.get('data')
   if (dataParam) {
-    // if (dataParam[0] !== '2') {
-    //   dataParam = dataParam.slice(1)
-    // }
-
-    // console.log(dataParam)
+    dataParam = dataParam.split(',')
+    // console.log(dataParam.length)
+    if (dataParam.length !== 21) {
+      return false
+    }
 
     params = [
       timestamp.valueOf(),
-      ...dataParam.split(',').map((_, index) => {
-        if (index !== 16) { // skip the flags column
-          const mm = _.match(/[\d]+\.[\d]+/)
-          if (mm) {
-            return parseFloat(m[0]) || 0
-          }
-          return parseFloat(_) || 0
-        }
-
-        return _
-      }),
     ]
-    // console.log(params)
 
-    if (params.length !== 22) {
-      return false
+    // console.log(params, JSON.stringify(dataParam))
+
+    // params[1] = dataParam[0]
+    // params[2] = dataParam[1]
+
+    for (let i = 1; i < paramsArrayMap.length; i += 1) {
+      const v = dataParam[i - 1]
+      if (!NOT_COUNT_COLUMN_INDEXES.includes(i) && v) {
+        const mm = v.match(/[\d]+\.[\d]+/)
+        // console.log(mm)
+        if (mm) {
+          params[i] = parseFloat(mm[0]) || 0
+        } else {
+          params[i] = v
+        }
+      } else {
+        params[i] = v
+      }
+
+      // else {
+      // // const index = index + 1
+      //   const mm = dataParam[i - 1].match(/[\d]+\.[\d]+/)
+
+      //   if (mm) {
+      //     const data = parseFloat(m[0]) || 0
+      //     params[i] = data
+      //   }
+      // }
     }
   } else {
     const _ = parseLogV1(raw_params)

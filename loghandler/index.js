@@ -29,7 +29,6 @@ const { exec } = require('child_process')
 const glob = require('glob')
 const util = require('util');
 const path = require('path')
-const paramsArrayMap = require('../server/paramsArrayMap')
 const parseLog = require('../server/parseLog')
 
 const promiseExec = util.promisify(exec);
@@ -95,90 +94,107 @@ function getLogList() {
 }
 
 const NOT_COUNT_COLUMN_INDEXES = [0, 17, 18, 19]
-function handleArrayOfLogToCount(data) {
-  const result = new Array(22)
-  result.fill(0)
+const PERIOD_IN_MINUTES = 15
+const DATA_LENGTH = 21
 
-  const [startTime] = data[0]
-  result[0] = startTime
+function handleArrayOfLogToCount(data) {
+  // create result array and fill with zero as default values
+  const result = new Array(DATA_LENGTH)
+  result.fill(Big(0))
+  // set default values
+  NOT_COUNT_COLUMN_INDEXES.forEach((_) => {
+    result[_] = data[0][_]
+  })
+
+  const processed_data_count = data.length
 
   data.forEach((_) => {
     _.forEach((d, i) => {
-      if (NOT_COUNT_COLUMN_INDEXES.includes(i)) {
+      if (!NOT_COUNT_COLUMN_INDEXES.includes(i)) {
         // result[i] += d
-      } else {
-        result[i] += d
+
+        try {
+          result[i] = result[i].plus(d)
+        } catch (error) {
+          // console.error(error)
+          // console.log('data', _)
+          // processed_data_count -= 1
+        }
       }
     })
   })
 
-  for (let i = 0; i < 22; i += 1) {
-    if (NOT_COUNT_COLUMN_INDEXES.includes(i)) continue
-    result[i] = Number.parseFloat(Big(result[i]).div(data.length).toFixed(2))
-  }
+  try {
+    for (let i = 0; i < DATA_LENGTH; i += 1) {
+      if (NOT_COUNT_COLUMN_INDEXES.includes(i)) continue
+      const n = result[i]
+      if (!Number.isNaN(n)) {
+        result[i] = Number.parseFloat(Big(n).div(processed_data_count).toFixed(2))
+      }
+    }
 
-  lowdb.get('logs')
-    .push(result)
-    .write()
+    lowdb.get('logs')
+      .push(result)
+      .write()
+  } catch (error) {
+    console.error(error)
+    console.error(JSON.stringify(result))
+    console.error(dayjs(data[0]).toDate())
+    // console.error(data)
+  }
 
   return result
 }
 
-const PERIOD_IN_MINUTES = 5
-
-async function main() {
-  console.time('took')
-  console.log('current mode is', MODE)
-  // await loadLogFromServer()
-
-  const files = await getLogList()
-  for (const file of files) {
-    console.log('handling', file)
-    const contents = fs.readFileSync(file, 'utf-8').split('\n')
-    let d1
-    let d2
-    let arrayOfLogToCount = []
-    // let counter = 0
-    for (const c of contents) {
-      // counter += 1
-      const log = parseLog(c)
-      if (!d1) {
-        // get perfect!
-        if (dayjs(log[0]).get('minutes') % PERIOD_IN_MINUTES !== 0) {
-          continue
-        }
-        d1 = dayjs(log[0])
-        console.log('start from', d1.toDate())
+function handleFile(file) {
+  console.log('handling', file)
+  const contents = fs.readFileSync(file, 'utf-8').split('\n')
+  let d1
+  let d2
+  let arrayOfLogToCount = []
+  // let counter = 0
+  for (const c of contents) {
+    // counter += 1
+    const log = parseLog(c)
+    if (!d1) {
+      // get perfect!
+      if (dayjs(log[0]).get('minutes') % PERIOD_IN_MINUTES !== 0) {
+        continue
       }
+      d1 = dayjs(log[0])
+      console.log('start from', d1.toDate())
+    }
 
+    if (log) {
+      arrayOfLogToCount.push(log)
       d2 = dayjs(log[0])
+      // const output = `handling ${d2.toDate()}\r`
 
-      if (log) {
-        arrayOfLogToCount.push(log)
-        const output = `handling ${d2.toDate()}\r`
-
-        // console.log(output)
-        // process.stdout.write(output)
-      }
-
+      // console.log(output)
+      // process.stdout.write(output)
       const diff = d2.diff(d1, 'minutes')
-      // console.log('Diff:', diff, d1.toDate(), d2.toDate())
-
-      // process.stdout.write(`Diff: ${d1.diff(d2, 'minutes')}`)
 
       if (diff >= PERIOD_IN_MINUTES) {
-        // console.log('yee')
-        // console.log("d2.diff(d1, 'minute')", d2.diff(d1, 'minute'), d1.toDate(), d2.toDate())
-        // console.log(arrayOfLogToCount)
         handleArrayOfLogToCount(arrayOfLogToCount)
 
         // reset
         arrayOfLogToCount = []
         d1 = dayjs(log[0])
       }
-
-      // if (counter >= 300) break
     }
+
+    // if (counter >= 300) break
+  }
+}
+
+async function main() {
+  console.time('took')
+  console.log('current mode is', MODE)
+  await loadLogFromServer()
+
+  const files = await getLogList()
+  for (const file of files) {
+    handleFile(file)
   }
   console.timeEnd('took')
 }
