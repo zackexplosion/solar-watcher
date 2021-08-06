@@ -67,7 +67,7 @@ async function sendData(data) {
   if (fields.length > 20) {
     const output = {
       id: ID,
-      ...fields.join(','),
+      data: fields.join(','),
     }
 
     console.log('sending data', output)
