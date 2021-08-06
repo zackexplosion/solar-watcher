@@ -60,11 +60,14 @@ const sendQuery = (txt) => {
 }
 
 async function sendData(data) {
+  console.log('data', data)
   // prevent failed data
-  if (data.length > 20) {
+
+  const fields = data.slice(1).split(' ');
+  if (fields.length > 20) {
     const output = {
       id: ID,
-      ...data.join(','),
+      ...fields.join(','),
     }
 
     console.log('sending data', output)
@@ -79,7 +82,7 @@ async function sendData(data) {
 
   setTimeout(() => {
     sendQuery('QPIGS')
-  }, 1000 * 1)
+  }, 1000)
 }
 
 // parse data received from the controller
@@ -206,11 +209,9 @@ const parseQuery = (cmd, data) => {
       // (000.0 00.0 000.0 00.0 0000 0000 000 000 00.00 000
       // 000 0000 0000 000.0 00.00 00000 10101010 00 00 00000 000
       if (data === '(NAK') return '<b>QPIGS (Inverter status)</b><br />Not recognised'
-      const fields = data.slice(1).split(' ');
+      // const fields = data.slice(1).split(' ');
       // const flags = fields[16];
-      sendData({
-        data: fields,
-      })
+      sendData(data)
       // sendData({
       //   a: parseFloat(fields[5]),
       //   b: parseFloat(fields[6]),
