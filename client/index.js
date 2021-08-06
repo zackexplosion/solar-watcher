@@ -785,7 +785,15 @@ const rxData = (data) => {
 // set up serial connection
 Serialport.list().then((ports) => {
   console.log('ports', ports)
-  const port_connect_to = SERIAL_PORT_PATH || ports[0]
+  let port_connect_to
+  if (Array.isArray(ports) && ports.length > 0) {
+    port_connect_to = ports[0].path
+  }
+
+  if (SERIAL_PORT_PATH) {
+    port_connect_to = SERIAL_PORT_PATH
+  }
+
   console.log('port_connect_to', port_connect_to)
   port = new Serialport(port_connect_to, {
     baudRate: 2400,
@@ -804,6 +812,7 @@ Serialport.list().then((ports) => {
     parser.on('data', (data) => { rxData(data) })
 
     try {
+      console.log('port opend, sending query')
       sendQuery('QPIGS')
     } catch (error) {
       // do nothing , just waiting for next loop
