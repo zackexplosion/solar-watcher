@@ -5,19 +5,6 @@ const SERIAL_PORT_PATH = process.env.CLIENT_SERIAL_PORT_PATH || 'COM1'
 
 const request = require('axios')
 
-function sendData(data) {
-  const output = {
-    id: ID,
-    ...data,
-  }
-  request.get(LOGGER_URL, {
-    params: output,
-  })
-    .catch((err) => {
-      console.error(err)
-    })
-}
-
 // code from https://github.com/prajna-pranab/converse/blob/master/index.html
 const Serialport = require('serialport')
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -155,7 +142,7 @@ const parseQuery = (cmd, data) => {
       const fields = data.slice(1).split(' ');
       // const flags = fields[16];
       sendData({
-        data: fields.join(','),
+        data: fields,
       })
       // sendData({
       //   a: parseFloat(fields[5]),
@@ -770,6 +757,27 @@ const sendQuery = (txt) => {
   })
 }
 
+async function sendData(data) {
+  // prevent failed data
+  if (data.length > 20) {
+    const output = {
+      id: ID,
+      ...data.join(','),
+    }
+    try {
+      await request.get(LOGGER_URL, {
+        params: output,
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  setTimeout(() => {
+    sendQuery('QPIGS')
+  }, 1000 * 1)
+}
+
 /// ////////////////////////////// main /////////////////////
 
 // set up serial connection
@@ -792,10 +800,6 @@ Serialport.list().then((ports) => {
 
     try {
       sendQuery('QPIGS')
-
-      setInterval(() => {
-        sendQuery('QPIGS')
-      }, 1000 * 5)
     } catch (error) {
       // do nothing , just waiting for next loop
       console.error(error)
