@@ -3,12 +3,6 @@ const LOG_PATH = process.env.SERVER_LOG_PATH || './test.log'
 const PORT = process.env.PORT || 7777
 const MAX_CACHE_POINTS = process.env.MAX_CACHE_POINTS || 900
 
-const low = require('lowdb')
-const FileSync = require('lowdb/adapters/FileSync')
-
-const adapter = new FileSync('db.json')
-const lowdb = low(adapter)
-
 // main server
 const express = require('express')
 
@@ -22,6 +16,7 @@ const io = require('socket.io')(server)
 const { exec } = require('child_process')
 
 const Tail = require('nodejs-tail')
+const db = require('./db')
 
 const parseLog = require('./parseLog')
 
@@ -61,8 +56,8 @@ io.on('connection', (socket) => {
 
   socket.on('getChartData', () => {
     // prevent cache
-    lowdb.read()
-    const logs = lowdb.get('logs').value()
+    db.read()
+    const logs = db.get('logs').value()
     console.log('logs read', logs.length)
     if (logs.length > 0) {
       socket.emit('setChartData', logs)
@@ -141,8 +136,8 @@ exec(`tail -n ${MAX_CACHE_POINTS} ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, asy
     }, 1000)
   }
 })
-const reduceLogAndSaveToDB = require('./reduceLogAndSaveToDB')
+// const reduceLogAndSaveToDB = require('./reduceLogAndSaveToDB')
 
-setInterval(() => {
-  reduceLogAndSaveToDB()
-}, 1000 * 5 * 60)
+// setInterval(() => {
+//   reduceLogAndSaveToDB()
+// }, 1000 * 5 * 60)

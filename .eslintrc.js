@@ -19,6 +19,8 @@ module.exports = {
     'no-func-assign': 'off',
     'prefer-destructuring': 'warn',
     'no-unused-vars': 'warn',
+    'no-continue' : 'off',
+    'no-restricted-syntax': 'off',
     'camelcase': 'off',
     'semi': 'off'
   },
