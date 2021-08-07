@@ -156,6 +156,7 @@ export default {
       let powerGeneratedToday = Big(0)
       let powerOutputToday = Big(0)
       const d1 = dayjs().startOf('date')
+      console.log('d1', d1.format())
       data.forEach((_) => {
         const d2 = dayjs(_[0])
         const diff = d2.diff(d1)

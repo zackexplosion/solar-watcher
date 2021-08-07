@@ -5,19 +5,6 @@ const SERIAL_PORT_PATH = process.env.CLIENT_SERIAL_PORT_PATH || 'COM1'
 
 const request = require('axios')
 
-function sendData(data) {
-  const output = {
-    id: ID,
-    ...data,
-  }
-  request.get(LOGGER_URL, {
-    params: output,
-  })
-    .catch((err) => {
-      console.error(err)
-    })
-}
-
 // code from https://github.com/prajna-pranab/converse/blob/master/index.html
 const Serialport = require('serialport')
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -27,6 +14,76 @@ const parser = new Readline({ delimiter: '\r' });
 
 let port; // reference for opened coms port
 let cmd; // last command that was sent
+
+// calculate XModem CRC-16
+const CRCXModem = (str) => {
+  let crc = 0;
+  for (let c = 0; c < str.length; c++) {
+    crc ^= str.charCodeAt(c) << 8;
+    for (let i = 0; i < 8; i++) {
+      if (crc & 0x8000) { crc = (crc << 1) ^ 0x1021; } else crc <<= 1;
+    }
+  }
+  // increment crc bytes containing lf, cr and '('
+  crc &= 0xffff;
+  let msb = crc >>> 8;
+  let lsb = crc & 0xff;
+  if ([0x0a, 0x0d, 0x28].includes(msb)) {
+    msb++;
+  }
+  if ([0x0a, 0x0d, 0x28].includes(lsb)) {
+    lsb++;
+  }
+  return Uint8Array.from([msb, lsb]);
+}
+
+// send command to controller
+const sendQuery = (txt) => {
+  // convert command, crc and \r to buffer
+  const bytes = Buffer.concat([
+    Buffer.from(txt, 'utf-8'),
+    CRCXModem(txt),
+    Uint8Array.from([0x0D]),
+  ])
+
+  // save the command so the reply parser knows what it is
+  cmd = txt;
+  // update window and log
+  // document.querySelector('#sent').textContent = txt;
+  // console.log('Tx:', bytes.toString('hex'), `(${txt})`);
+  // send it
+  port.write(bytes, (err) => {
+    if (err) {
+      console.error('Writing returned:', err.message);
+    }
+  })
+}
+
+async function sendData(data) {
+  console.log('data', data)
+  // prevent failed data
+
+  const fields = data.slice(1).split(' ');
+  if (fields.length > 20) {
+    const output = {
+      id: ID,
+      data: fields.join(','),
+    }
+
+    console.log('sending data', output)
+    try {
+      await request.get(LOGGER_URL, {
+        params: output,
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  setTimeout(() => {
+    sendQuery('QPIGS')
+  }, 1000)
+}
 
 // parse data received from the controller
 const parseQuery = (cmd, data) => {
@@ -152,11 +209,9 @@ const parseQuery = (cmd, data) => {
       // (000.0 00.0 000.0 00.0 0000 0000 000 000 00.00 000
       // 000 0000 0000 000.0 00.00 00000 10101010 00 00 00000 000
       if (data === '(NAK') return '<b>QPIGS (Inverter status)</b><br />Not recognised'
-      const fields = data.slice(1).split(' ');
+      // const fields = data.slice(1).split(' ');
       // const flags = fields[16];
-      sendData({
-        data: fields.join(','),
-      })
+      sendData(data)
       // sendData({
       //   a: parseFloat(fields[5]),
       //   b: parseFloat(fields[6]),
@@ -726,55 +781,22 @@ const rxData = (data) => {
   parseQuery(cmd, body);
 }
 
-// calculate XModem CRC-16
-const CRCXModem = (str) => {
-  let crc = 0;
-  for (let c = 0; c < str.length; c++) {
-    crc ^= str.charCodeAt(c) << 8;
-    for (let i = 0; i < 8; i++) {
-      if (crc & 0x8000) { crc = (crc << 1) ^ 0x1021; } else crc <<= 1;
-    }
-  }
-  // increment crc bytes containing lf, cr and '('
-  crc &= 0xffff;
-  let msb = crc >>> 8;
-  let lsb = crc & 0xff;
-  if ([0x0a, 0x0d, 0x28].includes(msb)) {
-    msb++;
-  }
-  if ([0x0a, 0x0d, 0x28].includes(lsb)) {
-    lsb++;
-  }
-  return Uint8Array.from([msb, lsb]);
-}
-
-// send command to controller
-const sendQuery = (txt) => {
-  // convert command, crc and \r to buffer
-  const bytes = Buffer.concat([
-    Buffer.from(txt, 'utf-8'),
-    CRCXModem(txt),
-    Uint8Array.from([0x0D]),
-  ])
-
-  // save the command so the reply parser knows what it is
-  cmd = txt;
-  // update window and log
-  // document.querySelector('#sent').textContent = txt;
-  // console.log('Tx:', bytes.toString('hex'), `(${txt})`);
-  // send it
-  port.write(bytes, (err) => {
-    if (err) {
-      console.error('Writing returned:', err.message);
-    }
-  })
-}
-
 /// ////////////////////////////// main /////////////////////
 
 // set up serial connection
 Serialport.list().then((ports) => {
-  port = new Serialport(SERIAL_PORT_PATH, {
+  console.log('ports', ports)
+  let port_connect_to
+  if (Array.isArray(ports) && ports.length > 0) {
+    port_connect_to = ports[0].path
+  }
+
+  if (SERIAL_PORT_PATH) {
+    port_connect_to = SERIAL_PORT_PATH
+  }
+
+  console.log('port_connect_to', port_connect_to)
+  port = new Serialport(port_connect_to, {
     baudRate: 2400,
   })
 
@@ -791,11 +813,8 @@ Serialport.list().then((ports) => {
     parser.on('data', (data) => { rxData(data) })
 
     try {
+      console.log('port opend, sending query')
       sendQuery('QPIGS')
-
-      setInterval(() => {
-        sendQuery('QPIGS')
-      }, 1000 * 5)
     } catch (error) {
       // do nothing , just waiting for next loop
       console.error(error)
