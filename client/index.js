@@ -42,6 +42,7 @@ const CRCXModem = (str) => {
 
 // send command to controller
 const sendQuery = (txt) => {
+  d1 = new Date().getTime()
   // convert command, crc and \r to buffer
   const bytes = Buffer.concat([
     Buffer.from(txt, 'utf-8'),
@@ -63,7 +64,8 @@ const sendQuery = (txt) => {
 }
 
 async function sendData(data) {
-  console.log(new Date().getTime(), 'data', data)
+  // console.log(new Date().toString(), 'data', data)
+  console.log('sending data', data)
   // prevent failed data
 
   const fields = data.slice(1).split(' ');
@@ -85,12 +87,13 @@ async function sendData(data) {
 
   d2 = new Date().getTime()
   const diff = d2 - d1
-  if (diff > 1000 * 1000) {
+  // console.log('query took', diff, 'ms run next query in', 1000 - diff, 'ms')
+  if (diff > 1000) {
     sendQuery('QPIGS')
   } else {
     setTimeout(() => {
       sendQuery('QPIGS')
-    }, diff)
+    }, 1000 - diff)
   }
 }
 
@@ -823,7 +826,6 @@ Serialport.list().then((ports) => {
 
     try {
       console.log('port opend, sending query')
-      d1 = new Date().getTime()
       sendQuery('QPIGS')
     } catch (error) {
       // do nothing , just waiting for next loop
