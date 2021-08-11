@@ -39,6 +39,7 @@ export default {
       majorTicks: [0, 500, 1000, 1500, 2000, 2500, 3000],
       units: 'Watt',
       value: 0,
+      valueDec: 0,
       minValue: 0,
       maxValue: 3000,
       title: '即時發電',
@@ -48,6 +49,7 @@ export default {
       majorTicks: [0, 500, 1000, 1500, 2000, 2500, 3000],
       units: 'Watt',
       value: 0,
+      valueDec: 0,
       minValue: 0,
       maxValue: 3000,
       title: '即時負載',
@@ -141,13 +143,14 @@ export default {
       if (pvInputPower) {
         let powerGenerated = Big(pvInputPower).div(3600).div(1000).toNumber()
         powerGenerated = Number.parseFloat(powerGenerated.toFixed(2))
-        g_powerGeneratedToday.value += powerGenerated
+        g_powerGeneratedToday.value = Number.parseFloat(g_powerGeneratedToday.value)
+        + powerGenerated
       }
 
       if (acOutputActivePower) {
         let p = Big(acOutputActivePower).div(3600).div(1000).toNumber()
         p = Number.parseFloat(p.toFixed(2))
-        g_powerOutputToday.value += p
+        g_powerOutputToday.value = Number.parseFloat(g_powerOutputToday.value) + p
       }
     })
 
