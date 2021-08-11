@@ -1,7 +1,7 @@
 // env
 const ID = process.env.CLIENT_ID || 'YOLO'
 const LOGGER_URL = process.env.CLIENT_LOGGER_URL || 'http://localhost:7788'
-const SERIAL_PORT_PATH = process.env.CLIENT_SERIAL_PORT_PATH || 'COM1'
+const SERIAL_PORT_PATH = process.env.CLIENT_SERIAL_PORT_PATH
 
 const request = require('axios')
 
@@ -14,6 +14,9 @@ const parser = new Readline({ delimiter: '\r' });
 
 let port; // reference for opened coms port
 let cmd; // last command that was sent
+
+let d1
+let d2
 
 // calculate XModem CRC-16
 const CRCXModem = (str) => {
@@ -60,7 +63,7 @@ const sendQuery = (txt) => {
 }
 
 async function sendData(data) {
-  console.log('data', data)
+  console.log(new Date().getTime(), 'data', data)
   // prevent failed data
 
   const fields = data.slice(1).split(' ');
@@ -70,7 +73,7 @@ async function sendData(data) {
       data: fields.join(','),
     }
 
-    console.log('sending data', output)
+    // console.log('sending data', output)
     try {
       await request.get(LOGGER_URL, {
         params: output,
@@ -80,9 +83,15 @@ async function sendData(data) {
     }
   }
 
-  setTimeout(() => {
+  d2 = new Date().getTime()
+  const diff = d2 - d1
+  if (diff > 1000) {
     sendQuery('QPIGS')
-  }, 1000)
+  } else {
+    setTimeout(() => {
+      sendQuery('QPIGS')
+    }, diff)
+  }
 }
 
 // parse data received from the controller
@@ -719,7 +728,7 @@ const getBuff = (str) => Buffer.concat([
   Uint8Array.from([0x0D]),
 ])
 // simulate port.write() and parser.on('data') events for testing
-fakePort = {
+const fakePort = {
   write: (buff, err) => {
     // (mostly) real data returned from Conversol 5K III (except s/n)
     switch (cmd) {
@@ -814,6 +823,7 @@ Serialport.list().then((ports) => {
 
     try {
       console.log('port opend, sending query')
+      d1 = new Date().getTime()
       sendQuery('QPIGS')
     } catch (error) {
       // do nothing , just waiting for next loop

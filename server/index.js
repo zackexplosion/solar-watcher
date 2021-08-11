@@ -136,8 +136,8 @@ exec(`tail -n ${MAX_CACHE_POINTS} ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, asy
     }, 1000)
   }
 })
-// const reduceLogAndSaveToDB = require('./reduceLogAndSaveToDB')
+const reduceLogAndSaveToDB = require('./reduceLogAndSaveToDB')
 
-// setInterval(() => {
-//   reduceLogAndSaveToDB()
-// }, 1000 * 5 * 60)
+setInterval(() => {
+  reduceLogAndSaveToDB()
+}, 1000 * 5 * 60)
