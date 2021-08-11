@@ -9,7 +9,7 @@ const MODES = require('./modes')
 const MODE = process.env.MODE || MODES.RENEW
 
 function handleFile(file, last_log) {
-  console.log('handling', file)
+  console.log('handling', file, 'with mode:', MODE)
   const contents = fs.readFileSync(file, 'utf-8').split('\n')
   let d1
   let d2
@@ -36,7 +36,7 @@ function handleFile(file, last_log) {
         const diff = d2.diff(dd, 'second')
         // console.log('_diff', diff)
 
-        if (diff < 0) {
+        if (diff <= 0) {
           continue
         }
       }

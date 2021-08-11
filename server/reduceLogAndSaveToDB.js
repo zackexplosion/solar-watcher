@@ -16,6 +16,8 @@ const handleFile = require('../loghandler/handleFile')
 
 async function main() {
   console.time('took')
+
+  lowdb.read()
   const last_log = lowdb.get('logs').last().value()
   handleFile(SERVER_LOG_PATH, last_log)
 

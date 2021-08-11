@@ -72,8 +72,10 @@ async function sendData(data) {
     const mm = f.match(/[\d]+\.[\d]+/)
     // console.log(mm)
     if (mm) {
-      fields[0] = parseFloat(mm[0]) || 0
+      fields[0] = mm[0] || 0
     }
+
+    fields[0] = parseFloat(fields[0]).toFixed(1)
   }
 
   const dataToSent = fields.join(',')
