@@ -85,7 +85,7 @@ async function sendData(data) {
 
   d2 = new Date().getTime()
   const diff = d2 - d1
-  if (diff > 1000) {
+  if (diff > 1000 * 1000) {
     sendQuery('QPIGS')
   } else {
     setTimeout(() => {
