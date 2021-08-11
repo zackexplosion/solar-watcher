@@ -64,15 +64,24 @@ const sendQuery = (txt) => {
 }
 
 async function sendData(data) {
-  // console.log(new Date().toString(), 'data', data)
-  console.log('sending data', data)
   // prevent failed data
-
   const fields = data.slice(1).split(' ');
+  {
+    const f = fields[0]
+
+    const mm = f.match(/[\d]+\.[\d]+/)
+    // console.log(mm)
+    if (mm) {
+      fields[0] = parseFloat(mm[0]) || 0
+    }
+  }
+
+  const dataToSent = fields.join(',')
+  console.log('sending data', dataToSent)
   if (fields.length > 20) {
     const output = {
       id: ID,
-      data: fields.join(','),
+      data: dataToSent,
     }
 
     // console.log('sending data', output)
