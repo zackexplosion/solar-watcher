@@ -9,11 +9,12 @@ const MODES = require('./modes')
 const MODE = process.env.MODE || MODES.RENEW
 
 function handleFile(file, last_log) {
-  console.log('handling', file, 'with mode:', MODE)
+  console.log('handling', file, 'with mode:', MODE, last_log)
   const contents = fs.readFileSync(file, 'utf-8').split('\n')
   let d1
   let d2
   let arrayOfLogToCount = []
+
   // let counter = 0
   for (const c of contents) {
     const log = parseLog(c)
@@ -33,11 +34,12 @@ function handleFile(file, last_log) {
       // skip old data
       if (MODE === MODES.APPEND) {
         const dd = dayjs(last_log[0])
-        const diff = d2.diff(dd, 'second')
-        // console.log('_diff', diff)
+        const diff = d2.diff(dd, 'minutes')
 
-        if (diff <= 0) {
+        if (diff <= 5) {
           continue
+        } else {
+          // console.log('_diff', diff)
         }
       }
 

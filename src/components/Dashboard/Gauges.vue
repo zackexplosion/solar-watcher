@@ -1,5 +1,5 @@
 <template>
-  <div class="gauges" ref="gauges" />
+  <div v-show="ready" class="gauges" ref="gauges" />
 </template>
 
 <script>
@@ -9,6 +9,10 @@ import Big from 'big.js'
 
 export default {
   name: 'Gauges',
+
+  data: () => ({
+    ready: false,
+  }),
   mounted() {
     // const radial = new RadialGauge({
     //   renderTo: document.createElement('canvas'),
@@ -28,6 +32,7 @@ export default {
     const g_powerOutputToday = this.createGauge({
       majorTicks: [0, 10, 20, 30, 40, 50],
       units: '度',
+      value: 0,
       minValue: 0,
       maxValue: 50,
       valueInt: 1,
@@ -67,11 +72,18 @@ export default {
     const g_pvInputVoltage = this.createGauge({
       majorTicks: [0, 50, 100, 150, 200, 250, 300],
       units: 'Voltage',
-      value: 0,
       minValue: 0,
       maxValue: 300,
       title: 'PV電壓',
     })
+
+    // const g_pvInputCurrent = this.createGauge({
+    //   majorTicks: [0, 20],
+    //   units: 'Ampere',
+    //   minValue: 0,
+    //   maxValue: 20,
+    //   title: 'PV電流',
+    // })
 
     // const g_acOutputVoltage = this.createGauge({
     //   majorTicks: [200, 210, 220, 230, 240, 250],
@@ -125,6 +137,7 @@ export default {
       g_pvInputPower.value = pvInputPower
       g_batteryVoltage.value = batteryVoltage
       g_pvInputVoltage.value = pvInputVoltage
+      // g_pvInputCurrent.value = pvInputCurrent
 
       document.querySelectorAll('.gauges canvas').forEach((_) => _.removeAttribute('style'))
     }
@@ -135,6 +148,7 @@ export default {
     })
 
     socket.on('updateLiveChart', (data) => {
+      if (!this.ready) return
       setupGauge(data)
       const acOutputActivePower = data[6]
       const pvInputPower = data[20]
@@ -181,11 +195,10 @@ export default {
 
       powerOutputToday = Number.parseFloat(powerOutputToday.toFixed(2))
       g_powerOutputToday.value = powerOutputToday
+
+      this.ready = true
     })
   },
-  data: () => ({
-
-  }),
   methods: {
     createGauge(options = {}) {
       let size = 400
@@ -216,6 +229,7 @@ export default {
         valueBoxStroke: 0,
         valueTextShadow: 0,
         valueDec: 1,
+        value: 0,
         fontNumbersSize: 15,
         // fontValueSize: 26,
         // fontUnitsSize: 20,

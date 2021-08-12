@@ -60,7 +60,8 @@ export default {
     liveMode: false,
     updateArgs: [true, true],
     chartOptions: {
-      panning: true,
+      // panning: true,
+      followPointer: true,
       time: {
         timezoneOffset: new Date().getTimezoneOffset(),
       },
