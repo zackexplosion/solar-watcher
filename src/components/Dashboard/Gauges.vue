@@ -142,6 +142,8 @@ export default {
       // g_pvInputCurrent.value = pvInputCurrent
 
       document.querySelectorAll('.gauges canvas').forEach((_) => _.removeAttribute('style'))
+
+      document.querySelector('.gauges').style = 'display:flex'
     }
 
     socket.emit('initLiveChart', (_data) => {
@@ -251,7 +253,7 @@ export default {
 </script>
 <style lang="scss">
 .gauges {
-  display: flex;
+  display: none;
   justify-content: space-between;
   text-align: center;
   flex-wrap: wrap;
