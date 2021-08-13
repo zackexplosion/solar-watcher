@@ -11,10 +11,11 @@
 </template>
 
 <script>
-
-import { createChart } from 'lightweight-charts'
+import { isBusinessDay, createChart, TickMarkType } from 'lightweight-charts'
 import dayjs from 'dayjs'
 import paramsArrayMap from '../../server/paramsArrayMap'
+
+console.log('LightweightCharts', TickMarkType)
 
 const DATE_FORMAT = 'YYYY/MM/DD HH:mm'
 
@@ -47,13 +48,6 @@ export default {
   mounted() {
     const container = this.$refs.lightweightChart
     const chart = createChart(container, {
-      // timeScale: {
-      //   tickMarkFormatter: (time) => {
-      //     // console.log('time', time)
-      //     const date = new Date(time);
-      //     return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
-      //   },
-      // },
       layout: {
         backgroundColor: '#111111',
         lineColor: '#2B2B43',
@@ -62,6 +56,39 @@ export default {
       timeScale: {
         timeVisible: true,
         secondsVisible: false,
+        tickMarkFormatter: (time, tickMarkType, locale) => {
+          // console.log('time', time)
+          const date = dayjs(time)
+          console.log(isBusinessDay(time))
+          if (isBusinessDay(time)) {
+            return ''
+          }
+          switch (tickMarkType) {
+            case TickMarkType.Year:
+              return date.format('MM/DD')
+            case TickMarkType.Month:
+              return date.format('hh:mm')
+            case TickMarkType.DayOfMonth:
+              return date.format('DD')
+            case TickMarkType.Time:
+              return date.format('hh:ss')
+            case TickMarkType.TimeWithSeconds:
+              return date.format('hh:mm:ss')
+
+            default:
+              return date.format(DATE_FORMAT)
+          }
+
+          // return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+        },
+      },
+      localization: {
+        timeFormatter: (time) => {
+          if (isBusinessDay(time)) {
+            return '';
+          }
+          return dayjs(time).format(DATE_FORMAT);
+        },
       },
       watermark: {
         color: 'rgba(0, 0, 0, 0)',
@@ -101,7 +128,7 @@ export default {
         _dataToApply[index] = []
       }
       data.forEach((d) => {
-        const t = d[0] / 1000
+        const t = d[0]
         for (let index = 0; index < series.length; index += 1) {
           const { className } = series[index]
           const v = d[paramsArrayMap.indexOf(className)] || 0
@@ -123,7 +150,7 @@ export default {
 
     chart.subscribeCrosshairMove((param) => {
       if (param.time === undefined) return
-      const time = dayjs(param.time * 1000)
+      const time = dayjs(param.time)
       this.crosshairCurrentTime = time.format(DATE_FORMAT)
       this.crosshairCurrentPVPower = param.seriesPrices.get(_series[0])
       this.crosshairCurrentAcOutputActivePower = param.seriesPrices.get(_series[1])
