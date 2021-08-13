@@ -23,6 +23,8 @@ module.exports = {
     'no-restricted-syntax': 'off',
     'no-underscore-dangle': 'off',
     'camelcase': 'off',
+    'no-tabs': 'off',
+    'max-len': 'off',
     'semi': 'off'
   },
 };
