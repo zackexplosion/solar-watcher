@@ -1,11 +1,11 @@
 <template>
-  <div id="chart">
+  <div class="chart">
     <div class="container" ref="lightweightChart">
-      <div class="legend">
+      <!-- <div class="legend">
         <div class="acOutputActivePower">負載：{{crosshairCurrentAcOutputActivePower}}</div>
         <div class="pvInputPower">發電：{{crosshairCurrentPVPower}}</div>
         <div class="date">時間：{{crosshairCurrentTime}}</div>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -15,30 +15,20 @@ import { isBusinessDay, createChart, TickMarkType } from 'lightweight-charts'
 import dayjs from 'dayjs'
 import paramsArrayMap from '../../server/paramsArrayMap'
 
-console.log('LightweightCharts', TickMarkType)
+// console.log('LightweightCharts', TickMarkType)
 
 const DATE_FORMAT = 'YYYY/MM/DD HH:mm'
 
 const series = [
   {
-    name: 'PV功率 (瓦特 W)',
-    className: 'pvInputPower',
-    color: 'green',
-  },
-  {
-    name: '輸出負載 (瓦特 W)',
-    className: 'acOutputActivePower',
-    color: '#CC0000',
-  },
-  {
-    name: 'PV電壓 (伏特 V)',
-    className: 'pvInputVoltage',
-    color: '#1d9bd5',
+    name: '電瓶電壓',
+    className: 'batteryVoltage',
+    color: '#CC9900',
   },
 ]
 
 export default {
-  name: 'Chart',
+  name: 'Chart2',
   data: () => ({
     chart: null,
     crosshairCurrentAcOutputActivePower: 0,
@@ -57,9 +47,7 @@ export default {
         timeVisible: true,
         secondsVisible: false,
         tickMarkFormatter: (time, tickMarkType, locale) => {
-          // console.log('time', time)
           const date = dayjs(time)
-          console.log(isBusinessDay(time))
           if (isBusinessDay(time)) {
             return ''
           }
@@ -74,7 +62,6 @@ export default {
               return date.format('hh:ss')
             case TickMarkType.TimeWithSeconds:
               return date.format('hh:mm:ss')
-
             default:
               return date.format(DATE_FORMAT)
           }
@@ -165,6 +152,8 @@ export default {
 
     this.chart = chart
 
+    this.$store.state.childChart = chart
+
     this.setChartSize()
 
     window.addEventListener('resize', (e) => {
@@ -176,11 +165,11 @@ export default {
       // let dashboardHeight = document.querySelector('#dashboard').offsetHeight
       // dashboardHeight -= document.querySelector('#dashboard').offsetTop
       const w = document.querySelector('#app').offsetWidth
-      let h = window.innerHeight - 400
+      const h = 100
 
-      if (window.innerWidth <= 768) {
-        h = window.innerHeight - 300
-      }
+      // if (window.innerWidth <= 768) {
+      //   h = window.innerHeight - 300
+      // }
 
       // console.log('h', h)
       this.chart.applyOptions({
@@ -200,20 +189,6 @@ export default {
 
 .container {
   position: relative;
-}
-
-.legend {
-  width: 35%;
-  height: 70px;
-  position: absolute;
-  padding: 8px;
-  font-size: 12px;
-  /* color: '#20262E'; */
-  color: #ccc;
-  background-color: rgba(255, 255, 255, 0.23);
-  text-align: left;
-  z-index: 1000;
-  pointer-events: none;
 }
 
 @media  (min-width: 768px) {

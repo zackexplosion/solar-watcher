@@ -11,6 +11,7 @@ Vue.config.productionTip = false;
 const store = new Vuex.Store({
   state: {
     count: 0,
+    childChart: null,
     socket: io(),
   },
 })

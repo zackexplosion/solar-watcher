@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import Chart from './components/Chart2.vue'
+import Chart from './components/Chart.vue'
 // import Loading from './components/Loading.vue'
 import Dashboard from './components/Dashboard/Dashboard.vue'
 

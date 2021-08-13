@@ -1,406 +1,293 @@
 <template>
-  <div v-show="ready">
-    <button @click="liveMode = true">Live</button>
-    <button @click="liveMode = false">歷史資料</button>
-    <Chart
-      ref="chart"
-      style="height:100%;min-height:600px;"
-      :constructorType="'stockChart'"
-      :options="chartOptions"
-      :updateArgs="updateArgs"
-    />
+  <div class="chart">
+    <div class="container" ref="lightweightChart">
+      <div class="legend">
+        <div class="acOutputActivePower">負載：{{crosshairCurrentAcOutputActivePower}} W</div>
+        <div class="pvInputPower">發電：{{crosshairCurrentPVPower}} W</div>
+        <div class="pvInputPower">電壓：{{crosshairBatteryVoltage}} V</div>
+        <div class="date">時間：{{crosshairCurrentTime}}</div>
+      </div>
+      <div class="go-to-realtime-button" v-show="goRealTimeButtonVisible" @click="onRealtimeButtonClicked()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" width="14" height="14"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M6.5 1.5l5 5.5-5 5.5M3 4l2.5 3L3 10"></path></svg>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import { Chart } from 'highcharts-vue'
-import Highcharts from 'highcharts'
-import stockInit from 'highcharts/modules/stock'
-
+import {
+  isBusinessDay, createChart, TickMarkType, PriceScaleMode,
+} from 'lightweight-charts'
+import dayjs from 'dayjs'
 import paramsArrayMap from '../../server/paramsArrayMap'
 
-// const paramsArrayMap = [
-//   'timestamp', // 0
-//   'gridVoltage', 'gridFrequency',
-//   'acOutputVoltage', 'acOutputFrequency',
-//   'acOutputApparentPower', 'acOutputActivePower',
-//   'acOutputLoad', // 7
-//   'busVoltage', 'batteryVoltage',
-//   'batteryChargingCurrent', 'batteryCapacity',
-//   'heatSinkTemp', // 12
-//   'pvInputCurrent', 'pvInputVoltage',
-//   'pvBatteryVoltage',
-//   'batteryDischargeCurrent', // 16
-//   'flags', // 17
-//   'batteryVoltageOffset',
-//   'EEPRomVersion',
-//   'pvInputPower', // 20
-// ]
+// const button = document.createElement('div');
+// button.className = 'go-to-realtime-button';
+// button.style.left = `${chartWidth - width - 60}px`;
+// button.style.top = `${chartHeight - height - 30}px`;
+// button.style.color = '#4c525e';
+// button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" width="14" height="14"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M6.5 1.5l5 5.5-5 5.5M3 4l2.5 3L3 10"></path></svg>';
+// document.body.appendChild(button);
 
-// import darkUnica from 'highcharts/themes/dark-unica';
+// console.log('LightweightCharts', TickMarkType)
 
-// darkUnica(Highcharts)
-stockInit(Highcharts)
+const DATE_FORMAT = 'YYYY/MM/DD HH:mm'
+
+const series = [
+  {
+    name: 'PV功率',
+    className: 'pvInputPower',
+    color: '#009900',
+  },
+  {
+    name: '輸出負載',
+    className: 'acOutputActivePower',
+    color: '#CC0000',
+  },
+  {
+    name: 'PV電壓',
+    className: 'pvInputVoltage',
+    color: '#1d9bd5',
+  },
+  {
+    name: '電瓶電壓',
+    className: 'batteryVoltage',
+    color: '#CC9900',
+    priceScaleId: 'batt',
+    scaleMargins: {
+      top: 0.4,
+      bottom: 0,
+    },
+  },
+]
 
 export default {
-  name: 'mychart',
-  components: {
-    Chart,
-  },
-  mounted() {
-    this.setup()
-  },
-  props: {
-    socket: {
-      type: Object,
-    },
-  },
+  name: 'Chart',
   data: () => ({
-    ready: false,
-    liveMode: false,
-    updateArgs: [true, true],
-    chartOptions: {
-      // panning: true,
-      followPointer: true,
-      time: {
-        timezoneOffset: new Date().getTimezoneOffset(),
+    chart: null,
+    crosshairCurrentAcOutputActivePower: 0,
+    crosshairCurrentPVPower: 0,
+    crosshairBatteryVoltage: 0,
+    crosshairCurrentTime: dayjs().format(DATE_FORMAT),
+    goRealTimeButtonVisible: true,
+  }),
+  mounted() {
+    const container = this.$refs.lightweightChart
+    const chart = createChart(container, {
+      layout: {
+        backgroundColor: '#111111',
+        lineColor: '#2B2B43',
+        textColor: '#ccc',
       },
-      chart: {
-        styledMode: true,
-        colorCount: 20,
-      },
-      navigator: {
-        adaptToUpdatedData: false,
-      },
-      title: '太陽能監控儀',
-      xAxis: {
-        type: 'datetime',
-        events: {
-          afterSetExtremes(e) {
-            // console.log(e)
-          },
+      rightPriceScale: {
+        scaleMargins: {
+          top: 0.1,
+          bottom: 0.05,
         },
+        // mode: PriceScaleMode.Percentage,
+        // borderColor: 'rgba(197, 203, 206, 0.4)',
       },
-      // yAxis: [
-      //   {
-      //     labels: {
-      //       align: 'left',
-      //     },
-      //     height: '50%',
-      //     resize: {
-      //       enabled: true,
-      //     },
-      //   // padding: 50,
-      //   },
-      //   {
-      //     title: '電池',
-      //     labels: {
-      //       align: 'left',
-      //     },
-      //     top: '50%',
-      //     height: '50%',
-      //     offset: 0,
-      //   // padding: 50,
-      //   },
-      //   {
-      //     labels: {
-      //       align: 'left',
-      //     },
-      //     top: '85%',
-      //     height: '15%',
-      //     offset: 0,
-      //     padding: 50,
-      //   },
-      // ],
-      rangeSelector: {
-        buttons: [
-          // {
-          //   type: 'minute',
-          //   count: 5,
-          //   text: '5m',
-          // },
-          {
-            type: 'minute',
-            count: 15,
-            text: 'live',
-            events: {
-              click() {
-                this.liveMode = true
-              },
-            },
-          },
-          // {
-          //   type: 'hour',
-          //   count: 1,
-          //   text: '1h',
-          //   events: {
-          //     click() {
-          //       this.liveMode = false
-          //     },
-          //   },
-          // },
-          // {
-          //   type: 'hour',
-          //   count: 4,
-          //   text: '4h',
-          //   events: {
-          //     click() {
-          //       this.liveMode = false
-          //     },
-          //   },
-          // },
-          // {
-          //   type: 'hour',
-          //   count: 12,
-          //   text: '12h',
-          //   events: {
-          //     click() {
-          //       this.liveMode = false
-          //     },
-          //   },
-          // },
-          {
-            type: 'day',
-            count: 1,
-            text: '1d',
-            events: {
-              click() {
-                this.liveMode = false
-              },
-            },
-          },
-          // {
-          //   type: 'month',
-          //   count: 1,
-          //   text: '1m',
-          //   events: {
-          //     click() {
-          //       this.liveMode = false
-          //     },
-          //   },
-          // },
-          // {
-          //   type: 'year',
-          //   count: 1,
-          //   text: '1y',
-          //   events: {
-          //     click() {
-          //       this.liveMode = false
-          //     },
-          //   },
-          // },
-          {
-            type: 'all',
-            text: 'All',
-          }],
-        inputEnabled: false, // it supports only days
-        selected: 1, // 1d
-      },
-      tooltip: {
-        shape: 'square',
-        headerShape: 'callout',
-        borderWidth: 0,
-        shadow: false,
-        valueDecimals: 1,
-        followTouchMove: false,
-        positioner(width, height, point) {
-          const { chart } = this;
-          let position;
-
-          if (point.isHeader) {
-            position = {
-              x: Math.max(
-              // Left side limit
-                chart.plotLeft,
-                Math.min(
-                  point.plotX + chart.plotLeft - width / 2,
-                  // Right side limit
-                  chart.chartWidth - width - chart.marginRight,
-                ),
-              ),
-              y: point.plotY,
-            };
-          } else {
-            position = {
-              x: point.series.chart.plotLeft,
-              y: point.series.yAxis.top - chart.plotTop,
-            };
+      timeScale: {
+        timeVisible: true,
+        secondsVisible: false,
+        tickMarkFormatter: (time, tickMarkType, locale) => {
+          const date = dayjs(time)
+          if (isBusinessDay(time)) {
+            return ''
+          }
+          switch (tickMarkType) {
+            case TickMarkType.Year:
+              return date.format('MM/DD')
+            case TickMarkType.Month:
+              return date.format('hh:mm')
+            case TickMarkType.DayOfMonth:
+              return date.format('DD')
+            case TickMarkType.Time:
+              return date.format('hh:ss')
+            case TickMarkType.TimeWithSeconds:
+              return date.format('hh:mm:ss')
+            default:
+              return date.format(DATE_FORMAT)
           }
 
-          return position;
+          // return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
         },
       },
-      series: [
-        {
-          name: 'PV功率 (瓦特 W)',
-          className: 'pvInputPower',
-          color: 'green',
+      localization: {
+        timeFormatter: (time) => {
+          if (isBusinessDay(time)) {
+            return '';
+          }
+          return dayjs(time).format(DATE_FORMAT);
         },
-        {
-          name: '輸出負載 (瓦特 W)',
-          className: 'acOutputActivePower',
-          color: 'blue',
+      },
+      watermark: {
+        color: 'rgba(0, 0, 0, 0)',
+      },
+      crosshair: {
+        color: '#758696',
+      },
+      grid: {
+        vertLines: {
+          color: '#2B2B43',
         },
-        // {
-        //   name: '市電電壓 (伏特 V)',
-        //   className: 'gridVoltage',
-        //   color: 'red',
-        //   yAxis: 1,
-        // },
-        // {
-        //   name: '輸出電壓 (伏特 V)',
-        //   className: 'acOutputVoltage',
-        //   color: 'blue',
-        //   yAxis: 1,
-        // },
-        // {
-        //   name: 'PV電流 (安培 A)',
-        //   className: 'pvInputCurrent',
-        //   yAxis: 1,
-        // },
-        {
-          name: 'PV電壓 (伏特 V)',
-          className: 'pvInputVoltage',
-          // color: '#000099',
-          // yAxis: 1,
+        horzLines: {
+          color: '#363C4E',
         },
-        // {
-        //   name: '電池電壓 (伏特 V)',
-        //   className: 'batteryVoltage',
-        //   // color: '#000000',
-        //   // type: 'column',
-        //   yAxis: 1,
-        // },
-        // {
-        //   name: '電池容量 (%)',
-        //   className: 'batteryCapacity',
-        //   color: '#CCCCCC',
-        //   // type: 'column',
-        //   yAxis: 1,
-        // },
-        // {
-        //   name: '電池電流 (安培 A)',
-        //   className: 'batteryChargingCurrent',
-        //   color: '#666666',
-        //   // type: 'column',
-        //   yAxis: 1,
-        // },
-        // {
-        //   name: '散熱器溫度 (攝氏 °C)',
-        //   className: 'heatSinkTemp',
-        //   // color: '#ffcc00',
-        //   yAxis: 1,
-        // },
-      ],
-    },
-  }),
-  watch: {
-    liveMode(n, o) {
-      const { socket } = this.$store.state
-      // console.log('o, n', o, n)
+      },
+    })
 
-      if (n) {
-        socket.emit('getLiveChartData')
-      } else {
-        socket.emit('getChartData')
+    const { socket } = this.$store.state
+
+    socket.on('connect', () => {
+      console.log('websocket connected')
+      socket.emit('getChartData')
+    })
+    const _series = []
+
+    socket.on('setChartData', (data) => {
+      // console.log('setChartData', data.length)
+      // clean data
+      const _dataToApply = []
+      for (let index = 0; index < series.length; index += 1) {
+        const s = series[index]
+        const p = {
+          ...s,
+          title: s.name,
+          color: s.color,
+        }
+
+        console.log('p', p)
+
+        _series[index] = chart.addLineSeries(p)
+
+        _dataToApply[index] = []
       }
-    },
+      data.forEach((d) => {
+        const t = d[0]
+        for (let index = 0; index < series.length; index += 1) {
+          const { className } = series[index]
+          const v = d[paramsArrayMap.indexOf(className)] || 0
+
+          _dataToApply[index].push({
+            time: t,
+            value: v,
+          })
+        }
+      })
+
+      for (let index = 0; index < series.length; index += 1) {
+        _series[index].setData(_dataToApply[index])
+      }
+
+      this.ready = true
+      this.$emit('ready', true)
+    })
+
+    chart.subscribeCrosshairMove((param) => {
+      if (param.time === undefined) return
+      const time = dayjs(param.time)
+      this.crosshairCurrentTime = time.format(DATE_FORMAT)
+      this.crosshairCurrentPVPower = param.seriesPrices.get(_series[0])
+      this.crosshairCurrentAcOutputActivePower = param.seriesPrices.get(_series[1])
+      this.crosshairBatteryVoltage = param.seriesPrices.get(_series[3])
+      // const a = param.seriesPrices.get(_series[0])
+
+      // debugger
+      // dateStr = `${param.time.year} - ${param.time.month} - ${param.time.day}`;
+      // const price = param.seriesPrices.get(series)
+      // toolTip.innerHTML =	`<div style="font-size: 24px; margin: 4px 0px; color: #20262E"> AEROSPACE</div><div style="font-size: 22px; margin: 4px 0px; color: #20262E">${(Math.round(price * 100) / 100).toFixed(2)}</div><div>${dateStr}</div>`
+      // const { childChart } = this.$store.state
+      // childChart.moveCrosshair({
+      //   ...param.point,
+      //   x: coord,
+      // });
+    })
+
+    this.chart = chart
+
+    this.setChartSize()
+
+    window.addEventListener('resize', (e) => {
+      this.setChartSize()
+    })
+
+    const timeScale = chart.timeScale()
+    timeScale.subscribeVisibleTimeRangeChange(() => {
+      this.goRealTimeButtonVisible = timeScale.scrollPosition() < 0
+    })
   },
   methods: {
-    setup() {
-      const { socket } = this.$store.state
+    onRealtimeButtonClicked() {
+      const timeScale = this.chart.timeScale()
+      timeScale.scrollToRealTime()
+    },
+    setChartSize() {
+      // let dashboardHeight = document.querySelector('#dashboard').offsetHeight
+      // dashboardHeight -= document.querySelector('#dashboard').offsetTop
+      const w = document.querySelector('#app').offsetWidth
+      let h = window.innerHeight - 400
 
-      socket.on('connect', () => {
-        console.log('websocket connected')
-      })
+      if (window.innerWidth <= 768) {
+        h = window.innerHeight - 300
+      }
 
-      socket.emit('getChartData')
-
-      socket.on('setChartData', (data) => {
-        console.log('setChartData', data.length)
-        // clean data
-        for (let index = 0; index < this.chartOptions.series.length; index += 1) {
-          this.chartOptions.series[index].data = []
-        }
-        data.forEach((d) => {
-          const t = d[0]
-          for (let index = 0; index < this.chartOptions.series.length; index += 1) {
-            const { className } = this.chartOptions.series[index]
-            const v = d[paramsArrayMap.indexOf(className)] || 0
-            this.chartOptions.series[index].data.push([t, v])
-            // this.chartOptions.series[index].update()
-          }
-        })
-        this.ready = true
-        this.$emit('ready', true)
-      })
-
-      socket.on('setLiveChartData', (data) => {
-        console.log('setLiveChartData', data.length)
-        for (let index = 0; index < this.chartOptions.series.length; index += 1) {
-          this.chartOptions.series[index].data = []
-        }
-
-        data.forEach((d) => {
-          const t = d[0]
-          for (let index = 0; index < this.chartOptions.series.length; index += 1) {
-            const { className } = this.chartOptions.series[index]
-            const v = d[paramsArrayMap.indexOf(className)] || 0
-            this.chartOptions.series[index].data.push([t, v])
-
-            // this.chartOptions.series[index].update()
-          }
-        })
-      })
-
-      socket.on('updateLiveChart', (data) => {
-        if (!this.ready || !this.liveMode) return
-        // console.log('updateChart', data)
-        // this.chartOptions.series[0].addPoint(data.acOutputPower)
-        // const updatedData = []
-        for (let index = 0; index < this.chartOptions.series.length; index += 1) {
-          let updateChart = false
-          const { className } = this.chartOptions.series[index]
-          const value = data[paramsArrayMap.indexOf(className)]
-          // updatedData.push([className, value])
-          if (index === this.chartOptions.series.length - 1) {
-            updateChart = true
-          }
-          // console.log(updatedData)
-
-          // this.$refs.chart.chart.series[index].data.shift()
-          const dateToUpdate = [data[0], value]
-          // console.log('dateToUpdate', className, dateToUpdate, updateChart)
-          this.$refs.chart.chart.series[index].addPoint(
-            dateToUpdate,
-            updateChart,
-            true,
-          )
-        }
+      // console.log('h', h)
+      this.chart.applyOptions({
+        width: w,
+        height: h,
       })
     },
   },
-};
+}
 </script>
 
 <style>
-/* .highcharts-color-0 {
-  color: red;
-}
-.highcharts-tracker-line {
-  stroke: green;
-} */
-/* .pvInputPower {
-  fill: rgb(38, 184, 9);
-  stroke: rgb(38, 184, 9);
+.chart {
+  position: absolute;
+  bottom: 1em;
 }
 
-.acOutputActivePower {
-  fill: rgb(10, 120, 247);
-  stroke:rgb(10, 120, 247);
+.container {
+  position: relative;
 }
-.heatSinkTemp {
-  fill: orange;
-  stroke:orange;
-} */
+
+.legend {
+  width: 35%;
+  height: 70px;
+  position: absolute;
+  padding: 8px;
+  font-size: 12px;
+  /* color: '#20262E'; */
+  color: #ccc;
+  background-color: rgba(255, 255, 255, 0.23);
+  text-align: left;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.go-to-realtime-button {
+	width: 27px;
+	height: 27px;
+	position: absolute;
+	padding: 7px;
+	box-sizing: border-box;
+	font-size: 10px;
+	border-radius: 50%;
+	text-align: center;
+	z-index: 1000;
+	color: #B2B5BE;
+	background: rgba(250, 250, 250, 0.95);
+	box-shadow: 0 2px 5px 0 rgba(117, 134, 150, 0.45);
+  right: 8em;
+  bottom: 4em;
+}
+
+@media  (min-width: 768px) {
+
+  .legend {
+    width: 15%;
+  }
+}
+
 </style>
