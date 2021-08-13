@@ -1,5 +1,7 @@
 <template>
-  <div v-show="ready" class="gauges" ref="gauges" />
+  <div v-show="ready">
+    <div class="gauges" ref="gauges" />
+  </div>
 </template>
 
 <script>

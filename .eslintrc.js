@@ -21,6 +21,7 @@ module.exports = {
     'no-unused-vars': 'warn',
     'no-continue' : 'off',
     'no-restricted-syntax': 'off',
+    'no-underscore-dangle': 'off',
     'camelcase': 'off',
     'semi': 'off'
   },

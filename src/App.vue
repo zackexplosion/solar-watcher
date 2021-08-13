@@ -1,14 +1,13 @@
 <template>
-  <div id="app" v-show="ready">
+  <div id="app" ref="app">
+    <!-- need app width before ready -->
     <Dashboard />
-    <div class="chart">
-      <Chart @ready="onReady()" />
-    </div>
+    <Chart @ready="onReady()" />
   </div>
 </template>
 
 <script>
-import Chart from './components/Chart.vue'
+import Chart from './components/Chart2.vue'
 // import Loading from './components/Loading.vue'
 import Dashboard from './components/Dashboard/Dashboard.vue'
 
@@ -39,19 +38,25 @@ export default {
 </script>
 
 <style lang="scss">
-body {
-  padding:0 1em;
+html, body {
+  margin:0;
+  padding:0;
 }
+
+body{
+  padding: 0 1em;
+}
+
 #app {
   text-align: left;
   margin: 0 auto;
   width: 100%;
-  height: 100vh;
+  // height: 100%;
   padding-top: 0.5em;
   // overflow: hidden;
 }
-.chart {
-  height: calc(100vh - 450px) ;
-}
+// .chart {
+//   height: calc(100vh - 450px) ;
+// }
 
 </style>

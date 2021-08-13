@@ -1,5 +1,5 @@
 <template>
-  <div v-if="ready">
+  <div v-show="ready">
     <button @click="liveMode = true">Live</button>
     <button @click="liveMode = false">歷史資料</button>
     <Chart
