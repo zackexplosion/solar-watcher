@@ -1,14 +1,17 @@
 <template>
   <div class="chart">
     <div class="container" ref="lightweightChart">
-      <div class="legend">
-        <div class="acOutputActivePower">負載：{{crosshairCurrentAcOutputActivePower}} W</div>
-        <div class="pvInputPower">發電：{{crosshairCurrentPVPower}} W</div>
-        <div class="pvInputPower">電壓：{{crosshairBatteryVoltage}} V</div>
-        <div class="date">時間：{{crosshairCurrentTime}}</div>
-      </div>
-      <div class="go-to-realtime-button" v-show="goRealTimeButtonVisible" @click="onRealtimeButtonClicked()">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" width="14" height="14"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M6.5 1.5l5 5.5-5 5.5M3 4l2.5 3L3 10"></path></svg>
+      <div v-show="ready">
+        <div class="legend">
+          <div class="acOutputActivePower">負載：{{crosshairCurrentAcOutputActivePower}} W</div>
+          <div class="pvInputPower">發電：{{crosshairCurrentPVPower}} W</div>
+          <div class="pvInputPower">電壓：{{crosshairBatteryVoltage}} V</div>
+          <div class="date">日期：{{crosshairCurrentTime.format('YYYY-MM-DD')}}</div>
+          <div class="date">時間：{{crosshairCurrentTime.format('hh:mm')}}</div>
+        </div>
+        <div class="go-to-realtime-button" v-show="goRealTimeButtonVisible" @click="onRealtimeButtonClicked()">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" width="14" height="14"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M6.5 1.5l5 5.5-5 5.5M3 4l2.5 3L3 10"></path></svg>
+        </div>
       </div>
     </div>
   </div>
@@ -76,7 +79,7 @@ export default {
     crosshairCurrentAcOutputActivePower: 0,
     crosshairCurrentPVPower: 0,
     crosshairBatteryVoltage: 0,
-    crosshairCurrentTime: dayjs().format(DATE_FORMAT),
+    crosshairCurrentTime: dayjs(),
     currentDate: null,
     goRealTimeButtonVisible: true,
   }),
@@ -96,6 +99,7 @@ export default {
 
     socket.on('setChartData', (data) => {
       console.log('setChartData', data.length)
+      let tickMarkFormatterIndex = 0
       chart = createChart(container, {
         layout: {
           backgroundColor: '#111111',
@@ -113,31 +117,36 @@ export default {
         timeScale: {
           timeVisible: true,
           secondsVisible: false,
+          // rightOffset: 12,
+          // barSpacing: 10,
+          // rightBarStaysOnScroll: true,
           tickMarkFormatter: (time, tickMarkType, locale) => {
             const date = dayjs(time)
+            tickMarkFormatterIndex += 1
             // console.log('date', date.format())
             if (isBusinessDay(time)) {
               return ''
             }
             switch (tickMarkType) {
-              case TickMarkType.Year:
-                return date.format('MM/DD')
-              case TickMarkType.Month:
-                return date.format('hh:mm')
-              case TickMarkType.DayOfMonth:
-                return date.format('DD')
-              case TickMarkType.Time:
-                return date.format('hh:ss')
-              case TickMarkType.TimeWithSeconds:
-                return date.format('hh:mm:ss')
+              // case TickMarkType.Year:
+              //   return date.format('MM/DD')
+              // case TickMarkType.Month:
+              //   return date.format('hh:mm')
+              // case TickMarkType.DayOfMonth:
+              //   return date.format('DD')
+              // case TickMarkType.Time:
+              //   return date.format('hh:ss')
+              // case TickMarkType.TimeWithSeconds:
+              //   return date.format('hh:mm:ss')
               default:
-                return date.format(DATE_FORMAT)
+                return `${date.format('hh:mm')}`
             }
 
           // return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
           },
         },
         localization: {
+          dateFormat: 'yyyy/MM/dd',
           timeFormatter: (time) => {
             if (isBusinessDay(time)) {
               return '';
@@ -146,7 +155,9 @@ export default {
           },
         },
         watermark: {
-          color: 'rgba(0, 0, 0, 0)',
+          text: 'Solar Watcher',
+          visible: true,
+          color: '#556',
         },
         crosshair: {
           color: '#758696',
@@ -202,7 +213,7 @@ export default {
       chart.subscribeCrosshairMove((param) => {
         if (param.time === undefined) return
         const time = dayjs(param.time)
-        this.crosshairCurrentTime = time.format(DATE_FORMAT)
+        this.crosshairCurrentTime = time
         this.crosshairCurrentPVPower = param.seriesPrices.get(_series[0])
         this.crosshairCurrentAcOutputActivePower = param.seriesPrices.get(_series[1])
         this.crosshairBatteryVoltage = param.seriesPrices.get(_series[3])
@@ -212,6 +223,20 @@ export default {
       timeScale.subscribeVisibleTimeRangeChange(() => {
         this.goRealTimeButtonVisible = timeScale.scrollPosition() < 0
       })
+
+      // chart.timeScale().setVisibleLogicalRange({
+      //   from: 0,
+      //   to: 100,
+      // })
+
+      const visibleRange = {
+        from: dayjs(data[0][0]).unix(),
+        to: dayjs().unix(),
+      }
+
+      console.log('visibleRange', visibleRange)
+
+      // chart.timeScale().setVisibleRange(visibleRange)
 
       this.chart = chart
       this.setChartSize()
@@ -249,6 +274,7 @@ export default {
         }
         _series[index].update(dateToUpdate)
       }
+      lastDate = data[0]
     })
 
     // // get new chart date every 5 minutes
@@ -303,10 +329,10 @@ export default {
   height: 70px;
   position: absolute;
   padding: 8px;
-  font-size: 12px;
+  font-size: 1.2em;
   /* color: '#20262E'; */
   color: #ccc;
-  background-color: rgba(255, 255, 255, 0.23);
+  /* background-color: rgba(255, 255, 255, 0.23); */
   text-align: left;
   z-index: 1000;
   pointer-events: none;

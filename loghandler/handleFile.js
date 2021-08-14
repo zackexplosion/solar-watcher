@@ -25,6 +25,9 @@ function handleFile(file, last_log) {
         continue
       }
       d1 = dayjs(log[0])
+      if (MODE === MODES.APPEND) {
+        d1 = dayjs(last_log[0])
+      }
       console.log('start from', d1.toDate())
     }
 
@@ -34,14 +37,16 @@ function handleFile(file, last_log) {
       // skip old data
       if (MODE === MODES.APPEND) {
         const dd = dayjs(last_log[0])
-        const diff = d2.diff(dd, 'minutes')
-
-        if (diff <= 5) {
+        const diff = d2.diff(dd, 'seconds')
+        if (diff <= 0) {
+          // console.log('diff', d2.format(), diff)
           continue
         } else {
           // console.log('_diff', diff)
         }
       }
+
+      // console.log('yolo')
 
       arrayOfLogToCount.push(log)
       const diff = d2.diff(d1, 'minutes')
