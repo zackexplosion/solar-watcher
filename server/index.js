@@ -64,9 +64,9 @@ io.on('connection', (socket) => {
     }
   })
 
-  socket.on('getLiveChartData', () => {
-    socket.emit('setLiveChartData', cacheData)
-  })
+  // socket.on('getLiveChartData', () => {
+  //   socket.emit('setLiveChartData', cacheData)
+  // })
 })
 
 // only cache last 15min
@@ -138,6 +138,19 @@ exec(`tail -n ${MAX_CACHE_POINTS} ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, asy
 })
 const reduceLogAndSaveToDB = require('./reduceLogAndSaveToDB')
 
+let latest_date = 0
 setInterval(() => {
   reduceLogAndSaveToDB()
-}, 1000 * 5 * 60)
+
+  try {
+  // prevent cache
+    db.read()
+    const log = db.get('logs').last().value()
+    if (log && latest_date !== log[0]) {
+      io.emit('appendDataToChart', log)
+      latest_date = log[0]
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}, 1000 * 60 * 5)

@@ -32,25 +32,33 @@ import paramsArrayMap from '../../server/paramsArrayMap'
 // console.log('LightweightCharts', TickMarkType)
 
 const DATE_FORMAT = 'YYYY/MM/DD HH:mm'
-
+function lineChartCreator(options) {
+  return {
+    ...options,
+    priceFormat: {
+      precision: 0,
+      minMove: 1,
+    },
+  }
+}
 const series = [
   {
-    name: 'PV功率',
+    title: 'PV功率',
     className: 'pvInputPower',
     color: '#009900',
   },
   {
-    name: '輸出負載',
+    title: '輸出負載',
     className: 'acOutputActivePower',
     color: '#CC0000',
   },
   {
-    name: 'PV電壓',
+    title: 'PV電壓',
     className: 'pvInputVoltage',
     color: '#1d9bd5',
   },
   {
-    name: '電瓶電壓',
+    title: '電瓶電壓',
     className: 'batteryVoltage',
     color: '#CC9900',
     priceScaleId: 'batt',
@@ -69,73 +77,12 @@ export default {
     crosshairCurrentPVPower: 0,
     crosshairBatteryVoltage: 0,
     crosshairCurrentTime: dayjs().format(DATE_FORMAT),
+    currentDate: null,
     goRealTimeButtonVisible: true,
   }),
   mounted() {
     const container = this.$refs.lightweightChart
-    const chart = createChart(container, {
-      layout: {
-        backgroundColor: '#111111',
-        lineColor: '#2B2B43',
-        textColor: '#ccc',
-      },
-      rightPriceScale: {
-        scaleMargins: {
-          top: 0.1,
-          bottom: 0.05,
-        },
-        // mode: PriceScaleMode.Percentage,
-        // borderColor: 'rgba(197, 203, 206, 0.4)',
-      },
-      timeScale: {
-        timeVisible: true,
-        secondsVisible: false,
-        tickMarkFormatter: (time, tickMarkType, locale) => {
-          const date = dayjs(time)
-          if (isBusinessDay(time)) {
-            return ''
-          }
-          switch (tickMarkType) {
-            case TickMarkType.Year:
-              return date.format('MM/DD')
-            case TickMarkType.Month:
-              return date.format('hh:mm')
-            case TickMarkType.DayOfMonth:
-              return date.format('DD')
-            case TickMarkType.Time:
-              return date.format('hh:ss')
-            case TickMarkType.TimeWithSeconds:
-              return date.format('hh:mm:ss')
-            default:
-              return date.format(DATE_FORMAT)
-          }
-
-          // return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
-        },
-      },
-      localization: {
-        timeFormatter: (time) => {
-          if (isBusinessDay(time)) {
-            return '';
-          }
-          return dayjs(time).format(DATE_FORMAT);
-        },
-      },
-      watermark: {
-        color: 'rgba(0, 0, 0, 0)',
-      },
-      crosshair: {
-        color: '#758696',
-      },
-      grid: {
-        vertLines: {
-          color: '#2B2B43',
-        },
-        horzLines: {
-          color: '#363C4E',
-        },
-      },
-    })
+    let chart
 
     const { socket } = this.$store.state
 
@@ -145,26 +92,95 @@ export default {
     })
     const _series = []
 
+    let lastDate
+
     socket.on('setChartData', (data) => {
-      // console.log('setChartData', data.length)
+      console.log('setChartData', data.length)
+      chart = createChart(container, {
+        layout: {
+          backgroundColor: '#111111',
+          lineColor: '#2B2B43',
+          textColor: '#ccc',
+        },
+        rightPriceScale: {
+          scaleMargins: {
+            top: 0.1,
+            bottom: 0.05,
+          },
+        // mode: PriceScaleMode.Percentage,
+        // borderColor: 'rgba(197, 203, 206, 0.4)',
+        },
+        timeScale: {
+          timeVisible: true,
+          secondsVisible: false,
+          tickMarkFormatter: (time, tickMarkType, locale) => {
+            const date = dayjs(time)
+            // console.log('date', date.format())
+            if (isBusinessDay(time)) {
+              return ''
+            }
+            switch (tickMarkType) {
+              case TickMarkType.Year:
+                return date.format('MM/DD')
+              case TickMarkType.Month:
+                return date.format('hh:mm')
+              case TickMarkType.DayOfMonth:
+                return date.format('DD')
+              case TickMarkType.Time:
+                return date.format('hh:ss')
+              case TickMarkType.TimeWithSeconds:
+                return date.format('hh:mm:ss')
+              default:
+                return date.format(DATE_FORMAT)
+            }
+
+          // return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+          },
+        },
+        localization: {
+          timeFormatter: (time) => {
+            if (isBusinessDay(time)) {
+              return '';
+            }
+            return dayjs(time).format(DATE_FORMAT);
+          },
+        },
+        watermark: {
+          color: 'rgba(0, 0, 0, 0)',
+        },
+        crosshair: {
+          color: '#758696',
+        },
+        grid: {
+          vertLines: {
+            color: '#2B2B43',
+          },
+          horzLines: {
+            color: '#363C4E',
+          },
+        },
+      })
       // clean data
       const _dataToApply = []
       for (let index = 0; index < series.length; index += 1) {
         const s = series[index]
-        const p = {
-          ...s,
-          title: s.name,
-          color: s.color,
-        }
+        // const p = {
+        //   ...s,
+        //   title: s.name,
+        //   color: s.color,
+        // }
 
-        console.log('p', p)
+        const p = lineChartCreator(s)
 
         _series[index] = chart.addLineSeries(p)
 
         _dataToApply[index] = []
       }
+
       data.forEach((d) => {
         const t = d[0]
+
+        lastDate = t
         for (let index = 0; index < series.length; index += 1) {
           const { className } = series[index]
           const v = d[paramsArrayMap.indexOf(className)] || 0
@@ -182,42 +198,72 @@ export default {
 
       this.ready = true
       this.$emit('ready', true)
+
+      chart.subscribeCrosshairMove((param) => {
+        if (param.time === undefined) return
+        const time = dayjs(param.time)
+        this.crosshairCurrentTime = time.format(DATE_FORMAT)
+        this.crosshairCurrentPVPower = param.seriesPrices.get(_series[0])
+        this.crosshairCurrentAcOutputActivePower = param.seriesPrices.get(_series[1])
+        this.crosshairBatteryVoltage = param.seriesPrices.get(_series[3])
+      })
+
+      const timeScale = chart.timeScale()
+      timeScale.subscribeVisibleTimeRangeChange(() => {
+        this.goRealTimeButtonVisible = timeScale.scrollPosition() < 0
+      })
+
+      this.chart = chart
+      this.setChartSize()
     })
 
-    chart.subscribeCrosshairMove((param) => {
-      if (param.time === undefined) return
-      const time = dayjs(param.time)
-      this.crosshairCurrentTime = time.format(DATE_FORMAT)
-      this.crosshairCurrentPVPower = param.seriesPrices.get(_series[0])
-      this.crosshairCurrentAcOutputActivePower = param.seriesPrices.get(_series[1])
-      this.crosshairBatteryVoltage = param.seriesPrices.get(_series[3])
-      // const a = param.seriesPrices.get(_series[0])
-
-      // debugger
-      // dateStr = `${param.time.year} - ${param.time.month} - ${param.time.day}`;
-      // const price = param.seriesPrices.get(series)
-      // toolTip.innerHTML =	`<div style="font-size: 24px; margin: 4px 0px; color: #20262E"> AEROSPACE</div><div style="font-size: 22px; margin: 4px 0px; color: #20262E">${(Math.round(price * 100) / 100).toFixed(2)}</div><div>${dateStr}</div>`
-      // const { childChart } = this.$store.state
-      // childChart.moveCrosshair({
-      //   ...param.point,
-      //   x: coord,
-      // });
-    })
-
-    this.chart = chart
-
-    this.setChartSize()
+    // end of setChartData
 
     window.addEventListener('resize', (e) => {
       this.setChartSize()
     })
 
-    const timeScale = chart.timeScale()
-    timeScale.subscribeVisibleTimeRangeChange(() => {
-      this.goRealTimeButtonVisible = timeScale.scrollPosition() < 0
+    socket.on('updateLiveChart', (data) => {
+      for (let index = 0; index < series.length; index += 1) {
+        const { className } = series[index]
+        const v = data[paramsArrayMap.indexOf(className)] || 0
+
+        const dateToUpdate = {
+          time: lastDate,
+          value: v,
+        }
+        _series[index].update(dateToUpdate)
+      }
     })
+
+    socket.on('appendDataToChart', (data) => {
+      console.log(data)
+
+      for (let index = 0; index < series.length; index += 1) {
+        const { className } = series[index]
+        const v = data[paramsArrayMap.indexOf(className)] || 0
+
+        const dateToUpdate = {
+          time: data[0],
+          value: v,
+        }
+        _series[index].update(dateToUpdate)
+      }
+    })
+
+    // // get new chart date every 5 minutes
+    // setInterval(() => {
+    //   this.resetChart()
+    //   socket.emit('getChartData')
+    // }, 1000 * 60 * 5)
+  },
+  unmounted() {
+    this.resetChart()
   },
   methods: {
+    resetChart() {
+      document.querySelector('.tv-lightweight-charts').remove()
+    },
     onRealtimeButtonClicked() {
       const timeScale = this.chart.timeScale()
       timeScale.scrollToRealTime()
