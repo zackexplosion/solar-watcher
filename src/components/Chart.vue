@@ -75,6 +75,7 @@ const series = [
 export default {
   name: 'Chart',
   data: () => ({
+    ready: false,
     chart: null,
     crosshairCurrentAcOutputActivePower: 0,
     crosshairCurrentPVPower: 0,
@@ -98,8 +99,9 @@ export default {
     let lastDate
 
     socket.on('setChartData', (data) => {
+      this.resetChart()
       console.log('setChartData', data.length)
-      let tickMarkFormatterIndex = 0
+      // let tickMarkFormatterIndex = 0
       chart = createChart(container, {
         layout: {
           backgroundColor: '#111111',
@@ -122,7 +124,7 @@ export default {
           // rightBarStaysOnScroll: true,
           tickMarkFormatter: (time, tickMarkType, locale) => {
             const date = dayjs(time)
-            tickMarkFormatterIndex += 1
+            // tickMarkFormatterIndex += 1
             // console.log('date', date.format())
             if (isBusinessDay(time)) {
               return ''
@@ -240,41 +242,41 @@ export default {
 
       this.chart = chart
       this.setChartSize()
+
+      socket.on('updateLiveChart', (_data) => {
+        for (let index = 0; index < series.length; index += 1) {
+          const { className } = series[index]
+          const v = _data[paramsArrayMap.indexOf(className)] || 0
+
+          const dateToUpdate = {
+            time: lastDate,
+            value: v,
+          }
+          _series[index].update(dateToUpdate)
+        }
+      })
+
+      socket.on('appendDataToChart', (_data) => {
+        // console.log(_data)
+
+        for (let index = 0; index < series.length; index += 1) {
+          const { className } = series[index]
+          const v = _data[paramsArrayMap.indexOf(className)] || 0
+
+          const dateToUpdate = {
+            time: _data[0],
+            value: v,
+          }
+          _series[index].update(dateToUpdate)
+        }
+        lastDate = _data[0]
+      })
     })
 
     // end of setChartData
 
     window.addEventListener('resize', (e) => {
       this.setChartSize()
-    })
-
-    socket.on('updateLiveChart', (data) => {
-      for (let index = 0; index < series.length; index += 1) {
-        const { className } = series[index]
-        const v = data[paramsArrayMap.indexOf(className)] || 0
-
-        const dateToUpdate = {
-          time: lastDate,
-          value: v,
-        }
-        _series[index].update(dateToUpdate)
-      }
-    })
-
-    socket.on('appendDataToChart', (data) => {
-      console.log(data)
-
-      for (let index = 0; index < series.length; index += 1) {
-        const { className } = series[index]
-        const v = data[paramsArrayMap.indexOf(className)] || 0
-
-        const dateToUpdate = {
-          time: data[0],
-          value: v,
-        }
-        _series[index].update(dateToUpdate)
-      }
-      lastDate = data[0]
     })
 
     // // get new chart date every 5 minutes
@@ -288,7 +290,10 @@ export default {
   },
   methods: {
     resetChart() {
-      document.querySelector('.tv-lightweight-charts').remove()
+      const dom = document.querySelector('.tv-lightweight-charts')
+      if (dom) {
+        dom.remove()
+      }
     },
     onRealtimeButtonClicked() {
       const timeScale = this.chart.timeScale()
