@@ -222,7 +222,8 @@ export default {
       })
 
       const timeScale = chart.timeScale()
-      timeScale.subscribeVisibleTimeRangeChange(() => {
+      timeScale.subscribeVisibleTimeRangeChange((e) => {
+        console.log(e)
         this.goRealTimeButtonVisible = timeScale.scrollPosition() < 0
       })
 
@@ -231,12 +232,12 @@ export default {
       //   to: 100,
       // })
 
-      const visibleRange = {
-        from: dayjs(data[0][0]).unix(),
-        to: dayjs().unix(),
-      }
+      // const visibleRange = {
+      //   from: dayjs(data[0][0]).unix(),
+      //   to: dayjs().unix(),
+      // }
 
-      console.log('visibleRange', visibleRange)
+      // console.log('visibleRange', visibleRange)
 
       // chart.timeScale().setVisibleRange(visibleRange)
 
@@ -330,6 +331,7 @@ export default {
 }
 
 .legend {
+  display: none;
   width: 35%;
   height: 70px;
   position: absolute;
@@ -361,8 +363,8 @@ export default {
 }
 
 @media  (min-width: 768px) {
-
   .legend {
+    display: block;
     width: 15%;
   }
 }

@@ -1,7 +1,7 @@
 {
   "name": "Solar Watcher",
   "short_name": "solar-watcher",
-  "theme_color": "#000000",
+  "theme_color": "#333333",
   "icons": [
     {
       "src": "./img/icons/android-chrome-192x192.png",
@@ -78,5 +78,5 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#000000"
+  "background_color": "#333333"
 }

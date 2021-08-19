@@ -43,7 +43,7 @@ export default {
 <style lang="scss" scoped>
 .clock {
   display: none;
-  text-align: center;
+  text-align: left;
   /* background: black; */
   /* position: absolute;
   top: 50%;
@@ -62,6 +62,7 @@ export default {
     display: block;
     padding: 0;
     font-size: 60px;
+    float:left;
     .time,
     .date {
       display: inline-block;

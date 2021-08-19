@@ -1,3 +1,4 @@
+
 <template>
   <div v-show="ready">
     <div class="gauges" ref="gauges" />
