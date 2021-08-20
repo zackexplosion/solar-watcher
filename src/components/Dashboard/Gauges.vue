@@ -259,7 +259,7 @@ export default {
   flex-wrap: wrap;
   canvas {
     margin: 0 auto;
-    max-width: 33%;
+    max-width: 35%;
     // height: 50%;
     // width: 50%;
   }
@@ -274,7 +274,7 @@ export default {
   }
   .gauges canvas{
     max-width: 320px;
-    width: 16%;
+    width: 20%;
     flex-grow: 1;
   }
 }

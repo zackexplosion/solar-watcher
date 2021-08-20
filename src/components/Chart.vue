@@ -39,8 +39,8 @@ function lineChartCreator(options) {
   return {
     ...options,
     priceFormat: {
-      precision: 0,
-      minMove: 1,
+      precision: 1,
+      minMove: 0.1,
     },
   }
 }
