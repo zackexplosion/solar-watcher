@@ -1,4 +1,3 @@
-
 <template>
   <div v-show="ready">
     <div class="gauges" ref="gauges" />
@@ -22,26 +21,26 @@ export default {
     // })
     const { socket } = this.$store.state
 
-    const g_powerGeneratedToday = this.createGauge({
-      majorTicks: [0, 5, 10, 15],
-      units: '度',
-      minValue: 0,
-      maxValue: 15,
-      valueInt: 1,
-      valueDec: 2,
-      title: '今日發電',
-    })
+    // const g_powerGeneratedToday = this.createGauge({
+    //   majorTicks: [0, 5, 10, 15],
+    //   units: '度',
+    //   minValue: 0,
+    //   maxValue: 15,
+    //   valueInt: 1,
+    //   valueDec: 2,
+    //   title: '今日發電',
+    // })
 
-    const g_powerOutputToday = this.createGauge({
-      majorTicks: [0, 10, 20, 30, 40, 50],
-      units: '度',
-      value: 0,
-      minValue: 0,
-      maxValue: 50,
-      valueInt: 1,
-      valueDec: 2,
-      title: '今日用電',
-    })
+    // const g_powerOutputToday = this.createGauge({
+    //   majorTicks: [0, 10, 20, 30, 40, 50],
+    //   units: '度',
+    //   value: 0,
+    //   minValue: 0,
+    //   maxValue: 50,
+    //   valueInt: 1,
+    //   valueDec: 2,
+    //   title: '今日用電',
+    // })
 
     const g_pvInputPower = this.createGauge({
       majorTicks: [0, 500, 1000, 1500, 2000, 2500, 3000],
@@ -162,14 +161,14 @@ export default {
       if (pvInputPower) {
         let powerGenerated = Big(pvInputPower).div(3600).div(1000).toNumber()
         powerGenerated = Number.parseFloat(powerGenerated.toFixed(2))
-        g_powerGeneratedToday.value = Number.parseFloat(g_powerGeneratedToday.value)
+        // g_powerGeneratedToday.value = Number.parseFloat(g_powerGeneratedToday.value)
         + powerGenerated
       }
 
       if (acOutputActivePower) {
         let p = Big(acOutputActivePower).div(3600).div(1000).toNumber()
         p = Number.parseFloat(p.toFixed(2))
-        g_powerOutputToday.value = Number.parseFloat(g_powerOutputToday.value) + p
+        // g_powerOutputToday.value = Number.parseFloat(g_powerOutputToday.value) + p
       }
     })
 
@@ -195,11 +194,11 @@ export default {
         }
       })
 
-      powerGeneratedToday = Number.parseFloat(powerGeneratedToday.toFixed(2))
-      g_powerGeneratedToday.value = powerGeneratedToday
+      // powerGeneratedToday = Number.parseFloat(powerGeneratedToday.toFixed(2))
+      // g_powerGeneratedToday.value = powerGeneratedToday
 
-      powerOutputToday = Number.parseFloat(powerOutputToday.toFixed(2))
-      g_powerOutputToday.value = powerOutputToday
+      // powerOutputToday = Number.parseFloat(powerOutputToday.toFixed(2))
+      // g_powerOutputToday.value = powerOutputToday
 
       this.ready = true
     })

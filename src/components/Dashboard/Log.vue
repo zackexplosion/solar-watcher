@@ -13,7 +13,34 @@ export default {
   mounted() {
     const { socket } = this.$store.state
     socket.on('updateLiveChart', (data) => {
-      this.currentLog = data
+      const [
+        timestamp,
+        gridVoltage, gridFrequency,
+        acOutputVoltage, acOutputFrequency,
+        acOutputApparentPower, acOutputActivePower,
+        acOutputLoad,
+        busVoltage, batteryVoltage,
+        batteryChargingCurrent, batteryCapacity,
+        heatSinkTemp,
+        pvInputCurrent, pvInputVoltage,
+        pvBatteryVoltage,
+        batteryDischargeCurrent,
+        flags,
+        batteryVoltageOffset,
+        EEPRomVersion,
+        pvInputPower,
+      ] = data
+
+      let powerSource = 'line'
+
+      if (batteryDischargeCurrent > 0 || pvInputPower > acOutputActivePower) {
+        powerSource = 'battery'
+      }
+      this.currentLog = {
+        chargingCurrent: batteryChargingCurrent,
+        dischargeCurrent: batteryDischargeCurrent,
+        powerSource,
+      }
     })
   },
   methods: {
@@ -30,7 +57,7 @@ export default {
   #log {
     display: block;
     color: #CCC;
-    width: calc(100% - 900px);
+    width: calc(100% - 950px);
     max-height: 150px;
     overflow: hidden;
     float: right;

@@ -72,7 +72,7 @@ function parseLog(row) {
         if (mm) {
           params[i] = parseFloat(mm[0]) || 0
         } else {
-          params[i] = v
+          params[i] = parseFloat(v) || 0
         }
       } else {
         params[i] = v

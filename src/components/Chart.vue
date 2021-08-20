@@ -298,7 +298,8 @@ export default {
     },
     onRealtimeButtonClicked() {
       const timeScale = this.chart.timeScale()
-      timeScale.scrollToRealTime()
+      // timeScale.scrollToRealTime()
+      timeScale.scrollToPosition(10);
     },
     setChartSize() {
       // let dashboardHeight = document.querySelector('#dashboard').offsetHeight

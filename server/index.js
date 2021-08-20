@@ -31,12 +31,6 @@ function setupLogReader() {
     try {
       const data = parseLog(line)
       if (!data) return
-
-      if (cacheData.length >= MAX_CACHE_POINTS) {
-        cacheData.shift()
-      }
-
-      cacheData.push(data)
       io.emit('updateLiveChart', data)
     } catch (error) {
       console.error(error)
@@ -100,31 +94,37 @@ exec(`tail -n ${MAX_CACHE_POINTS} ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, asy
     console.log(`listening on *:${PORT}`);
   })
 
+  function getRandom(n1, seed) {
+    const _seed = seed || 1
+    let r = Number.parseFloat((Math.random() * _seed) + 1)
+    r += n1
+    return Number.parseFloat(r.toFixed(2))
+  }
+
   if (process.env.NODE_ENV !== 'production') {
     setInterval(() => {
       const data = [
         new Date().getTime(), // timestamp
-        224.7 + (Number.parseFloat(Math.random() * 10) + 1),
+        getRandom(224.7, 1), // gridVoltage
+        60, // gridFrequency
+        getRandom(224.7, 1),
         60,
-        224.7 + (Number.parseFloat(Math.random() * 10) + 1),
-        60,
-        1078 + (Number.parseFloat(Math.random() * 100) + 1),
-        958 + (Number.parseFloat(Math.random() * 100) + 1),
+        getRandom(1078, 100),
+        getRandom(958, 100),
         21,
-        374 + (Number.parseFloat(Math.random() * 10) + 1),
-        49.2 + (Number.parseFloat(Math.random() * 10) + 1),
-        0,
-        40 + (Number.parseFloat(Math.random() * 10) + 1),
-        38,
-        0,
-        0,
-        0,
-        0,
+        getRandom(374, 1),
+        getRandom(49.2, 1),
+        getRandom(1, 10),
+        getRandom(40, 10),
+        getRandom(38, 10),
+        getRandom(0, 10),
+        getRandom(0, 10),
+        getRandom(0, 10),
+        getRandom(0, 10), // batteryDischargeCurrent
         '00010101',
         0,
         0,
-        1000 + (Number.parseFloat(Math.random() * 10) + 1),
-        1000 + (Number.parseFloat(Math.random() * 10) + 1),
+        getRandom(1000, 10),
       ]
 
       if (cacheData.length >= MAX_CACHE_POINTS) {
