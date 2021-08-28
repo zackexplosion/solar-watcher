@@ -119,6 +119,7 @@ export default {
         timeScale: {
           timeVisible: true,
           secondsVisible: false,
+          borderVisible: false,
           // rightOffset: 12,
           // barSpacing: 10,
           // rightBarStaysOnScroll: true,

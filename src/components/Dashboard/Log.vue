@@ -33,12 +33,15 @@ export default {
 
       let powerSource = 'line'
 
-      if (batteryDischargeCurrent > 0 || pvInputPower > acOutputActivePower) {
+      if (
+        pvInputPower > acOutputActivePower || batteryDischargeCurrent > 0
+      ) {
         powerSource = 'battery'
       }
       this.currentLog = {
         chargingCurrent: batteryChargingCurrent,
         dischargeCurrent: batteryDischargeCurrent,
+        pvInputCurrent,
         powerSource,
       }
     })
