@@ -8,8 +8,8 @@ const MODES = require('./modes')
 
 const MODE = process.env.MODE || MODES.RENEW
 
-function handleFile(file, last_log) {
-  console.log('handling', file, 'with mode:', MODE, last_log)
+function handleFile(file) {
+  console.log('handling', file, 'with mode:', MODE)
   const contents = fs.readFileSync(file, 'utf-8').split('\n')
   let d1
   let d2
@@ -23,7 +23,7 @@ function handleFile(file, last_log) {
       if (dayjs(log[0]).get('minutes') % PERIOD_IN_MINUTES !== 0) {
         continue
       }
-      d1 = dayjs(log[0])
+      d1 = dayjs(log[0]).startOf('m')
       console.log('start from', d1.toDate())
     }
 

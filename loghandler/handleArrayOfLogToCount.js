@@ -41,6 +41,8 @@ function handleArrayOfLogToCount(data) {
         result[i] = Number.parseFloat(Big(n).div(processed_data_count).toFixed(2))
       }
     }
+
+    result[0] = dayjs(result[0]).startOf('m')
     // console.log(dayjs(data[0]).toDate())
     db.get('logs')
       .push(result)

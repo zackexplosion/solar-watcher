@@ -4,12 +4,12 @@ const util = require('util')
 const path = require('path')
 const MODES = require('./modes')
 
-const MODE = process.env.MODE || MODES.RENEW
+// const MODE = process.env.MODE || MODES.RENEW
 
 const promiseExec = util.promisify(exec)
 
-async function loadLogFromServer() {
-  console.log('copy log from server')
+async function loadLogFromServer(MODE = process.env.MODE) {
+  console.log('copy log from server with', MODE, 'mode')
   let log_path = SERVER_LOG_URI
   if (MODE === MODES.RENEW) {
     log_path = SERVER_LOG_URI_RENEW
@@ -25,6 +25,8 @@ async function loadLogFromServer() {
       if (error) {
         return reject(error)
       }
+
+      console.log(log_path, 'downloaded')
 
       if (MODE === MODES.RENEW) {
         exec(`gunzip -d ${__dirname}/solar*.gz`, (_error, _stdout, _stderr) => {

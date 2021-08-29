@@ -18,15 +18,19 @@ async function main() {
   lowdb.read()
 
   const last_log = lowdb.get('logs').last().value()
-  let start_log_time = dayjs(last_log[0])
-  let next_log_time = dayjs(last_log[0]).add(5, 'minutes')
+  let d1 = dayjs(last_log[0]).startOf('m')
+  let d2
+
+  // console.log('log appender running', start_log_time.format(), 'to', next_log_time.format())
 
   const contents = fs.readFileSync(SERVER_LOG_PATH, 'utf-8').split('\n')
-  // handleFile(SERVER_LOG_PATH, last_log)
+
   let arrayOfLogToCount = []
   for (const c of contents) {
     const log = parseLog(c)
-    const skip_old_data_diff = next_log_time.diff(start_log_time, 'seconds')
+
+    d2 = dayjs(log[0])
+    const skip_old_data_diff = d2.diff(d1, 'seconds')
 
     if (skip_old_data_diff <= 0) {
       continue
@@ -35,16 +39,19 @@ async function main() {
     if (!log) {
       continue
     }
+    const d = dayjs(log[0])
 
     arrayOfLogToCount.push(log)
-    const diff = next_log_time.diff(start_log_time, 'minutes')
-    if (diff >= PERIOD_IN_MINUTES) {
+    const diff = d2.diff(d1, 'minutes')
+    console.log('handling..', d1.format(), d2.format(), diff)
+    // console.log('diff', diff)
+    if (diff <= PERIOD_IN_MINUTES) {
+      // console.log(arrayOfLogToCount)
       handleArrayOfLogToCount(arrayOfLogToCount)
 
       // reset
       arrayOfLogToCount = []
-      start_log_time = dayjs(log[0])
-      next_log_time = start_log_time.add(5, 'minutes')
+      d1 = d1.add(5, 'minutes')
     }
   }
 
@@ -57,3 +64,5 @@ if (require.main === module) {
 } else {
   module.exports = main
 }
+
+// rsync -avz --progress  zack@35.185.219.199:/var/log/nginx/solar.log /Users/zack/projects/solar-watcher/loghandler
