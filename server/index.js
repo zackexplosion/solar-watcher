@@ -2,7 +2,7 @@
 const LOG_PATH = process.env.SERVER_LOG_PATH || './test.log'
 const PORT = process.env.PORT || 7777
 const MAX_CACHE_POINTS = process.env.MAX_CACHE_POINTS || 900
-const LIVE_CHART_LOADED_DAYS = 3
+const LIVE_CHART_LOADED_DAYS = 7
 
 // main server
 const express = require('express')
@@ -55,7 +55,8 @@ io.on('connection', (socket) => {
     db.read()
     // const logs = db.get('logs').value()
     const now = dayjs().startOf('d')
-    const logs = db.get('logs').filter((_) => now.diff(dayjs(_[0]), 'h') < LIVE_CHART_LOADED_DAYS * 24).value()
+    const start = now.subtract(LIVE_CHART_LOADED_DAYS, 'd')
+    const logs = db.get('logs').filter((_) => dayjs(_[0]).diff(start, 'd') >= 0).value()
     console.log('logs read', logs.length)
     if (logs.length > 0) {
       socket.emit('setChartData', logs)
