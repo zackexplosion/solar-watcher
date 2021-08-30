@@ -21,6 +21,13 @@ async function main() {
   let d1 = dayjs(last_log[0]).startOf('m')
   let d2
 
+  const now = dayjs()
+
+  if (now.diff(d1, 'minutes') <= 5) {
+    console.log('run too earlier')
+    return
+  }
+
   // console.log('log appender running', start_log_time.format(), 'to', next_log_time.format())
 
   const contents = fs.readFileSync(SERVER_LOG_PATH, 'utf-8').split('\n')
@@ -29,24 +36,25 @@ async function main() {
   for (const c of contents) {
     const log = parseLog(c)
 
-    d2 = dayjs(log[0])
-    const skip_old_data_diff = d2.diff(d1, 'seconds')
-
-    if (skip_old_data_diff <= 0) {
-      continue
-    }
-
     if (!log) {
       continue
     }
-    const d = dayjs(log[0])
 
+    d2 = dayjs(log[0])
+    const skip_old_data_diff = d2.diff(d1, 's')
+
+    if (skip_old_data_diff <= 300) {
+      // console.log('skip', skip_old_data_diff)
+      continue
+    }
+
+    // const d = dayjs(log[0])
+    log[17] = 'append'
     arrayOfLogToCount.push(log)
-    const diff = d2.diff(d1, 'minutes')
-    console.log('handling..', d1.format(), d2.format(), diff)
-    // console.log('diff', diff)
-    if (diff <= PERIOD_IN_MINUTES) {
-      // console.log(arrayOfLogToCount)
+    const diff = d2.diff(d1, 's')
+    console.log('diff', diff)
+    if (diff >= PERIOD_IN_MINUTES * 60) {
+      // console.log('handling..', d1.format(), d2.format(), diff)
       handleArrayOfLogToCount(arrayOfLogToCount)
 
       // reset

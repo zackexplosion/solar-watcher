@@ -251,7 +251,7 @@ export default {
           const v = _data[paramsArrayMap.indexOf(className)] || 0
 
           const dateToUpdate = {
-            time: lastDate,
+            time: dayjs(lastDate).add(5, 'm').valueOf(),
             value: v,
           }
           _series[index].update(dateToUpdate)

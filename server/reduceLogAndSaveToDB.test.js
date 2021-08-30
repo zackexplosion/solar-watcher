@@ -12,7 +12,7 @@ async function main() {
   const last_log = lowdb.get('logs').last().value()
   const start_log_time = dayjs(last_log[0])
 
-  console.log('s', start_log_time.format())
+  console.log('start from', start_log_time.format())
   // await loadLogFromServer(MODES.APPEND)
   reduceLogAndSaveToDB()
 

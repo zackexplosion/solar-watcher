@@ -42,11 +42,15 @@ function handleArrayOfLogToCount(data) {
       }
     }
 
-    result[0] = dayjs(result[0]).startOf('m')
-    // console.log(dayjs(data[0]).toDate())
+    const time = dayjs(result[0]).startOf('m')
+
+    result[0] = time.valueOf()
+
     db.get('logs')
       .push(result)
       .write()
+
+    console.log('saved', time.format())
   } catch (error) {
     console.error(error)
     console.error(JSON.stringify(result))
