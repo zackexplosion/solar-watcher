@@ -2,7 +2,7 @@
 const LOG_PATH = process.env.SERVER_LOG_PATH || './test.log'
 const PORT = process.env.PORT || 7777
 const MAX_CACHE_POINTS = process.env.MAX_CACHE_POINTS || 900
-const LIVE_CHART_LOADED_DAYS = 7
+const LIVE_CHART_LOADED_DAYS = 3
 
 // main server
 const express = require('express')
@@ -10,6 +10,10 @@ const express = require('express')
 const app = express()
 const http = require('http')
 const dayjs = require('dayjs')
+const tz = require('dayjs/plugin/timezone')
+
+dayjs.extend(tz)
+dayjs.tz.setDefault('Asia/Taipei')
 
 const server = http.createServer(app)
 const io = require('socket.io')(server)
@@ -56,7 +60,7 @@ io.on('connection', (socket) => {
     // const logs = db.get('logs').value()
     const now = dayjs().startOf('d')
     const start = now.subtract(LIVE_CHART_LOADED_DAYS, 'd')
-    const logs = db.get('logs').filter((_) => dayjs(_[0]).diff(start, 'd') >= 0).value()
+    const logs = db.get('logs').filter((_) => dayjs(_[0]).diff(start, 'm') >= 0).value()
     console.log('logs read', logs.length)
     if (logs.length > 0) {
       socket.emit('setChartData', logs)

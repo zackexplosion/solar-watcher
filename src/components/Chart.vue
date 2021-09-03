@@ -120,6 +120,8 @@ export default {
           timeVisible: true,
           secondsVisible: false,
           borderVisible: false,
+          // fixLeftEdge: true,
+          // fixRightEdge: true,
           // rightOffset: 12,
           // barSpacing: 10,
           // rightBarStaysOnScroll: true,
@@ -142,7 +144,7 @@ export default {
               // case TickMarkType.TimeWithSeconds:
               //   return date.format('hh:mm:ss')
               default:
-                return `${date.format('hh:mm')}`
+                return `${date.format('HH:mm')}`
             }
 
           // return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
@@ -158,7 +160,7 @@ export default {
           },
         },
         watermark: {
-          text: 'Solar Watcher',
+          text: '萬池王',
           visible: true,
           color: '#556',
         },
