@@ -247,7 +247,9 @@ export default {
       this.chart = chart
       this.setChartSize()
 
+      let appendingNewData = false
       socket.on('updateLiveChart', (_data) => {
+        if (appendingNewData) return
         for (let index = 0; index < series.length; index += 1) {
           const { className } = series[index]
           const v = _data[paramsArrayMap.indexOf(className)] || 0
@@ -262,7 +264,7 @@ export default {
 
       socket.on('appendDataToChart', (_data) => {
         // console.log(_data)
-
+        appendingNewData = true
         for (let index = 0; index < series.length; index += 1) {
           const { className } = series[index]
           const v = _data[paramsArrayMap.indexOf(className)] || 0
@@ -274,6 +276,7 @@ export default {
           _series[index].update(dateToUpdate)
         }
         lastDate = _data[0]
+        appendingNewData = false
       })
     })
 
