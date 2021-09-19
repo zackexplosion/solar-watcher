@@ -37,7 +37,8 @@ function handleFile(file) {
 
         // reset
         arrayOfLogToCount = []
-        d1 = dayjs(log[0])
+        // d1 = dayjs(log[0])
+        d1 = d1.add(5, 'minutes')
       }
     }
   }

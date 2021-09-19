@@ -23,13 +23,12 @@ async function main() {
 
   const now = dayjs()
 
-  if (now.diff(d1, 'minutes') <= 5) {
+  if (now.diff(d1, 'minutes') < 5) {
     console.log('run too earlier')
     return
   }
 
   // console.log('log appender running', start_log_time.format(), 'to', next_log_time.format())
-
   const contents = fs.readFileSync(SERVER_LOG_PATH, 'utf-8').split('\n')
 
   let arrayOfLogToCount = []
@@ -43,13 +42,13 @@ async function main() {
     d2 = dayjs(log[0])
     const skip_old_data_diff = d2.diff(d1, 's')
 
-    if (skip_old_data_diff <= 300) {
+    if (skip_old_data_diff < 300) {
       // console.log('skip', skip_old_data_diff)
       continue
     }
 
     // const d = dayjs(log[0])
-    log[17] = 'append'
+    // log[17] = 'append'
     arrayOfLogToCount.push(log)
     const diff = d2.diff(d1, 's')
     console.log('diff', diff)

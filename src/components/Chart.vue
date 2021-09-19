@@ -3,10 +3,10 @@
     <div class="container" ref="lightweightChart">
       <div v-show="ready">
         <div class="legend">
-          <div class="acOutputActivePower">負載：{{crosshairCurrentAcOutputActivePower}} W</div>
           <div class="pvInputPower">發電：{{crosshairCurrentPVPower}} W</div>
+          <div class="acOutputActivePower">負載：{{crosshairCurrentAcOutputActivePower}} W</div>
           <div class="pvInputPower">電壓：{{crosshairBatteryVoltage}} V</div>
-          <div class="date">日期：{{crosshairCurrentTime.format('YYYY-MM-DD')}}</div>
+          <div class="date">日期：{{crosshairCurrentTime.format('MM/DD')}}</div>
           <div class="date">時間：{{crosshairCurrentTime.format('hh:mm')}}</div>
         </div>
         <div class="go-to-realtime-button" v-show="goRealTimeButtonVisible" @click="onRealtimeButtonClicked()">
@@ -338,12 +338,12 @@ export default {
 }
 
 .legend {
-  display: none;
-  width: 35%;
+  /* display: none; */
+  width: 30%;
   height: 70px;
   position: absolute;
   padding: 8px;
-  font-size: 1.2em;
+  font-size: 0.6em;
   /* color: '#20262E'; */
   color: #ccc;
   /* background-color: rgba(255, 255, 255, 0.23); */
@@ -371,7 +371,8 @@ export default {
 
 @media  (min-width: 768px) {
   .legend {
-    display: block;
+    /* display: block; */
+    font-size: 1.2em;
     width: 15%;
   }
 }

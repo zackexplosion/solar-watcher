@@ -50,7 +50,7 @@ function handleArrayOfLogToCount(data) {
       .push(result)
       .write()
 
-    console.log('saved', time.format())
+    // console.log('saved', time.format())
   } catch (error) {
     console.error(error)
     console.error(JSON.stringify(result))
