@@ -97,10 +97,10 @@ export default {
     // })
 
     const g_batteryVoltage = this.createGauge({
-      majorTicks: [45, 50, 55, 60],
+      majorTicks: [40, 45, 50, 55, 60],
       units: 'Voltage',
       value: 48,
-      minValue: 45,
+      minValue: 40,
       maxValue: 60,
       valueInt: 2,
       title: '電池電壓',
