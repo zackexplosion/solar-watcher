@@ -43,3 +43,5 @@ async function loadLogFromServer(MODE = process.env.MODE) {
 }
 
 module.exports = loadLogFromServer
+
+export default loadLogFromServer

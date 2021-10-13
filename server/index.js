@@ -5,26 +5,26 @@ const MAX_CACHE_POINTS = process.env.MAX_CACHE_POINTS || 900
 const LIVE_CHART_LOADED_DAYS = 3
 
 // main server
-const express = require('express')
-
-const app = express()
-const http = require('http')
-const dayjs = require('dayjs')
-const tz = require('dayjs/plugin/timezone')
+import http from 'http'
+import express from 'express'
+import dayjs from 'dayjs'
+import tz from 'dayjs/plugin/timezone.js'
+import { Server } from "socket.io"
 
 dayjs.extend(tz)
 dayjs.tz.setDefault('Asia/Taipei')
 
+const app = express()
 const server = http.createServer(app)
-const io = require('socket.io')(server)
+const io = new Server(server, {})
 
 // for log reader
-const { exec } = require('child_process')
+import { exec } from 'child_process'
 
-const Tail = require('nodejs-tail')
-const db = require('./db')
+import Tail from 'nodejs-tail'
+import db from './db.js'
 
-const parseLog = require('./parseLog')
+import parseLog from './parseLog.js'
 
 const cacheData = []
 
@@ -145,7 +145,7 @@ exec(`tail -n ${MAX_CACHE_POINTS} ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, asy
     }, 1000)
   }
 })
-const reduceLogAndSaveToDB = require('./reduceLogAndSaveToDB')
+import reduceLogAndSaveToDB from './reduceLogAndSaveToDB.js'
 
 let latest_date = 0
 setInterval(() => {

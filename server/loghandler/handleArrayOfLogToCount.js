@@ -1,7 +1,8 @@
 /* eslint-disable no-continue */
-const dayjs = require('dayjs')
-const Big = require('big.js')
-const db = require('../server/db')
+
+import dayjs from 'dayjs'
+import db from '../db.js'
+import Big from 'big.js'
 
 const NOT_COUNT_COLUMN_INDEXES = [0, 17, 18, 19]
 const DATA_LENGTH = 21
@@ -61,4 +62,6 @@ function handleArrayOfLogToCount(data) {
   return result
 }
 
-module.exports = handleArrayOfLogToCount
+// module.exports = handleArrayOfLogToCount
+
+export default handleArrayOfLogToCount

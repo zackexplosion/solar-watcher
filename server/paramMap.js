@@ -16,4 +16,4 @@ const paramMap = {
   flags: 'flags',
 }
 
-module.exports = paramMap
+export default paramMap

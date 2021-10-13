@@ -1,7 +1,7 @@
 const VALID_ID_LIST = process.env.SERVER_VALID_ID_LIST.split(',').map((_) => _.trim()) || []
-const dayjs = require('dayjs')
-const paramMapV1 = require('./paramMap')
-const paramsArrayMap = require('./paramsArrayMap')
+import dayjs from 'dayjs'
+import paramMapV1 from './paramMap.js'
+import paramsArrayMap from './paramsArrayMap.js'
 
 function parseLogV1(raw_params) {
   const output = {}
@@ -120,4 +120,7 @@ function parseLog(row) {
   return params
 }
 
-module.exports = parseLog
+// module.exports = parseLog
+
+
+export default parseLog

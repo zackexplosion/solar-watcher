@@ -159,11 +159,11 @@ export default {
             return dayjs(time).format(DATE_FORMAT);
           },
         },
-        watermark: {
-          text: '萬池王',
-          visible: true,
-          color: '#556',
-        },
+        // watermark: {
+        //   text: '萬池王',
+        //   visible: true,
+        //   color: '#556',
+        // },
         crosshair: {
           color: '#758696',
         },

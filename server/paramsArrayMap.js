@@ -16,4 +16,4 @@ const paramsArrayMap = [
   'pvInputPower', // 20
 ]
 
-module.exports = paramsArrayMap
+export default paramsArrayMap

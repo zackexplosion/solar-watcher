@@ -1,7 +1,7 @@
-const low = require('lowdb')
-const FileSync = require('lowdb/adapters/FileSync')
+import { Low, JSONFile } from 'lowdb'
 
-const adapter = new FileSync('db.json')
-const lowdb = low(adapter)
+const adapter = new JSONFile('db.json')
+const db = new Low(adapter)
+await db.read()
 
-module.exports = lowdb
+export default db

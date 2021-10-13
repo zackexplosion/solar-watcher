@@ -2,22 +2,29 @@
 /* eslint-disable no-continue */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
-const low = require('lowdb')
-const fs = require('fs')
-const FileSync = require('lowdb/adapters/FileSync')
-const dayjs = require('dayjs')
-const parseLog = require('./parseLog')
-const handleArrayOfLogToCount = require('../loghandler/handleArrayOfLogToCount')
+import fs from 'fs'
+import dayjs from 'dayjs'
+import lowdb from './db.js'
+import parseLog from './parseLog.js'
+import handleArrayOfLogToCount from './loghandler/handleArrayOfLogToCount.js'
+import lodash from 'lodash'
+
+
 
 const { SERVER_LOG_PATH } = process.env
 const PERIOD_IN_MINUTES = 5
-const lowdb = low(new FileSync('db.json'))
+
 async function main() {
   console.time('took')
 
-  lowdb.read()
+  await lowdb.read()
+
+  // ...
+  // Note: db.data needs to be initialized before lodash.chain is called.
+  lowdb.chain = lodash.chain(lowdb.data)
 
   const last_log = lowdb.get('logs').last().value()
+  // const last_log = lowdb.data.logs.last()
   let d1 = dayjs(last_log[0]).startOf('m')
   let d2
 
@@ -65,11 +72,6 @@ async function main() {
   console.timeEnd('took')
 }
 
-if (require.main === module) {
-  console.log('called directly');
-  main()
-} else {
-  module.exports = main
-}
+export default main
 
 // rsync -avz --progress  zack@35.185.219.199:/var/log/nginx/solar.log /Users/zack/projects/solar-watcher/loghandler
