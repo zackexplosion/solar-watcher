@@ -1,6 +1,6 @@
 const dayjs = require('dayjs')
 const fs = require('fs')
-const parseLog = require('../server/parseLog')
+const parseLog = require('../parseLog')
 const handleArrayOfLogToCount = require('./handleArrayOfLogToCount')
 
 const PERIOD_IN_MINUTES = 5

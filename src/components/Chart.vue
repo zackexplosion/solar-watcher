@@ -159,11 +159,11 @@ export default {
             return dayjs(time).format(DATE_FORMAT);
           },
         },
-        watermark: {
-          text: '萬池王',
-          visible: true,
-          color: '#556',
-        },
+        // watermark: {
+        //   text: '萬池王',
+        //   visible: true,
+        //   color: '#556',
+        // },
         crosshair: {
           color: '#758696',
         },
@@ -286,11 +286,11 @@ export default {
       this.setChartSize()
     })
 
-    // // get new chart date every 5 minutes
-    // setInterval(() => {
-    //   this.resetChart()
-    //   socket.emit('getChartData')
-    // }, 1000 * 60 * 5)
+    // reload every 5 minutes
+    setInterval(() => {
+      // eslint-disable-next-line no-self-assign
+      window.location = window.location
+    }, 1000 * 60 * 5)
   },
   unmounted() {
     this.resetChart()
@@ -317,6 +317,7 @@ export default {
         h = window.innerHeight - 300
       }
 
+      if (!this.chart) return
       // console.log('h', h)
       this.chart.applyOptions({
         width: w,

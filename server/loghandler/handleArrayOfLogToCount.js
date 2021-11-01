@@ -1,7 +1,7 @@
 /* eslint-disable no-continue */
 const dayjs = require('dayjs')
 const Big = require('big.js')
-const db = require('../server/db')
+const db = require('../db')
 
 const NOT_COUNT_COLUMN_INDEXES = [0, 17, 18, 19]
 const DATA_LENGTH = 21
