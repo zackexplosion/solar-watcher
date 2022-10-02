@@ -7,7 +7,7 @@ const fs = require('fs')
 const FileSync = require('lowdb/adapters/FileSync')
 const dayjs = require('dayjs')
 const parseLog = require('./parseLog')
-const handleArrayOfLogToCount = require('../loghandler/handleArrayOfLogToCount')
+const handleArrayOfLogToCount = require('./loghandler/handleArrayOfLogToCount')
 
 const { SERVER_LOG_PATH } = process.env
 const PERIOD_IN_MINUTES = 5
