@@ -76,7 +76,26 @@ export default {
       units: 'Voltage',
       minValue: 0,
       maxValue: 300,
+      valueInt: 1,
       title: 'PV電壓',
+    })
+
+    const g_batteryChargingCurrent = this.createGauge({
+      // majorTicks: [0, 50, 100, 150, 200, 250, 300],
+      units: 'Ampere',
+      valueInt: 1,
+      minValue: 0,
+      maxValue: 100,
+      title: '充電電流',
+    })
+
+    const g_batteryDischargeCurrent = this.createGauge({
+      // majorTicks: [0, 50, 100, 150, 200, 250, 300],
+      units: 'Ampere',
+      valueInt: 1,
+      minValue: 0,
+      maxValue: 100,
+      title: '放電電流',
     })
 
     // const g_pvInputCurrent = this.createGauge({
@@ -138,6 +157,8 @@ export default {
       // g_acOutputVoltage.value = acOutputVoltage
       g_pvInputPower.value = pvInputPower
       g_batteryVoltage.value = batteryVoltage
+      g_batteryChargingCurrent.value = batteryChargingCurrent
+      g_batteryDischargeCurrent.value = batteryDischargeCurrent
       g_pvInputVoltage.value = pvInputVoltage
       // g_pvInputCurrent.value = pvInputCurrent
 
@@ -152,7 +173,7 @@ export default {
     })
 
     socket.on('updateLiveChart', (data) => {
-      if (!this.ready) return
+      // if (!this.ready) return
       setupGauge(data)
       const acOutputActivePower = data[6]
       const pvInputPower = data[20]
@@ -259,7 +280,7 @@ export default {
   flex-wrap: wrap;
   canvas {
     margin: 0 auto;
-    max-width: 35%;
+    max-width: 45%;
     // height: 50%;
     // width: 50%;
   }
@@ -268,14 +289,29 @@ export default {
 @media  (min-width: 768px) {
   .gauges {
     flex-wrap: wrap;
-    // canvas {
-    //   width: 50%;
-    // }
   }
   .gauges canvas{
-    max-width: 320px;
-    width: 20%;
+    max-width: 33%;
     flex-grow: 1;
   }
 }
+
+@media  (min-width: 1024px) {
+  .gauges canvas{
+    max-width: 15%;
+  }
+}
+
+// @media  (min-width: 1440px) {
+//   .gauges canvas{
+//     max-width: 15%;
+//   }
+// }
+
+// @media  (min-width: 1920px) {
+//   .gauges canvas{
+//     width: 30%;
+//   }
+// }
+
 </style>

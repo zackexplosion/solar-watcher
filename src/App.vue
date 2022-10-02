@@ -1,20 +1,27 @@
 <template>
   <div id="app" ref="app">
-    <!-- need app width before ready -->
-    <Dashboard />
+    <nav>
+      <h1>Solar Watcher</h1>
+      <Clock/>
+      <Log />
+    </nav>
+    <Gauges />
     <Chart @ready="onReady()" />
   </div>
 </template>
 
 <script>
+import Log from './components/Log.vue'
 import Chart from './components/Chart.vue'
-// import Loading from './components/Loading.vue'
-import Dashboard from './components/Dashboard/Dashboard.vue'
+import Gauges from './components/Gauges.vue'
+import Clock from './components/Clock.vue'
 
 export default {
   name: 'App',
   components: {
-    Dashboard,
+    Log,
+    Gauges,
+    Clock,
     Chart,
   },
   mounted() {
@@ -39,12 +46,9 @@ export default {
 
 <style lang="scss">
 html, body {
-  margin:0;
-  padding:0;
-}
-
-body{
-  padding: 0 1em;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
 #app {
@@ -52,11 +56,26 @@ body{
   margin: 0 auto;
   width: 100%;
   // height: 100%;
-  padding-top: 0.5em;
+  // padding:0.5em 15px 0 15px;
   // overflow: hidden;
 }
 // .chart {
 //   height: calc(100vh - 450px) ;
 // }
+
+nav {
+  padding:0 1em;
+  margin-top: 1em;
+  position: relative;
+  height: 40px;
+  h1 {
+    background: url('/img/icons/apple-touch-icon-60x60.png') no-repeat left center;
+    display: inline-block;
+    background-size: contain;
+    padding-left: 50px;
+    margin:0;
+    color: #FFFFFF;
+  }
+}
 
 </style>

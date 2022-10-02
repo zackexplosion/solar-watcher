@@ -43,26 +43,30 @@ export default {
 <style lang="scss" scoped>
 .clock {
   display: none;
-  text-align: left;
-  /* background: black; */
-  /* position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translateX(-50%) translateY(-50%); */
-  color: #CCC;
-  font-size: 34px;
-  /* font-family: 'Inconsolata', monospace; */
-  font-weight: bold;
-  letter-spacing: 7px;
-  padding: 0.5em 0;
 }
 
 @media  (min-width: 768px) {
   .clock {
+    text-align: left;
+    position: absolute;
+    top:0;
+    text-align: center;
+    width: 100%;
+    /* background: black; */
+    /* position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%); */
+    color: #CCC;
+    // font-size: 34px;
+    // /* font-family: 'Inconsolata', monospace; */
+    font-weight: bold;
+    letter-spacing: 7px;
+    padding: 0.5em 0;
     display: block;
     padding: 0;
-    font-size: 60px;
-    float:left;
+    // font-size: 60px;
+    // float:left;
     .time,
     .date {
       display: inline-block;

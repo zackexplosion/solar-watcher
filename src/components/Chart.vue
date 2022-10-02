@@ -176,6 +176,7 @@ export default {
           },
         },
       })
+
       // clean data
       const _dataToApply = []
       for (let index = 0; index < series.length; index += 1) {
@@ -278,6 +279,8 @@ export default {
         lastDate = _data[0]
         appendingNewData = false
       })
+
+      this.goToRealtime()
     })
 
     // end of setChartData
@@ -302,15 +305,18 @@ export default {
         dom.remove()
       }
     },
-    onRealtimeButtonClicked() {
+    goToRealtime() {
       const timeScale = this.chart.timeScale()
-      // timeScale.scrollToRealTime()
-      timeScale.scrollToPosition(10);
+      timeScale.scrollToPosition(50);
+    },
+    onRealtimeButtonClicked() {
+      this.goToRealtime()
     },
     setChartSize() {
       // let dashboardHeight = document.querySelector('#dashboard').offsetHeight
       // dashboardHeight -= document.querySelector('#dashboard').offsetTop
-      const w = document.querySelector('#app').offsetWidth
+      // const w = document.querySelector('#app').offsetWidth
+      const w = document.querySelector('body').offsetWidth
       let h = window.innerHeight - 400
 
       if (window.innerWidth <= 768) {
@@ -329,10 +335,6 @@ export default {
 </script>
 
 <style>
-.chart {
-  position: absolute;
-  bottom: 1em;
-}
 
 .container {
   position: relative;
@@ -370,7 +372,12 @@ export default {
   bottom: 4em;
 }
 
-@media  (min-width: 768px) {
+@media  (min-width: 1024px) {
+  .chart {
+    position: absolute;
+    bottom: 0;
+  }
+
   .legend {
     /* display: block; */
     font-size: 1.2em;

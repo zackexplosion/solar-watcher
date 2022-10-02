@@ -39,8 +39,8 @@ export default {
         powerSource = 'battery'
       }
       this.currentLog = {
-        chargingCurrent: batteryChargingCurrent,
-        dischargeCurrent: batteryDischargeCurrent,
+        // chargingCurrent: batteryChargingCurrent,
+        // dischargeCurrent: batteryDischargeCurrent,
         pvInputCurrent,
         powerSource,
       }
@@ -58,12 +58,17 @@ export default {
 
 @media  (min-width: 768px) {
   #log {
+    text-align: right;
     display: block;
     color: #CCC;
-    width: calc(100% - 950px);
+    // width: calc(100% - 1050px);
+    width: 30%;
     max-height: 150px;
     overflow: hidden;
-    float: right;
+    position: absolute;
+    right:15px;
+    top: 0;
+    // float: right;
   }
 }
 </style>

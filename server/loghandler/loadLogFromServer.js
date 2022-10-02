@@ -29,12 +29,11 @@ async function loadLogFromServer(MODE = process.env.MODE) {
       console.log(log_path, 'downloaded')
 
       if (MODE === MODES.RENEW) {
-        exec(`gunzip -d ${__dirname}/solar*.gz`, (_error, _stdout, _stderr) => {
-          if (_error) {
-            return reject(_error)
-          }
-          return resolve(true)
-        })
+        exec(`gunzip -d ${__dirname}/solar*.gz`, (_error, _stdout, _stderr) =>
+          // if (_error) {
+          //   return reject(_error)
+          // }
+          resolve(true))
       } else {
         resolve(true)
       }

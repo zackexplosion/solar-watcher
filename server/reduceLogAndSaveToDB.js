@@ -11,9 +11,9 @@ const handleArrayOfLogToCount = require('./loghandler/handleArrayOfLogToCount')
 
 const { SERVER_LOG_PATH } = process.env
 const PERIOD_IN_MINUTES = 5
-const lowdb = low(new FileSync('db.json'))
+const lowdb = low(new FileSync('./db.json'))
 async function main() {
-  console.time('took')
+  console.time('handleArrayOfLogToCount')
 
   lowdb.read()
 
@@ -62,7 +62,7 @@ async function main() {
     }
   }
 
-  console.timeEnd('took')
+  console.timeEnd('handleArrayOfLogToCount')
 }
 
 if (require.main === module) {
