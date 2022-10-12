@@ -8,6 +8,7 @@
 import { RadialGauge } from 'canvas-gauges'
 import dayjs from 'dayjs'
 import Big from 'big.js'
+import logHandler from '../../common/log-handler'
 
 export default {
   name: 'Gauges',
@@ -135,31 +136,15 @@ export default {
     // ]
 
     function setupGauge(data) {
-      const [
-        timestamp,
-        gridVoltage, gridFrequency,
-        acOutputVoltage, acOutputFrequency,
-        acOutputApparentPower, acOutputActivePower,
-        acOutputLoad,
-        busVoltage, batteryVoltage,
-        batteryChargingCurrent, batteryCapacity,
-        heatSinkTemp,
-        pvInputCurrent, pvInputVoltage,
-        pvBatteryVoltage,
-        batteryDischargeCurrent,
-        flags,
-        batteryVoltageOffset,
-        EEPRomVersion,
-        pvInputPower,
-      ] = data
+      const log = logHandler(data)
       // g_gridVoltage.value = gridVoltage
-      g_acOutputActivePower.value = acOutputActivePower
+      g_acOutputActivePower.value = log.acOutputActivePower
       // g_acOutputVoltage.value = acOutputVoltage
-      g_pvInputPower.value = pvInputPower
-      g_batteryVoltage.value = batteryVoltage
-      g_batteryChargingCurrent.value = batteryChargingCurrent
-      g_batteryDischargeCurrent.value = batteryDischargeCurrent
-      g_pvInputVoltage.value = pvInputVoltage
+      g_pvInputPower.value = log.pvInputPower
+      g_batteryVoltage.value = log.batteryVoltage
+      g_batteryChargingCurrent.value = log.batteryChargingCurrent
+      g_batteryDischargeCurrent.value = log.batteryDischargeCurrent
+      g_pvInputVoltage.value = log.pvInputVoltage
       // g_pvInputCurrent.value = pvInputCurrent
 
       document.querySelectorAll('.gauges canvas').forEach((_) => _.removeAttribute('style'))
@@ -175,51 +160,51 @@ export default {
     socket.on('updateLiveChart', (data) => {
       // if (!this.ready) return
       setupGauge(data)
-      const acOutputActivePower = data[6]
-      const pvInputPower = data[20]
+      // const acOutputActivePower = data[6]
+      // const pvInputPower = data[20]
 
-      // update powerGenerated
-      if (pvInputPower) {
-        let powerGenerated = Big(pvInputPower).div(3600).div(1000).toNumber()
-        powerGenerated = Number.parseFloat(powerGenerated.toFixed(2))
-        // g_powerGeneratedToday.value = Number.parseFloat(g_powerGeneratedToday.value)
-        + powerGenerated
-      }
+      // // update powerGenerated
+      // if (pvInputPower) {
+      //   let powerGenerated = Big(pvInputPower).div(3600).div(1000).toNumber()
+      //   powerGenerated = Number.parseFloat(powerGenerated.toFixed(2))
+      //   // g_powerGeneratedToday.value = Number.parseFloat(g_powerGeneratedToday.value)
+      //   + powerGenerated
+      // }
 
-      if (acOutputActivePower) {
-        let p = Big(acOutputActivePower).div(3600).div(1000).toNumber()
-        p = Number.parseFloat(p.toFixed(2))
-        // g_powerOutputToday.value = Number.parseFloat(g_powerOutputToday.value) + p
-      }
+      // if (acOutputActivePower) {
+      //   let p = Big(acOutputActivePower).div(3600).div(1000).toNumber()
+      //   p = Number.parseFloat(p.toFixed(2))
+      //   // g_powerOutputToday.value = Number.parseFloat(g_powerOutputToday.value) + p
+      // }
     })
 
     socket.on('setChartData', (data) => {
       // console.time('count pv power')
-      let powerGeneratedToday = Big(0)
-      let powerOutputToday = Big(0)
-      const d1 = dayjs().startOf('date')
-      console.log('d1', d1.format())
-      data.forEach((_) => {
-        const d2 = dayjs(_[0])
-        const diff = d2.diff(d1)
-        if (diff < 0) return
+      // let powerGeneratedToday = Big(0)
+      // let powerOutputToday = Big(0)
+      // const d1 = dayjs().startOf('date')
+      // console.log('d1', d1.format())
+      // data.forEach((_) => {
+      //   const d2 = dayjs(_[0])
+      //   const diff = d2.diff(d1)
+      //   if (diff < 0) return
 
-        if (_[20]) {
-          const pvInputPower = Big(_[20]).div(12).div(1000)
-          powerGeneratedToday = powerGeneratedToday.plus(pvInputPower)
-        }
+      //   if (_[20]) {
+      //     const pvInputPower = Big(_[20]).div(12).div(1000)
+      //     powerGeneratedToday = powerGeneratedToday.plus(pvInputPower)
+      //   }
 
-        if (_[6]) {
-          const acOutputActivePower = Big(_[6]).div(12).div(1000)
-          powerOutputToday = powerOutputToday.plus(acOutputActivePower)
-        }
-      })
+      //   if (_[6]) {
+      //     const acOutputActivePower = Big(_[6]).div(12).div(1000)
+      //     powerOutputToday = powerOutputToday.plus(acOutputActivePower)
+      //   }
+      // })
 
-      // powerGeneratedToday = Number.parseFloat(powerGeneratedToday.toFixed(2))
-      // g_powerGeneratedToday.value = powerGeneratedToday
+      // // powerGeneratedToday = Number.parseFloat(powerGeneratedToday.toFixed(2))
+      // // g_powerGeneratedToday.value = powerGeneratedToday
 
-      // powerOutputToday = Number.parseFloat(powerOutputToday.toFixed(2))
-      // g_powerOutputToday.value = powerOutputToday
+      // // powerOutputToday = Number.parseFloat(powerOutputToday.toFixed(2))
+      // // g_powerOutputToday.value = powerOutputToday
 
       this.ready = true
     })

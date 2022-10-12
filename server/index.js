@@ -25,8 +25,49 @@ const Tail = require('nodejs-tail')
 const db = require('./db')
 
 const parseLog = require('./parseLog')
+const controlMiner = require('./control-miner')
+const logHandler = require('../common/log-handler')
 
 const cacheData = []
+let isMinerRunning = false
+
+// This function will be called in every second.
+function updateLiveChart(data) {
+  const log = logHandler(data)
+
+  // console.log('isMinerRunning', isMinerRunning)
+  // console.log('log.powerSource', log.powerSource)
+  // console.log('log.batteryVoltage', log.batteryVoltage)
+  try {
+    if (
+      !isMinerRunning
+      && log.powerSource === 'battery' && log.batteryVoltage > 55.5) {
+      controlMiner('restart').then((_) => {
+        isMinerRunning = true
+      })
+    } else if (
+      isMinerRunning
+      && (log.batteryVoltage <= 48 || log.powerSource !== 'battery')) {
+      controlMiner('stop').then((_) => {
+        isMinerRunning = false
+      })
+    } else {
+      // do nothing
+    }
+  } catch (error) {
+    console.error('control miner error', error)
+  }
+
+  io.emit('updateLiveChart', data)
+}
+
+// dev use
+function getRandom(n1, seed) {
+  const _seed = seed || 1
+  let r = Number.parseFloat((Math.random() * _seed) + 1)
+  r += n1
+  return Number.parseFloat(r.toFixed(2))
+}
 
 // const cacheData = []
 function setupLogReader() {
@@ -37,7 +78,8 @@ function setupLogReader() {
     try {
       const data = parseLog(line)
       if (!data) return
-      io.emit('updateLiveChart', data)
+      // io.emit('updateLiveChart', data)
+      updateLiveChart(data)
     } catch (error) {
       console.error(error)
     }
@@ -56,18 +98,20 @@ io.on('connection', (socket) => {
 
   socket.on('getChartData', () => {
     // prevent cache
+    let logs = []
     db.read()
     // const logs = db.get('logs').value()
     const db_logs = db.get('logs')
     const now = dayjs().startOf('d')
     const start = now.subtract(LIVE_CHART_LOADED_DAYS, 'd')
-    const logs = db_logs.filter((_) => dayjs(_[0]).diff(start, 'm') >= 0).value()
+    logs = db_logs.filter((_) => dayjs(_[0]).diff(start, 'm') >= 0).value()
 
     console.log('db_logs', db_logs.value())
     console.log('logs read', logs.length)
-    if (logs.length > 0) {
-      socket.emit('setChartData', logs)
-    }
+    // if (logs.length > 0) {
+    //   socket.emit('setChartData', logs)
+    // }
+    socket.emit('setChartData', logs)
   })
 
   // socket.on('getLiveChartData', () => {
@@ -106,13 +150,6 @@ exec(`tail -n ${MAX_CACHE_POINTS} ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, asy
     console.log(`listening on *:${PORT}`);
   })
 
-  function getRandom(n1, seed) {
-    const _seed = seed || 1
-    let r = Number.parseFloat((Math.random() * _seed) + 1)
-    r += n1
-    return Number.parseFloat(r.toFixed(2))
-  }
-
   if (process.env.NODE_ENV !== 'production') {
     setInterval(() => {
       const data = [
@@ -125,7 +162,7 @@ exec(`tail -n ${MAX_CACHE_POINTS} ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, asy
         getRandom(958, 100),
         21,
         getRandom(374, 1),
-        getRandom(49.2, 1),
+        getRandom(47, 60),
         getRandom(1, 10),
         getRandom(40, 10),
         getRandom(38, 10),
@@ -144,7 +181,8 @@ exec(`tail -n ${MAX_CACHE_POINTS} ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, asy
       }
 
       cacheData.push(data)
-      io.emit('updateLiveChart', data)
+      // io.emit('updateLiveChart', data)
+      updateLiveChart(data)
     }, 1000)
   }
 })
@@ -152,10 +190,9 @@ const reduceLogAndSaveToDB = require('./reduceLogAndSaveToDB')
 
 let latest_date = 0
 setInterval(() => {
-  reduceLogAndSaveToDB()
-
   try {
-  // prevent cache
+    reduceLogAndSaveToDB()
+    // prevent cache
     db.read()
     const log = db.get('logs').last().value()
     if (log && latest_date !== log[0]) {

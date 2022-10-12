@@ -100,7 +100,7 @@ export default {
 
     socket.on('setChartData', (data) => {
       this.resetChart()
-      console.log('setChartData', data.length)
+      // console.log('setChartData', data.length)
       // let tickMarkFormatterIndex = 0
       chart = createChart(container, {
         layout: {
@@ -227,7 +227,7 @@ export default {
 
       const timeScale = chart.timeScale()
       timeScale.subscribeVisibleTimeRangeChange((e) => {
-        console.log(e)
+        // console.log(e)
         this.goRealTimeButtonVisible = timeScale.scrollPosition() < 0
       })
 
@@ -299,6 +299,9 @@ export default {
     this.resetChart()
   },
   methods: {
+    isMobile() {
+      return window.innerWidth <= 768
+    },
     resetChart() {
       const dom = document.querySelector('.tv-lightweight-charts')
       if (dom) {
@@ -306,8 +309,12 @@ export default {
       }
     },
     goToRealtime() {
-      const timeScale = this.chart.timeScale()
-      timeScale.scrollToPosition(50);
+      const scrollToPosition = 50
+
+      if (!this.isMobile()) {
+        // scrollToPosition = 20
+        this.chart.timeScale().scrollToPosition(scrollToPosition);
+      }
     },
     onRealtimeButtonClicked() {
       this.goToRealtime()
@@ -319,7 +326,7 @@ export default {
       const w = document.querySelector('body').offsetWidth
       let h = window.innerHeight - 400
 
-      if (window.innerWidth <= 768) {
+      if (this.isMobile()) {
         h = window.innerHeight - 300
       }
 

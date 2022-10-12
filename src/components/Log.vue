@@ -5,6 +5,7 @@
 </template>
 <script>
 // import dayjs from 'dayjs'
+import logHandler from '../../common/log-handler'
 
 export default {
   data: () => ({
@@ -13,37 +14,14 @@ export default {
   mounted() {
     const { socket } = this.$store.state
     socket.on('updateLiveChart', (data) => {
-      const [
-        timestamp,
-        gridVoltage, gridFrequency,
-        acOutputVoltage, acOutputFrequency,
-        acOutputApparentPower, acOutputActivePower,
-        acOutputLoad,
-        busVoltage, batteryVoltage,
-        batteryChargingCurrent, batteryCapacity,
-        heatSinkTemp,
-        pvInputCurrent, pvInputVoltage,
-        pvBatteryVoltage,
-        batteryDischargeCurrent,
-        flags,
-        batteryVoltageOffset,
-        EEPRomVersion,
-        pvInputPower,
-      ] = data
+      const log = logHandler(data)
 
-      let powerSource = 'line'
-
-      if (
-        pvInputPower > acOutputActivePower || batteryDischargeCurrent > 0
-      ) {
-        powerSource = 'battery'
-      }
       this.currentLog = {
-        // chargingCurrent: batteryChargingCurrent,
-        // dischargeCurrent: batteryDischargeCurrent,
-        pvInputCurrent,
-        powerSource,
+        pvInputCurrent: log.pvInputCurrent,
+        powerSource: log.powerSource,
       }
+
+      // this.currentLog = log
     })
   },
   methods: {
