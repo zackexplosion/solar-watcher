@@ -94,7 +94,7 @@ function setupLogReader() {
 
 // main
 io.on('connection', (socket) => {
-  console.log('a user connected', socket.id, new Date())
+  console.log('a user connected', socket.id)
 
   socket.on('getChartData', () => {
     // prevent cache
@@ -106,8 +106,8 @@ io.on('connection', (socket) => {
     const start = now.subtract(LIVE_CHART_LOADED_DAYS, 'd')
     logs = db_logs.filter((_) => dayjs(_[0]).diff(start, 'm') >= 0).value()
 
-    console.log('db_logs', db_logs.value())
-    console.log('logs read', logs.length)
+    // console.log('db_logs', db_logs.value())
+    // console.log('logs read', logs.length)
     // if (logs.length > 0) {
     //   socket.emit('setChartData', logs)
     // }

@@ -51,7 +51,7 @@ async function main() {
     // log[17] = 'append'
     arrayOfLogToCount.push(log)
     const diff = d2.diff(d1, 's')
-    console.log('diff', diff)
+    // console.log('diff', diff)
     if (diff >= PERIOD_IN_MINUTES * 60) {
       // console.log('handling..', d1.format(), d2.format(), diff)
       handleArrayOfLogToCount(arrayOfLogToCount)
