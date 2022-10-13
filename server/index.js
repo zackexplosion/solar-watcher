@@ -29,7 +29,7 @@ const controlMiner = require('./control-miner')
 const logHandler = require('../common/log-handler')
 
 const cacheData = []
-let isMinerRunning = false
+let isMinerRunning = true
 
 // This function will be called in every second.
 function updateLiveChart(data) {
@@ -42,9 +42,8 @@ function updateLiveChart(data) {
     if (
       !isMinerRunning
       && log.powerSource === 'battery' && log.batteryVoltage > 55.5) {
-      controlMiner('restart').then((_) => {
-        isMinerRunning = true
-      })
+      isMinerRunning = true
+      controlMiner('restart')
     } else if (
       isMinerRunning
       && (log.batteryVoltage <= 48 || log.powerSource !== 'battery')) {
@@ -119,6 +118,9 @@ io.on('connection', (socket) => {
   // })
 })
 
+// *************************
+// ******** MAIN ***********
+// *************************
 // only cache last 15min
 exec(`tail -n ${MAX_CACHE_POINTS} ${LOG_PATH}`, { maxBuffer: 1024 * 50000 }, async (error, stdout, stderr) => {
   if (error) {
