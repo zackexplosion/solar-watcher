@@ -40,12 +40,13 @@ function updateLiveChart(data) {
   // console.log('log.batteryVoltage', log.batteryVoltage)
   try {
     if (
-      !isMinerRunning
+      isMinerRunning === false
       && log.powerSource === 'battery' && log.batteryVoltage > 55.5) {
-      isMinerRunning = true
-      controlMiner('restart')
+      controlMiner('restart').then((_) => {
+        isMinerRunning = true
+      })
     } else if (
-      isMinerRunning
+      isMinerRunning === true
       && (log.batteryVoltage <= 48 || log.powerSource !== 'battery')) {
       controlMiner('stop').then((_) => {
         isMinerRunning = false

@@ -293,7 +293,7 @@ export default {
     setInterval(() => {
       // eslint-disable-next-line no-self-assign
       window.location = window.location
-    }, 1000 * 60 * 5)
+    }, 1000 * 60 * 15)
   },
   unmounted() {
     this.resetChart()
