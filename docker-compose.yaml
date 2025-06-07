@@ -1,0 +1,15 @@
+services:
+  # This is not working on macos  
+  # data-collector:
+  #   # privileged: true
+  #   build:
+  #     context: ./data-collector
+  #   volumes:
+  #     - ./data-collector:/opt/app
+  #     - ${DATA_COLLECTOR_CONNECT_PATH}:${DATA_COLLECTOR_CONNECT_PATH}
+  #   # devices:
+  #   #   - ${DATA_COLLECTOR_CONNECT_PATH}:${DATA_COLLECTOR_CONNECT_PATH}
+  #   command: sh -c 'npm install && npm run dev'
+  #   environment:
+  #     CONNECT_PATH: ${DATA_COLLECTOR_CONNECT_PATH}
+  #     API_SERVER_URL: ${DATA_COLLECTOR_API_SERVER_URL}

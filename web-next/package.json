@@ -1,0 +1,26 @@
+{
+  "name": "web-next",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "deploy": "bun run deploy:prod",
+    "deploy:prod": "bun run build && wrangler pages deploy dist --commit-dirty=true --branch=main",
+    "deploy:preview": "bun run build && wrangler pages deploy dist --commit-dirty=true",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "dayjs": "^1.11.13",
+    "lightweight-charts": "^5.0.7",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.3",
+    "@vue/tsconfig": "^0.7.0",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5",
+    "vue-tsc": "^2.2.8"
+  }
+}
