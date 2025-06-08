@@ -1,5 +1,7 @@
 
 import eventEmitter from './event-emitter'
+import getDBInstance from './db'
+import dayjs from 'dayjs'
 
 let lastCollectedData: any = null;
 
@@ -24,14 +26,28 @@ const server = Bun.serve({
     return new Response("Hello world!!!");
   },
   websocket: {
-    open(ws) {
+    async open(ws) {
       console.log(`Websocket connection opened from ${ws}`);
-      ws.subscribe('on-data-collected')
+
+      const db = await getDBInstance()
+
+      const output = await db.collection("processed-data").find({
+        // id: req.params.id,
+        timestamp: {
+          $gte: dayjs().subtract(1, 'day').toDate(),
+        },
+      }).toArray()
+
+      console.log('output', output)
+
+      ws.send(sendData('initial-chart', output))
 
       if(lastCollectedData) {
-        ws.send(sendData('on-data-collected', lastCollectedData));
+        ws.send(sendData('on-data-collected', lastCollectedData))
       }
-      ws.send('Welcome to the WebSocket server!');
+
+      ws.subscribe('on-data-collected')
+      // ws.send('Welcome to the WebSocket server!');
     },
     // this is called when a message is received
     async message(ws, message) {

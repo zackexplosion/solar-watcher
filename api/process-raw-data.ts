@@ -71,22 +71,38 @@ export default async function processDataAndDeleteRaw({
   console.log('dataToProcess', dataToProcess[dataToProcess.length - 1])
 
 
-  const intervalSummaryData: { [key: string]: number } = {};
+  const intervalSummaryData: any = {};
   const excludeKeys = [
-    'flags'
+    'flags',
+    'EEPRomVersion'
   ]
   dataToProcess.forEach((item: any) => { // Removed async as it's not needed here for summary
     item.data.forEach((value: any, paramIndex: number) => {
       const key = dataParams[paramIndex]
 
       if (!key) { return } // Ensure key is valid
-      if (!intervalSummaryData[key]) {
-        intervalSummaryData[key] = 0
-      }
+
 
       const numericValue = Number.parseFloat(value)
+
+      if (!intervalSummaryData[key]) {
+        intervalSummaryData[key] = {
+          avg: numericValue,
+          open: numericValue,
+          low: numericValue,
+          high: numericValue,
+        }
+      }
+
+
       if (!isNaN(numericValue) && !excludeKeys.includes(key)) { // Ensure value is a number before adding
-        intervalSummaryData[key] += numericValue
+        intervalSummaryData[key] = {
+          ...intervalSummaryData[key],
+          avg: intervalSummaryData[key].avg + numericValue,
+          close: numericValue,
+          low: Math.min(numericValue, intervalSummaryData[key].low),
+          high: Math.max(numericValue, intervalSummaryData[key].high),
+        }
       } else {
         // For excludeKeys, keep the last record's value
         intervalSummaryData[key] = numericValue;
@@ -96,7 +112,7 @@ export default async function processDataAndDeleteRaw({
 
   Object.keys(intervalSummaryData).forEach((key) => {
     if (intervalSummaryData[key] && !excludeKeys.includes(key)) {
-      intervalSummaryData[key] = intervalSummaryData[key] / dataToProcess.length
+      intervalSummaryData[key].avg = intervalSummaryData[key].avg / dataToProcess.length
     }
   })
 
@@ -110,11 +126,6 @@ export default async function processDataAndDeleteRaw({
   console.log('inserted', inserted)
 
   await db.collection('raw-data').deleteMany(dataToProcessQuery)
-
-  // dataToProcessQuery.createdAt = {
-  //   $gte: processFrom.toDate(),
-  //   $lte: processEnd.toDate(),
-  // }
 
 
   console.log('Interval Summary Data:', intervalSummaryData);
