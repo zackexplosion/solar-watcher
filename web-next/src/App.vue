@@ -1,41 +1,9 @@
 <script setup lang="ts">
 import Chart from './components/Chart.vue'
-import { onMounted } from 'vue'
-const powerChartSeriesKeys = [
-{
-    label: 'acOutputActivePower',
-    color: '#da0808'
-  },
-  {
-    label: 'pvInputPower',
-    color: '#08da4a'
-  },
-]
-
-const batteryChartSeriesKeys =[
-  {
-    label: 'batteryVoltage',
-    color: '#ffeb00'
-  },
-]
-
-onMounted(() => {
-
-})
 </script>
 
 <template>
-  <!-- <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
-  </div>
-  <HelloWorld msg="Vite + Vue" /> -->
-  <Chart :series-keys="powerChartSeriesKeys"/>
-  <Chart :series-keys="batteryChartSeriesKeys"/>
+  <Chart/>
 </template>
 
 <style scoped>

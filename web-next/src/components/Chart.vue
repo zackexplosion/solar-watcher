@@ -8,40 +8,49 @@
 <script setup lang="ts">
 import {
   createChart,
+  type IChartApi,
   // createTextWatermark,
   LineSeries,
   CandlestickSeries,
 } from "lightweight-charts"
-import { onMounted } from 'vue'
+import {
+  onMounted,
+  onUnmounted
+} from 'vue'
 import dayjs from 'dayjs'
 // Lightweight Charts™ Example: Realtime updates
 // https://tradingview.github.io/lightweight-charts/tutorials/demos/realtime-updates
 
 import dataParams from '../data-params'
 
-const props = defineProps({
-  seriesKeys: {
-    type: Array,
-    default: []
-  }
-})
+let chart: IChartApi | null = null
 
-// const seriesKeys = [
-//   {
-//     label: 'acOutputActivePower',
-//     color: '#da0808'
-//   },
-//   {
-//     label: 'pvInputPower',
-//     color: '#08da4a'
-//   },
-//   {
-//     label: 'batteryVoltage',
-//     color: '#ffeb00'
-//   },
-// ]
+// const props = defineProps({
+//   seriesKeys: {
+//     type: Array,
+//     default: []
+//   }
+// })
 
-const seriesKeys = props.seriesKeys
+const seriesKeys = [
+  {
+    label: 'acOutputActivePower',
+    color: '#da0808',
+    paneIndex: 0
+  },
+  {
+    label: 'pvInputPower',
+    color: '#08da4a',
+    paneIndex: 0
+  },
+  {
+    label: 'batteryVoltage',
+    color: '#ffeb00',
+    paneIndex: 1
+  },
+]
+
+// const seriesKeys: any = props.seriesKeys
 
 let seriesMap: any = {}
 
@@ -200,12 +209,12 @@ onMounted(() => {
 
   if(!container) return
 
-  const chart = createChart(container, chartOptions)
+  chart = createChart(container, chartOptions)
 
   // Only needed within demo page
   // eslint-disable-next-line no-undef
   window.addEventListener('resize', () => {
-      chart.applyOptions({ height: 200 });
+    chart?.applyOptions({ height: 400 });
   })
 
 
@@ -215,7 +224,7 @@ onMounted(() => {
 
     const key = seriesKeys[index].label
     const color = seriesKeys[index].color
-    
+    const paneIndex = seriesKeys[index].paneIndex
 
     const series = chart.addSeries(LineSeries, {
       color: color
@@ -224,7 +233,7 @@ onMounted(() => {
       // borderVisible: false,
       // wickUpColor: color,
       // wickDownColor: color,
-    })
+    }, paneIndex)
 
     // const series = chart.addSeries(CandlestickSeries, {
     //   upColor: color,
@@ -291,6 +300,12 @@ onMounted(() => {
   connectToWebSocketServer()
 })
 
+onUnmounted(() => {
+  if (chart) {
+      chart.remove();
+      chart = null;
+  }
+});
 </script>
 
 <style scoped>
