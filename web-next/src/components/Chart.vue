@@ -43,6 +43,12 @@ const seriesKeys = [
     paneIndex: 0
   },
   {
+    label: 'pvInputVoltage',
+    color: '#1d7fa2',
+    type: LineSeries,
+    paneIndex: 0
+  },
+  {
     label: 'batteryVoltage',
     color: '#ffeb00',
     type: CandlestickSeries,
