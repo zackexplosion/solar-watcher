@@ -19,16 +19,29 @@ import dayjs from 'dayjs'
 
 import dataParams from '../data-params'
 
-const seriesKeys = [
-  {
-    label: 'acOutputActivePower',
-    color: '#da0808'
-  },
-  {
-    label: 'pvInputPower',
-    color: '#08da4a'
+const props = defineProps({
+  seriesKeys: {
+    type: Array,
+    default: []
   }
-]
+})
+
+// const seriesKeys = [
+//   {
+//     label: 'acOutputActivePower',
+//     color: '#da0808'
+//   },
+//   {
+//     label: 'pvInputPower',
+//     color: '#08da4a'
+//   },
+//   {
+//     label: 'batteryVoltage',
+//     color: '#ffeb00'
+//   },
+// ]
+
+const seriesKeys = props.seriesKeys
 
 let seriesMap: any = {}
 
@@ -36,8 +49,6 @@ interface Payload {
   data: string[]
   createdAt: Date  
 }
-
-
 
 function updateSeries(seriesKey: string, payload: Payload) {
   let update = {}
@@ -263,9 +274,9 @@ onMounted(() => {
   //       background-color: rgba(209, 212, 220, 1);
   //   }`;
 
-  const stylesElement = document.createElement('style');
+  // const stylesElement = document.createElement('style');
   // stylesElement.innerHTML = styles;
-  container?.appendChild(stylesElement);
+  // container?.appendChild(stylesElement);
 
   // const buttonsContainer = document.createElement('div');
   // buttonsContainer.classList.add('buttons-container');

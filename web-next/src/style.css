@@ -62,7 +62,7 @@ button:focus-visible {
   max-width: 1280px;
   width: 100%;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0em;
   text-align: center;
 }
 
