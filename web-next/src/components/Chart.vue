@@ -1,8 +1,5 @@
 <template>
-  <h1>hello!</h1>
   <div id="container"></div>
-  <div id="firstContainer"></div>
-  <div id="secondContainer"></div>
 </template>
 
 <script setup lang="ts">
@@ -24,7 +21,7 @@ import dayjs from 'dayjs'
 import dataParams from '../data-params'
 
 let chart: IChartApi | null = null
-
+const chartHeight = 800
 // const props = defineProps({
 //   seriesKeys: {
 //     type: Array,
@@ -206,7 +203,7 @@ onMounted(() => {
       vertLines: { color: "#444" },
       horzLines: { color: "#444" },
     },
-    height: 400,
+    height: chartHeight,
     timeScale: {
       timeVisible: true,
     },
@@ -225,7 +222,7 @@ onMounted(() => {
   // Only needed within demo page
   // eslint-disable-next-line no-undef
   window.addEventListener('resize', () => {
-    chart?.applyOptions({ height: 400 });
+    chart?.applyOptions({ height: chartHeight });
   })
 
 
