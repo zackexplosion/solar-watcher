@@ -36,16 +36,19 @@ const seriesKeys = [
   {
     label: 'acOutputActivePower',
     color: '#da0808',
+    type: LineSeries,
     paneIndex: 0
   },
   {
     label: 'pvInputPower',
     color: '#08da4a',
+    type: LineSeries,
     paneIndex: 0
   },
   {
     label: 'batteryVoltage',
     color: '#ffeb00',
+    type: CandlestickSeries,
     paneIndex: 1
   },
 ]
@@ -191,9 +194,17 @@ onMounted(() => {
   }
 
   const chartOptions: any = {
+    // layout: {
+    //     textColor: 'black',
+    //     background: { type: 'solid', color: 'white' },
+    // },
     layout: {
-        textColor: 'black',
-        background: { type: 'solid', color: 'white' },
+      background: { color: "#222" },
+      textColor: "#DDD",
+    },
+    grid: {
+      vertLines: { color: "#444" },
+      horzLines: { color: "#444" },
     },
     height: 400,
     timeScale: {
@@ -219,21 +230,29 @@ onMounted(() => {
 
 
   for (let index = 0; index < seriesKeys.length; index++) {
-    // // const element = array[index];
-    // seriesKeys
+    const {
+      label,
+      color,
+      paneIndex,
+      type
+    } = seriesKeys[index]
 
-    const key = seriesKeys[index].label
-    const color = seriesKeys[index].color
-    const paneIndex = seriesKeys[index].paneIndex
+    let series = null
 
-    const series = chart.addSeries(LineSeries, {
-      color: color
-      // upColor: color,
-      // downColor: color,
-      // borderVisible: false,
-      // wickUpColor: color,
-      // wickDownColor: color,
-    }, paneIndex)
+
+    if(type === CandlestickSeries) {
+      series = chart.addSeries(type, {
+        upColor: color,
+        downColor: color,
+        borderVisible: false,
+        wickUpColor: color,
+        wickDownColor: color,
+      }, paneIndex)
+    } else {
+      series = chart.addSeries(type, {
+        color: color
+      }, paneIndex)
+    }
 
     // const series = chart.addSeries(CandlestickSeries, {
     //   upColor: color,
@@ -243,7 +262,7 @@ onMounted(() => {
     //   wickDownColor: color,
     // })
 
-    seriesMap[key] = {
+    seriesMap[label] = {
       lastCandle: null,
       series: series
     }    
