@@ -21,7 +21,7 @@ import dayjs from 'dayjs'
 import dataParams from '../data-params'
 
 let chart: IChartApi | null = null
-const chartHeight = 800
+const chartHeight = window.innerHeight
 // const props = defineProps({
 //   seriesKeys: {
 //     type: Array,
@@ -209,9 +209,13 @@ onMounted(() => {
       vertLines: { color: "#444" },
       horzLines: { color: "#444" },
     },
+    rightOffset: 200,
     height: chartHeight,
     timeScale: {
       timeVisible: true,
+      rightOffset: 30,
+      // fixLeftEdge: true,
+      barSpacing: 5
     },
     localization: {
       locale: "zh-TW",
@@ -228,9 +232,11 @@ onMounted(() => {
   // Only needed within demo page
   // eslint-disable-next-line no-undef
   window.addEventListener('resize', () => {
-    chart?.applyOptions({ height: chartHeight });
+    chart?.applyOptions({ 
+      width: window.innerWidth,
+      height: window.innerHeight,
+    })
   })
-
 
   for (let index = 0; index < seriesKeys.length; index++) {
     const {
