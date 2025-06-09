@@ -32,24 +32,28 @@ const chartHeight = window.innerHeight
 const seriesKeys = [
   {
     label: 'acOutputActivePower',
+    legendLabel: 'AC 輸出功率',
     color: '#da0808',
     type: LineSeries,
     paneIndex: 0
   },
   {
     label: 'pvInputPower',
+    legendLabel: 'PV 輸入功率',
     color: '#08da4a',
     type: LineSeries,
     paneIndex: 0
   },
   {
     label: 'pvInputVoltage',
+    legendLabel: 'PV 輸入電壓',
     color: '#1d7fa2',
     type: LineSeries,
     paneIndex: 0
   },
   {
     label: 'batteryVoltage',
+    legendLabel: '電池電壓',
     color: '#ffeb00',
     type: CandlestickSeries,
     paneIndex: 1
@@ -121,19 +125,6 @@ onMounted(() => {
 
       try {
         const data = JSON.parse(event.data)
-        // console.log('data.channel', data.channel)
-
-        // if(data.channel === 'on-data-collected') {
-
-        //   // const key = 'acOutputActivePower'
-
-        //   // updateSeries('pvInputPower', data.payload)
-
-        //   seriesKeys.forEach(_ => {
-        //     updateSeries(_.label, data.payload)
-        //   })
-        // }
-
         switch(data.channel) {
           case 'on-data-collected':
             seriesKeys.forEach(_ => {
@@ -227,7 +218,67 @@ onMounted(() => {
 
   if(!container) return
 
+
+
+
   chart = createChart(container, chartOptions)
+
+
+
+
+  const legend = document.createElement('id')
+  legend.id = 'legend'
+  // legend.style = `position: absolute; right: 12px; top: 12px; z-index: 1; font-size: 14px; font-family: sans-serif; line-height: 18px; font-weight: 300;`
+  container.appendChild(legend)
+
+  // const setTooltipHtml = () => {
+  //   // legend.innerHTML = `<div>${name}</div>
+  //   // <div style="font-size: 22px; margin: 4px 0px;">${price}</div><div>${date}</div>`;
+  //   legend.innerHTML = '<div>'
+  //   seriesKeys.forEach(_ => {
+  //     legend.innerHTML.replace('name', _.legendLabel);
+  //   })
+  // }
+
+  const updateLegend = (param: any) => {
+
+    const validCrosshairPoint = !(
+        param === undefined || param.time === undefined || param.point.x < 0 || param.point.y < 0
+    )
+
+    if(!validCrosshairPoint) return
+    // console.log('param', param.seriesData)
+
+    // debugger
+    // const bar = validCrosshairPoint ? param.seriesData.get(areaSeries) : getLastBar(areaSeries);
+    // // time is in the same format that you supplied to the setData method,
+    // // which in this case is YYYY-MM-DD
+    // const time = bar.time;
+    // const price = bar.value !== undefined ? bar.value : bar.close;
+    // const formattedPrice = formatPrice(price);
+    // setTooltipHtml(param.seriesData);
+    let html = ''
+
+    seriesKeys.forEach((_, index) => {
+      const data = param.seriesData.get(seriesMap[_.label].series)
+      // console.log('data', data)
+
+      if(!data || Number.isNaN(data.value)) return
+
+      if(_.label === 'batteryVoltage') {
+        data.value = (data.open + data.close) / 2
+      } 
+
+      data.value = data.value.toFixed(2)
+      html += `<li><span style="color: ${seriesKeys[index].color}">${seriesKeys[index].legendLabel}: ${data.value}</span></li>`
+    })
+
+    legend.innerHTML = html
+  }
+
+  chart.subscribeCrosshairMove(updateLegend)
+
+  updateLegend(undefined)
 
   // Only needed within demo page
   // eslint-disable-next-line no-undef
@@ -263,67 +314,14 @@ onMounted(() => {
       }, paneIndex)
     }
 
-    // const series = chart.addSeries(CandlestickSeries, {
-    //   upColor: color,
-    //   downColor: color,
-    //   borderVisible: false,
-    //   wickUpColor: color,
-    //   wickDownColor: color,
-    // })
-
     seriesMap[label] = {
       lastCandle: null,
       series: series
     }    
   }
 
-  // series.setData(data.initialData);
   chart.timeScale().fitContent();
   // chart.timeScale().scrollToPosition(5);
-
-  // const styles = `
-  //   .buttons-container {
-  //       display: flex;
-  //       flex-direction: row;
-  //       gap: 8px;
-  //   }
-  //   .buttons-container button {
-  //       all: initial;
-  //       font-family: -apple-system, BlinkMacSystemFont, 'Trebuchet MS', Roboto, Ubuntu,
-  //           sans-serif;
-  //       font-size: 16px;
-  //       font-style: normal;
-  //       font-weight: 510;
-  //       line-height: 24px; /* 150% */
-  //       letter-spacing: -0.32px;
-  //       padding: 8px 24px;
-  //       color: rgba(19, 23, 34, 1);
-  //       background-color: rgba(240, 243, 250, 1);
-  //       border-radius: 8px;
-  //       cursor: pointer;
-  //   }
-
-  //   .buttons-container button:hover {
-  //       background-color: rgba(224, 227, 235, 1);
-  //   }
-
-  //   .buttons-container button:active {
-  //       background-color: rgba(209, 212, 220, 1);
-  //   }`;
-
-  // const stylesElement = document.createElement('style');
-  // stylesElement.innerHTML = styles;
-  // container?.appendChild(stylesElement);
-
-  // const buttonsContainer = document.createElement('div');
-  // buttonsContainer.classList.add('buttons-container');
-  // const button = document.createElement('button');
-  // button.innerText = 'Go to realtime';
-  // button.addEventListener('click', () => chart.timeScale().scrollToRealTime());
-  // buttonsContainer.appendChild(button);
-
-  // container?.appendChild(buttonsContainer);
-
 
   connectToWebSocketServer()
 })
@@ -342,5 +340,22 @@ onUnmounted(() => {
     height: 100%;
     min-width: 320px;
     min-height: 100vh;
+  }
+
+
+</style>
+
+<style>
+  #legend {
+    position: absolute;
+    right: 6em;
+    top: 1em;
+    z-index: 1000;
+    font-size: 14px;
+    font-family: sans-serif;
+    line-height: 18px;
+    font-weight: bold;
+    text-align: left;
+    list-style: none;
   }
 </style>
