@@ -58,6 +58,20 @@ const seriesKeys = [
     type: CandlestickSeries,
     paneIndex: 1
   },
+  {
+    label: 'batteryChargingCurrent',
+    legendLabel: '電池充電電流',
+    color: '#da0808',
+    type: LineSeries,
+    paneIndex: 2
+  },
+  {
+    label: 'batteryDischargeCurrent',
+    legendLabel: '電池放電電流',
+    color: '#08da4a',
+    type: LineSeries,
+    paneIndex: 2
+  },
 ]
 
 // const seriesKeys: any = props.seriesKeys
