@@ -34,7 +34,7 @@ const seriesKeys = [
     label: 'acOutputActivePower',
     legendLabel: 'AC 輸出功率',
     color: '#da0808',
-    type: LineSeries,
+    type: CandlestickSeries,
     paneIndex: 0
   },
   {
