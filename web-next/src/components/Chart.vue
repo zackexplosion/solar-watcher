@@ -289,7 +289,7 @@ onMounted(() => {
       try {
 
         if (_.type === CandlestickSeries) {
-          data.value = `<br />H:${data.high}, L:${data.low}, C:${data.close}, O:${data.open}`
+          data.value = `<br />H:${data.high}, L:${data.low}, O:${data.open}, C:${data.close}`
         } else {
           data.value = data.value.toFixed(2)
         }
