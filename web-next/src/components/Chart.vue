@@ -54,25 +54,25 @@ const seriesKeys = [
     paneIndex: 1
   },
   {
+    label: 'batteryCapacity',
+    legendLabel: '電量百分比',
+    color: '#620bed',
+    type: LineSeries,
+    paneIndex: 2
+  },
+  {
     label: 'batteryChargingCurrent',
     legendLabel: '電池充電電流',
     color: '#da0808',
     type: LineSeries,
-    paneIndex: 1
+    paneIndex: 2
   },
   {
     label: 'batteryDischargeCurrent',
     legendLabel: '電池放電電流',
     color: '#08da4a',
     type: LineSeries,
-    paneIndex: 1
-  },
-  {
-    label: 'batteryCapacity',
-    legendLabel: '電量百分比',
-    color: '#620bed',
-    type: LineSeries,
-    paneIndex: 1
+    paneIndex: 2
   },
 ]
 
@@ -281,16 +281,21 @@ onMounted(() => {
 
       if(!data || Number.isNaN(data.value)) return
 
-      if(_.label === 'batteryVoltage') {
-        data.value = (data.open + data.close) / 2
-      }
+      // if(_.label === 'batteryVoltage') {
+      //   data.value = (data.open + data.close) / 2
+      // }
 
 
       try {
-        data.value = data.value.toFixed(2)
+
+        if (_.type === CandlestickSeries) {
+          data.value = `<br />H:${data.high}, L:${data.low}, C:${data.close}, O:${data.open}`
+        } else {
+          data.value = data.value.toFixed(2)
+        }
         html += `<li><span style="color: ${seriesKeys[index].color}">${seriesKeys[index].legendLabel}: ${data.value}</span></li>`        
       } catch (error) {
-        
+        console.error(error)
       }
     })
 
