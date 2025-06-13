@@ -22,12 +22,7 @@ import dataParams from '../data-params'
 
 let chart: IChartApi | null = null
 const chartHeight = window.innerHeight
-// const props = defineProps({
-//   seriesKeys: {
-//     type: Array,
-//     default: []
-//   }
-// })
+
 
 const seriesKeys = [
   {
@@ -63,14 +58,21 @@ const seriesKeys = [
     legendLabel: '電池充電電流',
     color: '#da0808',
     type: LineSeries,
-    paneIndex: 2
+    paneIndex: 1
   },
   {
     label: 'batteryDischargeCurrent',
     legendLabel: '電池放電電流',
     color: '#08da4a',
     type: LineSeries,
-    paneIndex: 2
+    paneIndex: 1
+  },
+  {
+    label: 'batteryCapacity',
+    legendLabel: '電量百分比',
+    color: '#620bed',
+    type: LineSeries,
+    paneIndex: 1
   },
 ]
 
@@ -281,10 +283,15 @@ onMounted(() => {
 
       if(_.label === 'batteryVoltage') {
         data.value = (data.open + data.close) / 2
-      } 
+      }
 
-      data.value = data.value.toFixed(2)
-      html += `<li><span style="color: ${seriesKeys[index].color}">${seriesKeys[index].legendLabel}: ${data.value}</span></li>`
+
+      try {
+        data.value = data.value.toFixed(2)
+        html += `<li><span style="color: ${seriesKeys[index].color}">${seriesKeys[index].legendLabel}: ${data.value}</span></li>`        
+      } catch (error) {
+        
+      }
     })
 
     legend.innerHTML = html
@@ -335,15 +342,14 @@ onMounted(() => {
   }
 
   chart.timeScale().fitContent();
-  // chart.timeScale().scrollToPosition(5);
 
   connectToWebSocketServer()
 })
 
 onUnmounted(() => {
   if (chart) {
-      chart.remove();
-      chart = null;
+    chart.remove();
+    chart = null;
   }
 });
 </script>
