@@ -36,7 +36,7 @@ const seriesKeys = [
     label: 'pvInputPower',
     legendLabel: 'PV 輸入功率',
     color: '#08da4a',
-    type: LineSeries,
+    type: CandlestickSeries,
     paneIndex: 0
   },
   {
