@@ -50,13 +50,13 @@ interface Payload {
   data: string[]
   createdAt: Date  
 }
-
+let lastInitCandleTime: number = 0
 function updateSeries(seriesKey: string, payload: Payload) {
   let update = {}
   let diff = 0
 
   const index = dataParams.indexOf(seriesKey)
-  const value = Number.parseFloat(payload.data[index])
+  const value = Number.parseFloat(payload.data[index]) || 0
   const time = dayjs(payload.createdAt)
 
   if(!seriesMap[seriesKey] && !seriesMap[seriesKey].lastCandle) {
@@ -66,8 +66,12 @@ function updateSeries(seriesKey: string, payload: Payload) {
   let lastCandle = seriesMap[seriesKey].lastCandle
 
   if (lastCandle) {
-    diff = time.diff( dayjs(lastCandle.time * 1000), 'minute')
+    diff = time.diff( dayjs(lastInitCandleTime * 1000), 'minute')
   }
+
+  // console.log('time', time.format())
+  // console.log('lastInitCandleTime', lastInitCandleTime)
+  // console.log('diff', diff)
 
   if (lastCandle && diff <= 10 ) {
     update = {
@@ -96,28 +100,40 @@ function updateSeries(seriesKey: string, payload: Payload) {
   }
 }
 
+interface InitChartPayloadItem {
+  timestamp: Date
+  data: any
+}
+
 onMounted(() => {
   const url = import.meta.env.VITE_APP_API_URL
 
   function connectToWebSocketServer() {
-    let webSocket = new WebSocket(url)
-    webSocket.onmessage = (event) => {
 
-      // console.log(event)
+    console.log('connectToWebSocketServer')
+    let webSocket = new WebSocket(url)
+
+    let isChartInit = false
+
+    webSocket.onmessage = (event) => {
 
       try {
         const data = JSON.parse(event.data)
         switch(data.channel) {
           case 'on-data-collected':
+            if (!isChartInit) {
+              break
+            }
             seriesKeys.forEach(_ => {
               updateSeries(_.label, data.payload)
             })
             break;
+          case 'on-data-processed':
           case 'initial-chart':
-
-            console.log('data', data)
-
+            console.log('initial-chart')
             if(!Array.isArray(data.payload)) return 
+
+            // console.log('payload', data.payload)
 
             const dataToInit: any = {}
 
@@ -125,30 +141,40 @@ onMounted(() => {
               dataToInit[_.label] = []
             })
 
-            data.payload.forEach( (__:any) => {
+            data.payload.forEach( (__:InitChartPayloadItem) => {
               
+              // let lastAddedTime: number | null = null
               seriesKeys.forEach(_ => {
+
+                
                 const data = __.data[_.label]
                 data.time = dayjs(__.timestamp).add(8, 'hours').unix()
                 data.value = __.data[_.label].avg
+
+                lastInitCandleTime = data.time
 
                 // const data = {
                 //   time: dayjs(__.timestamp).add(8, 'hours').unix(),
                 //   value: __.data[_.label].avg
                 // }
+
+                // console.log('data.time', data.time)
+
                 dataToInit[_.label].push(data)
               })
             })
 
-            console.log('dataToInit', dataToInit)
+            // console.log('dataToInit', dataToInit)
 
             seriesKeys.forEach(_ => {
               seriesMap[_.label].series.setData(dataToInit[_.label])
             })
 
-            break;
+            isChartInit = true
+
+            break
           default:
-            break;
+            break
         }
 
 
