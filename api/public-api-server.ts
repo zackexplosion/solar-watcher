@@ -3,7 +3,7 @@ import eventEmitter from './event-emitter'
 import getDBInstance from './db'
 import dayjs from 'dayjs'
 
-let lastCollectedData: any = null;
+let lastCollectedData: any = null
 
 function sendData(channel: string = 'default', payload: any) {
   return JSON.stringify({
@@ -34,11 +34,11 @@ const server = Bun.serve({
       const output = await db.collection("processed-data").find({
         // id: req.params.id,
         timestamp: {
-          $gte: dayjs().subtract(1, 'day').toDate(),
+          $gte: dayjs().subtract(3, 'day').toDate(),
         },
       }).toArray()
 
-      console.log('output', output)
+      console.log('output data length', output.length)
 
       ws.send(sendData('initial-chart', output))
 
@@ -47,6 +47,7 @@ const server = Bun.serve({
       }
 
       ws.subscribe('on-data-collected')
+      ws.subscribe('on-data-processed')
       // ws.send('Welcome to the WebSocket server!');
     },
     // this is called when a message is received
@@ -59,9 +60,14 @@ const server = Bun.serve({
 });
 
 eventEmitter.on('data-collected', (data : any) => {
-  console.log('Data collected:', JSON.stringify(data));
+  // console.log('data-collected', data)
   lastCollectedData = data
   server.publish('on-data-collected', sendData('on-data-collected', data))
+})
+
+eventEmitter.on('data-processed', (data : any) => {
+  // lastCollectedData = data
+  server.publish('on-data-processed', sendData('on-data-processed', data))
 })
 
 console.log(`Websocket server is Listening on ${server.hostname}:${server.port}`);

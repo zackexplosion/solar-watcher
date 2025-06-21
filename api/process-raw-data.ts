@@ -2,6 +2,7 @@ import 'dotenv/config'
 import getDBInstance from './db'
 import dayjs from 'dayjs'
 import dataParams from './data-params'
+import eventEmitter from './event-emitter'
 
 interface ProcessDataAndDeleteRawParams {
   deviceId: string
@@ -68,7 +69,7 @@ export default async function processDataAndDeleteRaw({
     ).toArray()
 
   console.log('dataToProcess', dataToProcess.length)
-  console.log('dataToProcess', dataToProcess[dataToProcess.length - 1])
+  // console.log('dataToProcess', dataToProcess[dataToProcess.length - 1])
 
 
   const intervalSummaryData: any = {};
@@ -128,5 +129,27 @@ export default async function processDataAndDeleteRaw({
   await db.collection('raw-data').deleteMany(dataToProcessQuery)
 
 
-  console.log('Interval Summary Data:', intervalSummaryData);
+  // console.log('Interval Summary Data:', intervalSummaryData);
 }
+
+async function processDataAndDeleteRawRunner() {
+  try {
+    const result = await processDataAndDeleteRaw({
+      deviceId: process.env.DEVICE_ID || "",
+    })
+
+    eventEmitter.emit('data-processed', result)
+
+    if (result?.code === 'no_more_new_raw_data') {
+      setTimeout(() => {
+        processDataAndDeleteRawRunner()
+      }, 60 * 1000)
+    } else {
+      processDataAndDeleteRawRunner()
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+processDataAndDeleteRawRunner()
