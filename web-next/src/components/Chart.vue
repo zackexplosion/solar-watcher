@@ -348,6 +348,11 @@ onUnmounted(() => {
     chart.remove();
     chart = null;
   }
+  
+  // Reload every 11 minutes
+  setTimeout( () => {
+    window.location.reload()
+  }, 1000 * 60 * 1.1)
 });
 </script>
 
