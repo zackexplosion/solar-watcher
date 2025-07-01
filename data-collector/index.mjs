@@ -79,7 +79,12 @@ async function handleData(data) {
     })    
   } catch (error) {
     console.error('Error sending data to API:')
-    console.error(error)
+    
+    // if(error.response && error.response.data) {
+    //   console.error(error.response.data)
+    // } else {
+    //   console.error(error)
+    // }
   }
 
 }

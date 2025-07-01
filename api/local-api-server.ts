@@ -8,6 +8,10 @@ const port = process.env.PORT || 8000
 
 app.use(express.json())
 
+app.get('/', async (req, res) => {
+  res.send('hello')
+})
+
 app.post('/collect/:id', async (req, res) => {
   const fields = req.body?.data || []
 

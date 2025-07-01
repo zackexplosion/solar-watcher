@@ -31,14 +31,21 @@ const server = Bun.serve({
 
       const db = await getDBInstance()
 
-      const output = await db.collection("processed-data").find({
-        // id: req.params.id,
-        timestamp: {
-          $gte: dayjs().subtract(3, 'day').toDate(),
+      const output = await db.collection("processed-data").find(
+        {
+          // id: req.params.id,
+          timestamp: {
+            $gte: dayjs().subtract(3, 'day').toDate(),
+          },
         },
-      }).toArray()
+        {
+          sort: {
+            timestamp: 1
+          }
+        }
+      ).toArray()
 
-      console.log('output data length', output.length)
+      console.log('output data length', output[output.length - 1])
 
       ws.send(sendData('initial-chart', output))
 

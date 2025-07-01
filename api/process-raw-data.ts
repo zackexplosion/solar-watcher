@@ -68,7 +68,7 @@ export default async function processDataAndDeleteRaw({
       }
     ).toArray()
 
-  console.log('dataToProcess', dataToProcess.length)
+  // console.log('dataToProcess', dataToProcess.length)
   // console.log('dataToProcess', dataToProcess[dataToProcess.length - 1])
 
 
@@ -82,7 +82,6 @@ export default async function processDataAndDeleteRaw({
       const key = dataParams[paramIndex]
 
       if (!key) { return } // Ensure key is valid
-
 
       const numericValue = Number.parseFloat(value)
 
