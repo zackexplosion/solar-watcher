@@ -45,7 +45,7 @@ const server = Bun.serve({
         }
       ).toArray()
 
-      console.log('output data length', output[output.length - 1])
+      // console.log('output data length', output[output.length - 1])
 
       ws.send(sendData('initial-chart', output))
 
