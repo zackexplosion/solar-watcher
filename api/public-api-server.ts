@@ -46,13 +46,13 @@ const server = Bun.serve({
           }
         ).toArray()
 
-        // console.log('output data length', output[output.length - 1])
+        console.log('output data length', output.length - 1)
 
         ws.send(sendData('initial-chart', output))
 
-        if(lastCollectedData) {
-          ws.send(sendData('on-data-collected', lastCollectedData))
-        }
+        // if(lastCollectedData) {
+        //   ws.send(sendData('on-data-collected', lastCollectedData))
+        // }
 
         ws.subscribe('on-data-collected')
         ws.subscribe('on-data-processed') 
