@@ -29,32 +29,36 @@ const server = Bun.serve({
     async open(ws) {
       console.log(`Websocket connection opened from ${ws}`);
 
-      const db = await getDBInstance()
+      try {
+        const db = await getDBInstance()
 
-      const output = await db.collection("processed-data").find(
-        {
-          // id: req.params.id,
-          timestamp: {
-            $gte: dayjs().subtract(3, 'day').toDate(),
+        const output = await db.collection("processed-data").find(
+          {
+            // id: req.params.id,
+            timestamp: {
+              $gte: dayjs().subtract(3, 'day').toDate(),
+            },
           },
-        },
-        {
-          sort: {
-            timestamp: 1
+          {
+            sort: {
+              timestamp: 1
+            }
           }
+        ).toArray()
+
+        // console.log('output data length', output[output.length - 1])
+
+        ws.send(sendData('initial-chart', output))
+
+        if(lastCollectedData) {
+          ws.send(sendData('on-data-collected', lastCollectedData))
         }
-      ).toArray()
 
-      // console.log('output data length', output[output.length - 1])
-
-      ws.send(sendData('initial-chart', output))
-
-      if(lastCollectedData) {
-        ws.send(sendData('on-data-collected', lastCollectedData))
+        ws.subscribe('on-data-collected')
+        ws.subscribe('on-data-processed') 
+      } catch (error) {
+        console.error(error)
       }
-
-      ws.subscribe('on-data-collected')
-      ws.subscribe('on-data-processed')
       // ws.send('Welcome to the WebSocket server!');
     },
     // this is called when a message is received
