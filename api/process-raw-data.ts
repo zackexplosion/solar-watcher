@@ -68,6 +68,9 @@ export default async function processDataAndDeleteRaw({
       }
     ).toArray()
 
+  // Delete the raw-data right after query
+  await db.collection('raw-data').deleteMany(dataToProcessQuery)
+
   // console.log('dataToProcess', dataToProcess.length)
   // console.log('dataToProcess', dataToProcess[dataToProcess.length - 1])
 
@@ -116,16 +119,16 @@ export default async function processDataAndDeleteRaw({
     }
   })
 
-  const inserted = await db.collection("processed-data").insertOne({
+  const dataToInsert = {
     id: deviceId,
     data: intervalSummaryData,
     timestamp: processEnd.toDate(),
     createdAt: new Date(),
-  })
+  }
 
-  console.log('inserted', inserted)
+  const inserted = await db.collection("processed-data").insertOne(dataToInsert)
 
-  await db.collection('raw-data').deleteMany(dataToProcessQuery)
+  console.log('inserted', dataToInsert.timestamp)
 
 
   // console.log('Interval Summary Data:', intervalSummaryData);

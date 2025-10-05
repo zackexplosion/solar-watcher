@@ -9,9 +9,14 @@ let client: MongoClient
 
 export default async function db() {
 
-  if (!client) {
-    client = await MongoClient.connect(MONGODB_URI)
+  try {
+    if (!client) {
+      client = await MongoClient.connect(MONGODB_URI)
+    }    
+  } catch (error) {
+    console.error(error)
   }
+
 
   return client.db(process.env.MONGODB_NAME)
 }
