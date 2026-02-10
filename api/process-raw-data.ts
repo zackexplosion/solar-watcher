@@ -11,7 +11,7 @@ interface ProcessDataAndDeleteRawParams {
 export default async function processDataAndDeleteRaw({
   deviceId
 }: ProcessDataAndDeleteRawParams) {
-  const db = await getDBInstance()
+  let db = await getDBInstance()
 
   const startFrom = await db.collection("raw-data")
     .findOne(
@@ -150,6 +150,7 @@ async function processDataAndDeleteRawRunner() {
       processDataAndDeleteRawRunner()
     }
   } catch (error) {
+    processDataAndDeleteRawRunner()
     console.log(error)
   }
 }
